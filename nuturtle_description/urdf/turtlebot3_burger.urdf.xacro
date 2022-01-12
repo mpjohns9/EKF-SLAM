@@ -9,9 +9,9 @@
   <xacro:property name="track_width" value="${props['track_width']}"/>
 
   <xacro:arg name="color" default="black"/>
+  <xacro:property name="color" value="$(arg color)"/>
 
   <xacro:macro name="bot_color" params="color">
-
     <link name="${color}_base_footprint"/>
 
     <joint name="${color}_base_joint" type="fixed">
@@ -150,7 +150,7 @@
       <visual>
         <origin xyz="0 0 0.0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://nuturtle_description/meshes/sensors/lds.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://nuturtle_description/meshes/lds.stl" scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="dark"/>
       </visual>
@@ -172,11 +172,11 @@
     </link>
   </xacro:macro>
 
-  <xacro:unless value="$(arg color)=='all'">
-    <xacro:bot_color color="$(arg color)"/>
+  <xacro:unless value="${color == 'all'}">
+    <xacro:bot_color color="${color}"/>
   </xacro:unless>
 
-  <xacro:if value="$(arg color)=='all'">
+  <xacro:if value="${color == 'all'}">
     <xacro:bot_color color="black"/>
     <xacro:bot_color color="red"/>
     <xacro:bot_color color="blue"/>
