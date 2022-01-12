@@ -1,6 +1,7 @@
 <launch>
     <arg name="use_jsp" default="false"/>
     <arg name="use_rviz" default="true"/>
+    <arg name="color" default="blue"/>
 
     <param name="robot_description" command="$(find xacro)/xacro $(find nuturtle_description)/urdf/turtlebot3_burger.urdf.xacro" />
     <rosparam command="load" file="$(find nuturtle_description)/config/diff_params.yaml"/>
