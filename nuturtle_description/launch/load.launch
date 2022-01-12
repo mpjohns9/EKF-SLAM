@@ -3,7 +3,7 @@
     <arg name="use_rviz" default="true"/>
 
     <param name="robot_description" command="$(find xacro)/xacro $(find nuturtle_description)/urdf/turtlebot3_burger.urdf.xacro" />
-    <rosparam command="load" file="$(find nutrutle_description)/config/diff_params.yaml"/>
+    <rosparam command="load" file="$(find nuturtle_description)/config/diff_params.yaml"/>
 
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" if="$(eval arg('use_jsp') == true)"/>
     <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" if="$(eval arg('use_jsp') == false)"/>
