@@ -36,7 +36,7 @@ namespace turtlelib
     /// \returns radians
     constexpr double deg2rad(double deg)
     {
-        auto rad = PI/180*deg;
+        double rad = PI/180*deg;
         return(rad);
     }
 
@@ -45,7 +45,7 @@ namespace turtlelib
     /// \returns the angle in degrees
     constexpr double rad2deg(double rad)
     {
-        auto deg = 180/PI*rad;
+        double deg = 180/PI*rad;
         return(deg);
     }
 
@@ -68,7 +68,6 @@ namespace turtlelib
     static_assert(almost_equal(rad2deg(PI), 180.0), "rad2deg) failed");
 
     static_assert(almost_equal(deg2rad(rad2deg(3.0)), 3.0), "deg2rad failed");
-
 
     /// \brief A 2-Dimensional Vector
     struct Vector2D
