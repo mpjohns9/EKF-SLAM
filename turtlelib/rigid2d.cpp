@@ -41,6 +41,15 @@ Vector2D Transform2D::operator()(Vector2D v) const
     return(out);
 }
 
+Twist2D Transform2D::operator()(Twist2D V) const 
+{
+    Twist2D out;
+    out.ang = ang;
+    out.x = y*V.ang + cos(ang)*V.x + -sin(ang)*V.y;
+    out.y = -x*V.ang + sin(ang)*V.x + cos(ang)*V.y;
+    return(out);
+}
+
 Transform2D Transform2D::inv() const
 {
     Transform2D T;
