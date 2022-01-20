@@ -99,6 +99,11 @@ namespace turtlelib
     /// v - the vector to print
     std::ostream & operator<<(std::ostream & os, const Vector2D & v);
 
+    /// \brief output a 2 dimensional twist as [angcomponent xcomponent ycomponent]
+    /// os - stream to output to
+    /// V - the twist to print
+    std::ostream & operator<<(std::ostream & os, const Twist2D & V);
+
     /// \brief input a 2 dimensional vector
     ///   You should be able to read vectors entered as follows:
     ///   [x y] or x y
@@ -118,6 +123,13 @@ namespace turtlelib
     /// peek looks at the next unprocessed character in the buffer without removing it
     /// get removes the next unprocessed character from the buffer.
     std::istream & operator>>(std::istream & is, Vector2D & v);
+
+    /// \brief input a 2 dimensional twist
+    ///   You should be able to read twists entered as follows:
+    ///   [ang x y] or ang x y
+    /// is - stream from which to read
+    /// V [out] - output twist
+    std::istream & operator>>(std::istream & is, Twist2D & V);
 
     /// \brief a rigid body transformation in 2 dimensions
     class Transform2D
