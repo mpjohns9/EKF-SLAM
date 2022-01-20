@@ -51,14 +51,13 @@ Transform2D Transform2D::inv() const
     return T;
 }
 
-// Transform2D & operator*=(const Transform2D & rhs)
-// {
-//     Transform2D T;
-//     T.x = cos(rhs.ang)*x + -sin(rhs.ang)*y + rhs.x;
-//     T.y = sin(rhs.ang)*x + cos(rhs.ang)*y + rhs.y;
+Transform2D & Transform2D::operator*=(const Transform2D & rhs)
+{
+    x = cos(rhs.ang)*x + -sin(rhs.ang)*y + rhs.x;
+    y = sin(rhs.ang)*x + cos(rhs.ang)*y + rhs.y;
 
-//     return T;
-// }
+    return *this;
+}
 
 Vector2D Transform2D::translation() const
 {
@@ -75,9 +74,9 @@ double Transform2D::rotation() const
 }
 
 
-std::ostream & operator<<(std::ostream & os, const Transform2D & tf) 
+std::ostream & Transform2D::operator<<(std::ostream & os, const Transform2D & tf) 
 {
-    os << "angle (deg.): " << tf.rotation() << " x: " << tf.translation().x << " y: " << tf.translation().y;
+    os << "angle (deg.): " << this.rotation() << " x: " << this.translation().x << " y: " << this.translation().y;
     return os;
 }
 
@@ -88,7 +87,7 @@ int main(void) {
 
     Transform2D T(trans);
 
-    // std::cout << T;
+    std::cout << T;
     
     return(0);
 }
