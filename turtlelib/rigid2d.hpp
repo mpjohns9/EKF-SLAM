@@ -154,7 +154,10 @@ namespace turtlelib
         /// \brief \see operator<<(...) (declared outside this class)
         /// for a description
         friend std::ostream & operator<<(std::ostream & os, const Transform2D & tf);
-
+    private:
+        double x;
+        double y;
+        double ang;
     };
 
 
