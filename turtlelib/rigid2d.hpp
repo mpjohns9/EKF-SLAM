@@ -79,6 +79,19 @@ namespace turtlelib
         double y = 0.0;
     };
 
+    /// \brief A 2-dimensional Twist
+    struct Twist2D
+    {
+        /// \brief the angular component
+        double ang = 0.0;
+
+        /// \brief the x coordinate
+        double x = 0.0;
+
+        /// \brief the y coordinate
+        double y = 0.0;
+    }
+
 
 
     /// \brief output a 2 dimensional vector as [xcomponent ycomponent]
