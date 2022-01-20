@@ -73,19 +73,15 @@ double Transform2D::rotation() const
     return ang;
 }
 
-
-std::ostream & Transform2D::operator<<(std::ostream & os, const Transform2D & tf) 
+std::ostream & operator<<(std::ostream & os, const Transform2D & tf) 
 {
-    os << "angle (deg.): " << this.rotation() << " x: " << this.translation().x << " y: " << this.translation().y;
+    os << "deg: " << tf.rotation() << " x: " << tf.translation().x << " y: " << tf.translation().y;
     return os;
 }
 
 int main(void) {
-    Vector2D trans;
-    trans.x = 4;
-    trans.y = 5;
 
-    Transform2D T(trans);
+    Transform2D T;
 
     std::cout << T;
     
