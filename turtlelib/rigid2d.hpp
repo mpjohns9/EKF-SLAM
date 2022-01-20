@@ -90,7 +90,7 @@ namespace turtlelib
 
         /// \brief the y coordinate
         double y = 0.0;
-    }
+    };
 
 
 
@@ -180,9 +180,9 @@ namespace turtlelib
         /// for a description
         friend std::ostream & operator<<(std::ostream & os, const Transform2D & tf);
     private:
-        double x;
-        double y;
-        double ang;
+        double x = 0.0;
+        double y = 0.0;
+        double ang = 0.0;
     };
 
 
