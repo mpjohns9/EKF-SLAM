@@ -30,11 +30,11 @@ int main()
     std::cout << "Enter vector v_b: " << std::endl;
     std::cin >> v_b;
 
-    // v_bhat = 0;
+    v_bhat = v_b.hat(v_b);
     v_a = T_ab(v_b);
     v_c = T_cb(v_b);
 
-    // std::cout << "v_bhat: " << v_bhat << std::endl;
+    std::cout << "v_bhat: " << v_bhat << std::endl;
     std::cout << "v_a: " << v_a << std::endl;
     std::cout << "v_b: " << v_b << std::endl;
     std::cout << "v_c: " << v_c << std::endl;
