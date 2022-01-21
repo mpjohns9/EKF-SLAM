@@ -3,6 +3,6 @@
     <node pkg="nusim" type="nusim_node" name="nusim">
         <param name="rate" type="int" value="500"/>
     </node>
-    <node name="rviz" pkg="rviz" type="rviz"/>
 
+    <include file="$(find nuturtle_description)/launch/load.launch"/>
 </launch>
