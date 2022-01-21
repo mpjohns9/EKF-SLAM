@@ -78,7 +78,7 @@ namespace turtlelib
         /// \brief the y coordinate
         double y = 0.0;
 
-        double hat() const;
+        Vector2D hat(Vector2D v);
     };
 
     /// \brief A 2-dimensional Twist

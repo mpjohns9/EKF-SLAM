@@ -162,10 +162,11 @@ namespace turtlelib
         return lhs*=rhs;
     }
 
-    double hat(Vector2D v)
+    Vector2D Vector2D::hat(Vector2D v)
     {
-        double v_hat;
-        v_hat = sqrt(v.x**2 + v.y**2)/(v.x + v.y);
+        Vector2D v_hat;
+        v_hat.x = v.x/sqrt(pow(v.x,2) + pow(v.y,2));
+        v_hat.y = v.y/sqrt(pow(v.x,2) + pow(v.y,2));
         return v_hat;
     }
 }
