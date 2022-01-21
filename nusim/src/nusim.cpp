@@ -5,8 +5,12 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
+#include "nusim/Teleport.h"
 
 static int timestep;
+static int rate;
+static double x_0, y_0, theta_0;
+static double x, y, theta;
 
 bool reset_callback(std_srvs::TriggerRequest & request, std_srvs::TriggerResponse & response)
 {
@@ -14,10 +18,15 @@ bool reset_callback(std_srvs::TriggerRequest & request, std_srvs::TriggerRespons
     return true;
 }
 
+bool teleport_callback(nusim::Teleport::Request & request, nusim::Teleport::Response & response)
+{
+    x = request.x;
+    y = request.y;
+    theta = request.theta;
+}
+
 int main(int argc, char * argv[])
 {
-    static int rate;
-    double x_0, y_0, theta_0;
 
     ros::init(argc, argv, "nusim");
     ros::NodeHandle nh_prv("~");
@@ -28,6 +37,10 @@ int main(int argc, char * argv[])
     nh_prv.param("y0", y_0, 0.0);
     nh_prv.param("theta0", theta_0, 0.0);
 
+    x = x_0;
+    y = y_0;
+    theta = theta_0;
+
     std_msgs::UInt64 step;
 
     ros::Publisher pub_step = nh_prv.advertise<std_msgs::UInt64>("timestep", rate);
@@ -36,6 +49,7 @@ int main(int argc, char * argv[])
     sensor_msgs::JointState js;
 
     ros::ServiceServer reset = nh_prv.advertiseService("reset", reset_callback);
+    ros::ServiceServer teleport = nh_prv.advertiseService("teleport", teleport_callback);
 
     static tf2_ros::TransformBroadcaster br;
     geometry_msgs::TransformStamped transform;
@@ -49,12 +63,12 @@ int main(int argc, char * argv[])
         transform.header.frame_id = "world";
         transform.child_frame_id = "red_base_footprint";
 
-        transform.transform.translation.x = x_0;
-        transform.transform.translation.y = y_0;
+        transform.transform.translation.x = x;
+        transform.transform.translation.y = y;
         transform.transform.translation.z = 0.0;
 
         tf2::Quaternion q;
-        q.setRPY(0, 0, theta_0);
+        q.setRPY(0, 0, theta);
 
         transform.transform.rotation.x = q.x();
         transform.transform.rotation.y = q.y();
