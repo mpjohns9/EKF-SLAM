@@ -4,5 +4,8 @@
         <param name="rate" type="int" value="500"/>
     </node>
 
-    <include file="$(find nuturtle_description)/launch/load.launch"/>
+    <include file="$(find nuturtle_description)/launch/load.launch">
+        <arg name="color" value="red"/>
+        <arg name="config" value="$(find nusim)/config/nusim.rviz"/>
+    </include>
 </launch>

@@ -2,7 +2,7 @@
     <arg name="use_jsp" default="false"/>
     <arg name="use_rviz" default="true"/>
     <arg name="color" default="black"/>
-    <arg name="config" default="basic.rviz"/>
+    <arg name="config" default="$(find nuturtle_description)/config/basic.rviz"/>
 
     <rosparam command="load" file="$(find nuturtle_description)/config/diff_params.yaml"/>
 
@@ -12,6 +12,6 @@
         <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
         <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" if="$(eval arg('use_jsp') == false)"/>
         <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" if="$(eval arg('use_jsp') == true)"/>
-        <node name="rviz" pkg="rviz" type="rviz" args="-d $(find nuturtle_description)/config/$(arg config)" if="$(eval arg('use_rviz') == true)" required="true"/>
+        <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg config)" if="$(eval arg('use_rviz') == true)" required="true"/>
     </group>
 </launch>
