@@ -4,6 +4,8 @@
 int main() 
 {
     turtlelib::Transform2D T_ab, T_ba, T_bc, T_cb, T_ac, T_ca;
+    turtlelib::Vector2D v_bhat, v_a, v_b, v_c;
+    turtlelib::Twist2D V_a, V_b, V_c;
 
 
     std::cout << "Enter transform T_{a,b}: " << std::endl;
@@ -28,17 +30,24 @@ int main()
     std::cout << "Enter vector v_b: " << std::endl;
     std::cin >> v_b;
 
-    v_bhat = sqrt(v_b.x + v_b.y)/(v_b.x + v_b.y);
+    // v_bhat = 0;
     v_a = T_ab(v_b);
     v_c = T_cb(v_b);
 
-    std::cout << "v_bhat: " << v_bhat << std::endl;
+    // std::cout << "v_bhat: " << v_bhat << std::endl;
     std::cout << "v_a: " << v_a << std::endl;
     std::cout << "v_b: " << v_b << std::endl;
     std::cout << "v_c: " << v_c << std::endl;
 
     std::cout << "Enter twist V_b: " << std::endl;
-    std::in >> V_b;
+    std::cin >> V_b;
+
+    V_a = T_ab(V_b);
+    V_c = T_cb(V_b);
+
+    std::cout << "V_a: " << V_a << std::endl;
+    std::cout << "V_b: " << V_b << std::endl;
+    std::cout << "V_c: " << V_c << std::endl;
 
     return 0;
 
