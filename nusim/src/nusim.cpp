@@ -15,6 +15,9 @@ static double x, y, theta;
 bool reset_callback(std_srvs::TriggerRequest & request, std_srvs::TriggerResponse & response)
 {
     timestep = 0;
+    x = 0.0;
+    y = 0.0;
+    theta = 0.0;
     return true;
 }
 
