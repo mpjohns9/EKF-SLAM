@@ -29,6 +29,7 @@ int main(int argc, char * argv[])
         std_msgs::UInt64 step;
         step.data = timestep;
         pub_step.publish(step);
+        pub_joints.publish(0);
         timestep++;
         ros::spinOnce();
         r.sleep();
