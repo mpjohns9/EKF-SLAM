@@ -1,6 +1,6 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
-#include "rigid2d.hpp"
+#include "turtlelib/rigid2d.hpp"
 
 TEST_CASE("translation", "[vector]") {
     turtlelib::Vector2D v;
