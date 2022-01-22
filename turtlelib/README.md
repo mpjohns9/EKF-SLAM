@@ -32,12 +32,12 @@ A struct and a class are very similar in C++. The primary difference between the
 
 3. Why is Vector2D a struct and Transform2DClass (refer to at least 2 specific C++ core guidelines in your answer)?
 
-Vector2D is a struct because the members can vary independently (C++ core guideline C.2). Transform2D 
+Vector2D is a struct because the members can vary independently (C.2). Conversely, Transform2D has an invariant and establishes constructors to allow member functions to be called. Additionally, Transform2D makes an explicit distinction between interface and implementation, while Vector2D does not (C.3).
 
 
 4. Why are some of the constructors in Transform2D explicit (refer to a specific C++ core guideline in your answer)?
 
-
+They are single argument constructors, so by default, they should be declared explicit (C.46).
 
 
 5. Why is Transform2D::inv() declared const while Transform2D::operator*=() is not?
