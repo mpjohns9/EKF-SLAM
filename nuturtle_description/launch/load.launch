@@ -1,8 +1,8 @@
 <launch>
-    <arg name="use_jsp" default="false"/>
-    <arg name="use_rviz" default="true"/>
-    <arg name="color" default="black"/>
-    <arg name="config" default="$(find nuturtle_description)/config/basic.rviz"/>
+    <arg name="use_jsp" default="false" doc="use jsp gui if true"/>
+    <arg name="use_rviz" default="true" doc="launch rviz by default, if false won't launch"/>
+    <arg name="color" default="black" doc="set color of turtlebot"/>
+    <arg name="config" default="$(find nuturtle_description)/config/basic.rviz" doc="filepath to rviz config"/>
 
     <rosparam command="load" file="$(find nuturtle_description)/config/diff_params.yaml"/>
 
