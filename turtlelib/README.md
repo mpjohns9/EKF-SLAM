@@ -43,7 +43,7 @@ They are single argument constructors, so by default, they should be declared ex
 5. Why is Transform2D::inv() declared const while Transform2D::operator*=() is not?
    - Refer to [[https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#con-constants-and-immutability][C++ Core Guidelines (Constants and Immutability)]] in your answer
 
-   
+Transform2D::operator*=() changes an objects observable state, and thus, should not be marked const. The converse is true for Transform2D::inv() (Con.2).
 
 # Sample Run of frame_main
 ```
