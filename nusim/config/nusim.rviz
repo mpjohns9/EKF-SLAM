@@ -102,6 +102,14 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /nusim/obstacles
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -130,7 +138,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.3069676160812378
+      Distance: 5.092895984649658
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1

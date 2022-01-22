@@ -42,17 +42,16 @@ int main(int argc, char * argv[])
     ros::init(argc, argv, "nusim");
     ros::NodeHandle nh_prv("~");
     ros::NodeHandle nh;
-    ros::NodeHandle nh_obs("~obstacles");
     ros::Rate r(nh_prv.param("rate", rate, 500));
 
     nh_prv.param("x0", x_0, 0.0);
     nh_prv.param("y0", y_0, 0.0);
     nh_prv.param("theta0", theta_0, 0.0);
 
-    nh_obs.getParam("obs_x", obs_x);
-    nh_obs.getParam("obs_y", obs_y);
-    nh_obs.getParam("radius", radius);
-    nh_obs.getParam("height", height);
+    nh_prv.getParam("obstacles/obs_x", obs_x);
+    nh_prv.getParam("obstacles/obs_y", obs_y);
+    nh_prv.getParam("obstacles/radius", radius);
+    nh_prv.getParam("obstacles/height", height);
 
     // ROS_DEBUG("hello %f",obs_x[0]);
     x = x_0;
@@ -63,7 +62,7 @@ int main(int argc, char * argv[])
 
     ros::Publisher pub_step = nh_prv.advertise<std_msgs::UInt64>("timestep", 1000);
     ros::Publisher pub_joints = nh.advertise<sensor_msgs::JointState>("red/joint_states", 1000);
-    ros::Publisher marker_pub = nh_obs.advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 1, true);
+    ros::Publisher marker_pub = nh_prv.advertise<visualization_msgs::MarkerArray>("obstacles", 1, true);
 
     sensor_msgs::JointState js;
 
@@ -94,8 +93,8 @@ int main(int argc, char * argv[])
         ma.markers[i].action = visualization_msgs::Marker::ADD;
 
         //set pose of marker
-        ma.markers[i].pose.position.x = 1;
-        ma.markers[i].pose.position.y = 1;
+        ma.markers[i].pose.position.x = obs_x.at(i);
+        ma.markers[i].pose.position.y = obs_y.at(i);
         ma.markers[i].pose.position.z = 0;
         ma.markers[i].pose.orientation.x = 0;
         ma.markers[i].pose.orientation.y = 0;

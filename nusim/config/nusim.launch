@@ -1,6 +1,6 @@
 <launch>
 
-    <rosparam command="load" file="$(find nusim)/config/basic_world.yaml" ns="nusim"/>
+    <rosparam command="load" file="$(find nusim)/config/basic_world.yaml"/>
   
     <node pkg="nusim" type="nusim_node" name="nusim">
         <param name="rate" type="int" value="500"/>
