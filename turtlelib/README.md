@@ -19,6 +19,7 @@ A library for handling transformations in SE(2) and other turtlebot-related math
    One possible design is using a function within a struct or class. Another possible design would be creating a normalize class or struct and using a function within that. A third possible design would be using a function outside of both struct and class. 
 
    - Discuss the pros and cons of each proposed method, in light of the C++ Core Guidelines.
+   
    Adding a function to an existing class would be simple and keep the complexity down. However, it could make things confusing by adding another item to a complex class. Making a class for only the normalize function could add complexity that's not needed. However, the plus side is that it would be private to the class. Using a function outside of class and struct would reduce the confusion, but it would not be tied to anything and would be public to other users.
 
    - Which of the methods would you implement and why?
