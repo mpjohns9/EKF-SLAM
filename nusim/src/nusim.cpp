@@ -151,7 +151,6 @@ int main(int argc, char * argv[])
     timestep = 0;
     while(ros::ok())
     {
-        ROS_DEBUG("hello");
         transform.header.stamp = ros::Time::now();
 
         transform.header.frame_id = "world";
