@@ -1,3 +1,23 @@
+/// \file
+/// \brief Node that can be used as simulator and visualizer.
+///
+/// PARAMETERS:
+///     x0 (double): starting x-coordinate of robot
+///     y0 (double): starting y-coordinate of robot
+///     theta0 (double): starting orientation of robot
+///     obs_x (std::vector<double>): list of x-coordinates for obstacles
+///     obs_y (std::vector<double>): list of x-coordinates for obstacles
+///     radius (double): radius of obstacles
+///     height (double): height of obstacles
+/// PUBLISHES:
+///     timestep (std_msgs/UInt64): publishes timestep of simulation
+///     red/joint_states (sensor_msgs/JointState): publishes joint states
+///     obstacles (visualization_msgs/MarkerArray): publishes array of cylindrical markers
+/// SERVICES:
+///     reset (Empty): resets the timestep to 0 and robot to initial position
+///     teleport (nusim/Teleport): teleports robot to x, y, theta position
+
+
 #include "ros/ros.h"
 #include <std_msgs/UInt64.h>
 #include <std_srvs/Trigger.h>

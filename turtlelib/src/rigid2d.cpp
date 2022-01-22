@@ -2,6 +2,9 @@
 #include <cmath>
 #include "turtlelib/rigid2d.hpp"
 
+/// \file
+/// \brief Implementation of two-dimensional rigid body transformations.
+
 namespace turtlelib
 {
     Transform2D::Transform2D()

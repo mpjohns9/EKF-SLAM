@@ -2,6 +2,9 @@
 #include "catch.hpp"
 #include "turtlelib/rigid2d.hpp"
 
+/// \file
+/// \brief Test file for Transform2D class
+
 
 //Collaborators: Devesh Bhura, Marco Morales
 

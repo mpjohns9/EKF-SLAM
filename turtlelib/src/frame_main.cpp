@@ -1,6 +1,9 @@
 #include <iostream>
 #include "turtlelib/rigid2d.hpp"
 
+/// \file
+/// \brief Program that asks user for input and calculates transformations.
+
 int main() 
 {
     turtlelib::Transform2D T_ab, T_ba, T_bc, T_cb, T_ac, T_ca;
