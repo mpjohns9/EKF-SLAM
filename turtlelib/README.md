@@ -2,8 +2,9 @@
 A library for handling transformations in SE(2) and other turtlebot-related math.
 
 # Components
-- rigid2d - Handles 2D rigid body transformations
-- frame_main - Perform some rigid body computations based on user input
+- rigid2d: Handles 2D rigid body transformations
+- frame_main: Perform some rigid body computations based on user input
+- tests: Tests Transform2D class implementation
 
 # Conceptual Questions
 1. We need to be able to ~normalize~ Vector2D objects (i.e., find the unit vector in the direction of a given Vector2D):
@@ -17,7 +18,7 @@ A library for handling transformations in SE(2) and other turtlebot-related math
 
    - Which of the methods would you implement and why?
 
-   A function within a struct --- the struct format would help keep things organized and being able to call variables from this struct is convenient. The function would have access to the struct variables allowing for a simple elegant solution.
+   A function within a struct --- the struct format would help keep things organized and being able to call variables from this struct is convenient. The data members can vary independently. The function would have access to the struct variables allowing for a simple elegant solution.
 
 2. What is the difference between a class and a struct in C++?
 
