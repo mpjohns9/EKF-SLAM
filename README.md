@@ -48,9 +48,9 @@ Vector2D is a struct because the members can vary independently (C++ core guidel
 # Sample Run of frame_main
 ```
 Enter transform T_{a,b}: 
-90 0 1
+deg: 90 x: 0 y: 1
 Enter transform T_{b,c}: 
-90 1 0
+deg: 90 x: 1 y: 0
 T_{a,b}: deg: 90 x: 0 y: 1
 T_{b,a}: deg: -90 x: -1 y: -6.12323e-17
 T_{b,c}: deg: 90 x: 1 y: 0
@@ -64,7 +64,7 @@ v_a: [-1 2]
 v_b: [1 1]
 v_c: [1 1.11022e-16]
 Enter twist V_b: 
-1 1 1 
+1 1 1
 V_a: [1 0 1]
 V_b: [1 1 1]
 V_c: [1 2 -1]

@@ -149,6 +149,8 @@ namespace turtlelib
             is >> ang >> v.x >> v.y;
         }
 
+        is.get();
+
         ang = deg2rad(ang);
         Transform2D T(v, ang);
 
