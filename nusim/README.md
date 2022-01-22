@@ -18,3 +18,6 @@ Below is a list of parameters that can be modified by the user to change the sim
  - y0: starting y position of the robot
  - theta0: starting orientation of the robot
 
+ # Rviz Demonstration
+ ![Rviz - Obstacles](images/nusim1.png)
+
