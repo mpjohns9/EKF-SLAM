@@ -76,8 +76,9 @@ int main(int argc, char * argv[])
 
     visualization_msgs::MarkerArray ma;
 
+    int i;
     ma.markers.resize(obs_x.size());
-    for (int i;i<obs_x.size();i++)
+    for (i=0;i<obs_x.size();i++)
     {
         // visualization_msgs::Marker marker;
 
