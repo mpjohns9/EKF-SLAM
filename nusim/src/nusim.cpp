@@ -39,6 +39,9 @@ static std::vector<double> obs_y;
 static double radius;
 static double height;
 
+/// \brief callback for reset service
+///
+/// resets timestep to 0 and robot to initial position
 bool reset_callback(std_srvs::TriggerRequest & request, std_srvs::TriggerResponse & response)
 {
     timestep = 0;
@@ -48,6 +51,10 @@ bool reset_callback(std_srvs::TriggerRequest & request, std_srvs::TriggerRespons
     return true;
 }
 
+
+/// \brief callback for teleport service
+///
+/// teleports robot to x, y, theta position
 bool teleport_callback(nusim::Teleport::Request & request, nusim::Teleport::Response & response)
 {
     x = request.x;
@@ -73,7 +80,6 @@ int main(int argc, char * argv[])
     nh_prv.getParam("obstacles/radius", radius);
     nh_prv.getParam("obstacles/height", height);
 
-    // ROS_DEBUG("hello %f",obs_x[0]);
     x = x_0;
     y = y_0;
     theta = theta_0;
