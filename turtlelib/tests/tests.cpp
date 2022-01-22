@@ -2,6 +2,9 @@
 #include "catch.hpp"
 #include "turtlelib/rigid2d.hpp"
 
+
+//Collaborators: Devesh Bhura, Marco Morales
+
 TEST_CASE("translation", "[vector]") { //Marshall Johnson
     turtlelib::Vector2D v;
     v.x = 1;
@@ -92,20 +95,20 @@ TEST_CASE( "Test for vector transformation", "Vector Transform" ) {// Devesh Bhu
 
 TEST_CASE( "Test for Twist transformation", "Twist Transform" ) {// Devesh Bhura
 
-    turtlelib::Twist V0, Vt;
+    turtlelib::Twist2D V0, Vt;
     turtlelib::Vector2D v;
     double theta = turtlelib::deg2rad(90);
     v.x = 1.0;
     v.y = 1.0;
     turtlelib::Transform2D Tab(v,theta);
-    Vt.xdot = 0.0;
-    Vt.ydot = 0.0;
-    Vt.thetadot = 0.0;
+    Vt.x = 0.0;
+    Vt.y = 0.0;
+    Vt.ang = 0.0;
     V0 = Tab(Vt);
 
-    REQUIRE(turtlelib::almost_equal(V0.xdot,Vt.xdot,0.01));
-    REQUIRE(turtlelib::almost_equal(V0.ydot,Vt.ydot,0.01));
-    REQUIRE(turtlelib::almost_equal(V0.thetadot,Vt.thetadot,0.01));
+    REQUIRE(turtlelib::almost_equal(V0.x,Vt.x,0.01));
+    REQUIRE(turtlelib::almost_equal(V0.y,Vt.y,0.01));
+    REQUIRE(turtlelib::almost_equal(V0.ang,Vt.ang,0.01));
 }
 
 
@@ -131,5 +134,50 @@ TEST_CASE( "Test for Multiplication", "Multiplication" ) {// Devesh Bhura
     REQUIRE(turtlelib::almost_equal(v0.y, v.y,0.01));
 }
 
+TEST_CASE("Test Both Translational and Rotational Transform", "[transform]") {//Marco Morales
+    double angle_init = 90.0;
+    turtlelib::Vector2D vector;
+    vector.x = 2.0;
+    vector.y = 3.0;
+    turtlelib::Transform2D transform = turtlelib::Transform2D(vector,angle_init);
+    turtlelib::Vector2D vec = transform.translation();
+    double angle = transform.rotation();
+    double x_ph = vec.x;
+    double y_ph = vec.y;
+
+    REQUIRE( angle == 90.0 );
+    REQUIRE( x_ph == 2.0 );
+    REQUIRE( y_ph == 3.0 );
+}
+
+TEST_CASE("Test Input stream", "[transform]") { //Marco Morales
+    std::stringstream ss;
+
+    SECTION( "Just numbers" ) {
+        ss << 90 << ' '<< 0 << ' ' << 1;
+        int deg,x,y;
+        ss >> deg >>x>>y;
+        REQUIRE(deg == 90);
+        REQUIRE(x == 0);
+        REQUIRE(y == 1);
+    }
+
+    SECTION( "Strings added" ) {
+        ss.peek();
+        ss << "deg: " << 90 << " x: "<< 0 << " y: " << 1;
+        int deg,x,y;
+        ss >> deg >>x>>y;
+        REQUIRE(deg == 90);
+        REQUIRE(x == 0);
+        REQUIRE(y == 1);
+    }
+}
+
+TEST_CASE("Test Output stream", "[transform]") { //Marco Morales
+    std::stringstream ss;
+    std::string s("deg: 90 x: 0 y: 1");
+    ss << "deg: " << 90 << " x: "<< 0 << " y: " << 1; 
+    REQUIRE(s == ss.str());
+} 
 
 
