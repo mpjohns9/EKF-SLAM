@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.9)
 project(turtlelib)
 
 # create the turtlelib library 
-add_library(turtlelib src/rigid2d.cpp)
+add_library(${PROJECT_NAME} src/rigid2d.cpp)
 # The add_library function just added turtlelib as a "target"
 # A "target" is a name that CMake uses to refer to some type of output
 # In this case it is a library but it could also be an executable or some other items
@@ -10,13 +10,13 @@ add_library(turtlelib src/rigid2d.cpp)
 # Public include directories can be used by other targets that link against turtlelib
 # By adding include/ to the include path, this means that files in e.g., include/turtlelib
 # can be included with #include"turtlelib/file.hpp"
-target_include_directories(turtlelib PUBLIC include/)
+target_include_directories(${PROJECT_NAME} PUBLIC include/)
 
 # enable C++ 17
-target_compile_features(turtlelib PUBLIC cxx_std_17) 
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17) 
 
 # warnings are your friend!
-target_compile_options(turtlelib PUBLIC -Wall -Wextra)
+target_compile_options(${PROJECT_NAME} PUBLIC -Wall -Wextra)
 
 # create the executable target  and link it with the rigid2d library
 # It is also possible specify multiple cpp files and they will be linked
@@ -24,7 +24,7 @@ target_compile_options(turtlelib PUBLIC -Wall -Wextra)
 # However, by creating a library (as we are doing here) the library files
 # can be compiled once and used
 add_executable(frame_main src/frame_main.cpp)
-target_link_libraries(frame_main rigid2d.cpp)
+target_link_libraries(frame_main ${PROJECT_NAME})
 
 # Use the cmake testing functionality. A test is just an executable.
 enable_testing()
