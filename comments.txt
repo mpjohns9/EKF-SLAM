@@ -1,0 +1,47 @@
+catkin_lint -W2
+catkin_make
+
+Task A.
+README.md
+   - command
+   - command
+   - Rviz screenshot
+
+roslaunch nuturtle_description load.launch
+[ does not load except when the color is black] -2
+
+roslaunch nuturtle_description load_all.launch
+  - it is possible to write load_all.launch by including load.launch
+
+
+Minimal Files To Display Turtlebot:
+meshes/
+   burger_base.stl
+   lds.stl
+   left_tire.stl
+   right_tire.stl
+urdf/
+   common_properties.xacro
+   turtlebot3_burger.urdf.xacro
+
+config/diff_params.yaml
+   wheel_radius: 0.033
+   wheel_track: 0.160
+
+Task B.
+     static_assertions?
+     unit_tests (enough + passed?) (passed your own + mine)
+     Code works? (see // rec: in code for suggestions)
+     conceptual questions [see README.md] -1
+
+Task C.
+   roslaunch nusim.launch
+   [CMakeLists.txt has not enabled C++17 -Wall, or -Werr] -1
+   [ There is a problem with how you are timestamping joint states (or not setting them),
+     which causes the JointState is X seconds old] -1
+   
+   clock is published? [timestep seems to be counting up seconds instead of iterations or the loop is not running at 1hz for some reason] 
+   teleport works?
+   reset works?
+   README
+95/100

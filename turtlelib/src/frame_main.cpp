@@ -6,6 +6,7 @@
 
 int main() 
 {
+    /// rec: declare variables closer to where they are used
     turtlelib::Transform2D T_ab, T_ba, T_bc, T_cb, T_ac, T_ca;
     turtlelib::Vector2D v_bhat, v_a, v_b, v_c;
     turtlelib::Twist2D V_a, V_b, V_c;

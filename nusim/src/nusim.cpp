@@ -30,6 +30,7 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <ros/console.h>
 
+/// rec: it would be good practice to explicitly initialize these variables
 static int timestep;
 static int rate;
 static double x_0, y_0, theta_0;
@@ -42,6 +43,7 @@ static double height;
 /// \brief callback for reset service
 ///
 /// resets timestep to 0 and robot to initial position
+/// rec: the request could be const
 bool reset_callback(std_srvs::TriggerRequest & request, std_srvs::TriggerResponse & response)
 {
     timestep = 0;
@@ -101,9 +103,9 @@ int main(int argc, char * argv[])
 
     visualization_msgs::MarkerArray ma;
 
-    int i;
+    int i; /// rec: this is an unitialized local varialbe, which is very bad. 
     ma.markers.resize(obs_x.size());
-    for (i=0;i<obs_x.size();i++)
+    for (i=0;i<obs_x.size();i++) // just declare i in the for loop.  size of vector is not an int (or signed) so its better to use size_t
     {
         // visualization_msgs::Marker marker;
 

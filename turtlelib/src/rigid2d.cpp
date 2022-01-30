@@ -7,7 +7,7 @@
 
 namespace turtlelib
 {
-    Transform2D::Transform2D()
+    Transform2D::Transform2D() /// rec: use initializer lists and delegating constructors
     {
         x = 0;
         y = 0; 
@@ -37,7 +37,7 @@ namespace turtlelib
 
     Vector2D Transform2D::operator()(Vector2D v) const 
     {
-        Vector2D out;
+        Vector2D out;   // rec: just return these expressions directly return { cos(ang) * ...etc,sin(ang)...etc}
         out.x = cos(ang)*v.x + -sin(ang)*v.y + x;
         out.y = sin(ang)*v.x + cos(ang)*v.y + y;
         return out;
@@ -54,7 +54,7 @@ namespace turtlelib
 
     Transform2D Transform2D::inv() const
     {
-        Transform2D T;
+        Transform2D T;   // can just return this directly, using the Transform2D constructor?
         T.x = -x*cos(ang) - y*sin(ang);
         T.y = -y*cos(ang) + x*sin(ang);
         T.ang = -ang;
