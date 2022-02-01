@@ -1,6 +1,6 @@
-#define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+#include "catch_ros/catch.hpp"
 #include "turtlelib/rigid2d.hpp"
+#include<sstream>
 
 /// \file
 /// \brief Test file for Transform2D class

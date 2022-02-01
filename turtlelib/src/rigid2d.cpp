@@ -180,12 +180,12 @@ namespace turtlelib
         return (v1.x*v2.x) + (v1.y*v2.y);
     }
 
-    double Vector2D::magnitude(Vector2D v);
+    double Vector2D::magnitude(Vector2D v)
     {
         return sqrt(pow(v.x,2) + pow(v.y,2));
     }
 
-    double Vector2D::angle(Vector2D v1, Vector2D v2);
+    double Vector2D::angle(Vector2D v1, Vector2D v2)
     {
         return acos(dot(v1, v2)/(magnitude(v1)*magnitude(v2)));
     }
@@ -210,20 +210,20 @@ namespace turtlelib
         return *this;
     }
 
-    Vector2D & Vector2D::operator+(const Vector2D & rhs)
+    Vector2D operator+(Vector2D lhs, const Vector2D & rhs)
     {
-        lhs += rhs
+        lhs += rhs;
         return lhs;
     }
 
-    Vector2D & Vector2D::operator-(const Vector2D & rhs)
+    Vector2D operator-(Vector2D lhs, const Vector2D & rhs)
     {
-        lhs -= rhs
+        lhs -= rhs;
         return lhs;
     }
-    Vector2D & Vector2D::operator*(double rhs)
+    Vector2D operator*(Vector2D lhs, double rhs)
     {
-        lhs *= rhs
+        lhs *= rhs;
         return lhs;
     }
 }
