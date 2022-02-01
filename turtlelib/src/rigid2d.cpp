@@ -85,6 +85,24 @@ namespace turtlelib
         return ang;
     }
 
+    Transform2D Transform2D::integrate_twist(Twist2D V)
+    {
+        if (V.ang != 0.0) 
+        {
+            double x = -V.y/V.ang;
+            double y = -V.x/V.ang;
+        }
+        else 
+        {
+            double x = 0.0;
+            double y = 0.0;
+        }
+
+        Transform2D Tsb(Vector2D(x,y));
+        Transform2D Tss(V.ang);
+        return Tsb.inv()*Tss*Tsb;
+    }
+
     std::ostream & operator<<(std::ostream & os, const Vector2D & v)
     {
         os << "[" << v.x << " " << v.y << "]";
