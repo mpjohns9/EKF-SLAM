@@ -49,6 +49,17 @@ namespace turtlelib
         return(deg);
     }
 
+    /// \brief convert angle to interval [-pi, pi)
+    /// \param rad - angle in radians
+    /// \returns converted angle in interval [-pi, pi)
+    constexpr double normalize_angle(double rad)
+    {
+        if (rad >= PI || rad < PI)
+        {
+            return rad % PI;
+        }
+    }
+
     /// static_assertions test compile time assumptions.
     /// You should write at least one more test for each function
     /// You should also purposely (and temporarily) make one of these tests fail
