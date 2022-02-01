@@ -29,20 +29,25 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <ros/console.h>
+#include <nuturtlebot_msgs/WheelCommands.h>
+#include <nuturtlebot_msgs/SensorData.h>
 
-static int timestep;
-static int rate;
-static double x_0, y_0, theta_0;
-static double x, y, theta;
-static std::vector<double> obs_x;
-static std::vector<double> obs_y;
-static double radius;
-static double height;
+
+static auto timestep = 0;
+static auto rate = 0;
+static auto x_0 = 0.0, y_0 = 0.0, theta_0 = 0.0;
+static auto x = 0.0, y = 0.0, theta = 0.0;
+static std::vector<double> obs_x{};
+static std::vector<double> obs_y{};
+static auto radius = 0.0;
+static auto height = 0.0;
+static auto lwheel_vel = 0;
+static auto rwheel_vel = 0;
 
 /// \brief callback for reset service
 ///
 /// resets timestep to 0 and robot to initial position
-bool reset_callback(std_srvs::TriggerRequest & request, std_srvs::TriggerResponse & response)
+bool resetCallback(std_srvs::TriggerRequest & request, std_srvs::TriggerResponse & response)
 {
     timestep = 0;
     x = 0.0;
@@ -55,12 +60,21 @@ bool reset_callback(std_srvs::TriggerRequest & request, std_srvs::TriggerRespons
 /// \brief callback for teleport service
 ///
 /// teleports robot to x, y, theta position
-bool teleport_callback(nusim::Teleport::Request & request, nusim::Teleport::Response & response)
+bool teleportCallback(nusim::Teleport::Request & request, nusim::Teleport::Response & response)
 {
     x = request.x;
     y = request.y;
     theta = request.theta;
     return true;
+}
+
+/// \brief callback for wheel_cmd subscriber
+/// \param msg - nuturtlebot_msgs/WheelCommands message obj
+/// receives motion commands for the turtlebot
+void cmdCallback(const nuturtlebot_msgs::WheelCommands & msg)
+{
+    lwheel_vel = msg.left_velocity;
+    rwheel_vel = msg.right_velocity;
 }
 
 int main(int argc, char * argv[])
@@ -87,13 +101,16 @@ int main(int argc, char * argv[])
     std_msgs::UInt64 step;
 
     ros::Publisher pub_step = nh_prv.advertise<std_msgs::UInt64>("timestep", 1000);
-    ros::Publisher pub_joints = nh.advertise<sensor_msgs::JointState>("red/joint_states", 1000);
+    // ros::Publisher pub_joints = nh.advertise<sensor_msgs::JointState>("red/joint_states", 1000);
     ros::Publisher marker_pub = nh_prv.advertise<visualization_msgs::MarkerArray>("obstacles", 1, true);
+    ros::Publisher sensor_pub = nh.advertise<nuturtlebot_msgs::SensorData>("red/sensor_data", 1000);
 
-    sensor_msgs::JointState js;
+    ros::Subscriber vel_sub = nh.subscribe("red/wheel_cmd", 1000, cmdCallback);
 
-    ros::ServiceServer reset = nh_prv.advertiseService("reset", reset_callback);
-    ros::ServiceServer teleport = nh_prv.advertiseService("teleport", teleport_callback);
+    // sensor_msgs::JointState js;
+
+    ros::ServiceServer reset = nh_prv.advertiseService("reset", resetCallback);
+    ros::ServiceServer teleport = nh_prv.advertiseService("teleport", teleportCallback);
 
     static tf2_ros::TransformBroadcaster br;
     geometry_msgs::TransformStamped transform;
@@ -101,9 +118,8 @@ int main(int argc, char * argv[])
 
     visualization_msgs::MarkerArray ma;
 
-    int i;
     ma.markers.resize(obs_x.size());
-    for (i=0;i<obs_x.size();i++)
+    for (int i=0;i<obs_x.size();i++)
     {
         // visualization_msgs::Marker marker;
 
@@ -173,9 +189,9 @@ int main(int argc, char * argv[])
         step.data = timestep;
         pub_step.publish(step);
 
-        js.name = {"red_wheel_left_joint", "red_wheel_right_joint"};
-        js.position = {0.0, 0.0};
-        pub_joints.publish(js);
+        // js.name = {"red_wheel_left_joint", "red_wheel_right_joint"};
+        // js.position = {0.0, 0.0};
+        // pub_joints.publish(js);
         timestep++;
         ros::spinOnce();
         r.sleep();
