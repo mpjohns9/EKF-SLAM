@@ -90,6 +90,44 @@ namespace turtlelib
         double y = 0.0;
 
         Vector2D hat(Vector2D v);
+
+        /// \brief add this vector to another and store the result 
+        /// in this object
+        /// \param rhs - the vector to add
+        /// \return a reference to the new vector object
+        Vector2D & operator+=(const Vector2D & rhs);
+
+        /// \brief subtract another vector from this one and store the result 
+        /// in this object
+        /// \param rhs - the vector to subtract
+        /// \return a reference to the new vector object
+        Vector2D & operator-=(const Vector2D & rhs);
+
+        /// \brief multiply this vector with another and store the result 
+        /// in this object
+        /// \param rhs - the vector to multiply
+        /// \return a reference to the new vector object
+        Vector2D & operator*=(const Vector2D & rhs);
+
+        /// \brief add one vector to another and return result
+        /// \param lhs - the left hand operand
+        /// \param rhs - the right hand operand
+        /// \return the sum of the two vectors
+        Vector2D & operator+(Vector2D lhs, const Vector2D & rhs);
+
+        /// \brief subtract another vector from this one and store the result 
+        /// in this object
+        /// \param lhs - the left hand operand
+        /// \param rhs - the right hand operand
+        /// \return the difference of the two vectors
+        Vector2D & operator-(const Vector2D & rhs);
+
+        /// \brief multiply this vector with another and store the result 
+        /// in this object
+        /// \param lhs - the left hand operand
+        /// \param rhs - the right hand operand
+        /// \return the product of the two vectors
+        Vector2D & operator*(const Vector2D & rhs);
     };
 
     /// \brief A 2-dimensional Twist

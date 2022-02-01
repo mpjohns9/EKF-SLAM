@@ -174,5 +174,42 @@ namespace turtlelib
         v_hat.y = v.y/sqrt(pow(v.x,2) + pow(v.y,2));
         return v_hat;
     }
+
+    Vector2D & Vector2D::operator+=(const Vector2D & rhs)
+    {
+        x = x + rhs.x;
+        y = y + rhs.y;
+        return *this
+    }
+
+    Vector2D & Vector2D::operator-=(const Vector2D & rhs)
+    {
+        x = x - rhs.x;
+        y = y - rhs.y;
+        return *this
+    }
+    Vector2D & Vector2D::operator*=(const Vector2D & rhs)
+    {
+        x = x * rhs.x;
+        y = y * rhs.y;
+        return *this
+    }
+
+    Vector2D & Vector2D::operator+(const Vector2D & rhs)
+    {
+        lhs += rhs
+        return lhs
+    }
+
+    Vector2D & Vector2D::operator-(const Vector2D & rhs)
+    {
+        lhs -= rhs
+        return lhs
+    }
+    Vector2D & Vector2D::operator*(const Vector2D & rhs)
+    {
+        lhs *= rhs
+        return lhs
+    }
 }
 
