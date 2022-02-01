@@ -89,6 +89,9 @@ namespace turtlelib
         /// \brief the y coordinate
         double y = 0.0;
 
+        /// \brief normalize a vector
+        /// \param v - the vector
+        /// \return the normalized vector
         Vector2D hat(Vector2D v);
 
         /// \brief add this vector to another and store the result 
@@ -103,11 +106,11 @@ namespace turtlelib
         /// \return a reference to the new vector object
         Vector2D & operator-=(const Vector2D & rhs);
 
-        /// \brief multiply this vector with another and store the result 
+        /// \brief multiply this vector with a scalar and store the result 
         /// in this object
         /// \param rhs - the vector to multiply
         /// \return a reference to the new vector object
-        Vector2D & operator*=(const Vector2D & rhs);
+        Vector2D & operator*=(double rhs);
 
         /// \brief add one vector to another and return result
         /// \param lhs - the left hand operand
@@ -120,14 +123,32 @@ namespace turtlelib
         /// \param lhs - the left hand operand
         /// \param rhs - the right hand operand
         /// \return the difference of the two vectors
-        Vector2D & operator-(const Vector2D & rhs);
+        Vector2D & operator-(Vector2D lhs, const Vector2D & rhs);
 
-        /// \brief multiply this vector with another and store the result 
+        /// \brief multiply this vector with a scalar and store the result 
         /// in this object
         /// \param lhs - the left hand operand
         /// \param rhs - the right hand operand
-        /// \return the product of the two vectors
-        Vector2D & operator*(const Vector2D & rhs);
+        /// \return the product of the vector and scalar
+        Vector2D & operator*(Vector2D lhs, double rhs);
+
+        /// \brief the dot product of two vectors
+        /// \param v1 - the first vector
+        /// \param v2 - the second vector
+        /// \return the dot product of v1 and v2
+        double dot(Vector2D v1, Vector2D v2);
+
+        /// \brief compute magnitude of a vector
+        /// \param v - the vector
+        /// \return the magnitude of vector v
+        double magnitude(Vector2D v);
+
+        /// \brief compute the angle between two vectors
+        /// \param v1 - the first vector
+        /// \param v2 - the second vector
+        /// \return the angle in radians between v1 and v2
+        double angle(Vector2D v1, Vector2D v2);
+        
     };
 
     /// \brief A 2-dimensional Twist
