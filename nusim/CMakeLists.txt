@@ -10,6 +10,7 @@ add_compile_options(-std=c++17 -Wall -Wextra)
 find_package(catkin REQUIRED COMPONENTS
     message_generation
     message_runtime
+    nuturtlebot_msgs
     roscpp
     sensor_msgs
     std_msgs
