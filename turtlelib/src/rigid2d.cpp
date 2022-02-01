@@ -87,18 +87,16 @@ namespace turtlelib
 
     Transform2D Transform2D::integrate_twist(Twist2D V)
     {
+        double x = 0.0;
+        double y = 0.0;
+        
         if (V.ang != 0.0) 
         {
-            double x = -V.y/V.ang;
-            double y = -V.x/V.ang;
-        }
-        else 
-        {
-            double x = 0.0;
-            double y = 0.0;
+            x = -V.y/V.ang;
+            y = -V.x/V.ang;
         }
 
-        Transform2D Tsb(Vector2D(x,y));
+        Transform2D Tsb(Vector2D{x,y});
         Transform2D Tss(V.ang);
         return Tsb.inv()*Tss*Tsb;
     }
