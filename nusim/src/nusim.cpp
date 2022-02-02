@@ -50,9 +50,9 @@ static std::vector<double> obs_y;
 static double radius;
 static double height;
 
-// // left and right wheel velocities
-// static auto lwheel_vel = 0;
-// static auto rwheel_vel = 0;
+// left and right wheel velocities
+static auto lwheel_vel = 0;
+static auto rwheel_vel = 0;
 
 // x, y length and thickness of arena (walls)
 static auto x_length = 0.0;
@@ -86,11 +86,11 @@ bool teleportCallback(nusim::Teleport::Request & request, nusim::Teleport::Respo
 /// \brief callback for wheel_cmd subscriber
 /// \param msg - nuturtlebot_msgs/WheelCommands message obj
 /// receives motion commands for the turtlebot
-// void cmdCallback(const nuturtlebot_msgs::WheelCommands & msg)
-// {
-//     lwheel_vel = msg.left_velocity;
-//     rwheel_vel = msg.right_velocity;
-// }
+void cmdCallback(const nuturtlebot_msgs::WheelCommands & msg)
+{
+    lwheel_vel = msg.left_velocity;
+    rwheel_vel = msg.right_velocity;
+}
 
 int main(int argc, char * argv[])
 {
@@ -124,7 +124,7 @@ int main(int argc, char * argv[])
     ros::Publisher wall_pub = nh_prv.advertise<visualization_msgs::MarkerArray>("walls", 1, true);
     // ros::Publisher sensor_pub = nh.advertise<nuturtlebot_msgs::SensorData>("red/sensor_data", 1000);
 
-    // ros::Subscriber vel_sub = nh.subscribe("red/wheel_cmd", 1000, cmdCallback);
+    ros::Subscriber vel_sub = nh.subscribe("red/wheel_cmd", 1000, cmdCallback);
 
     // sensor_msgs::JointState js;
 
