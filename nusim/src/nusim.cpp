@@ -35,14 +35,29 @@
 
 static auto timestep = 0;
 static auto rate = 0;
+
+// initial position and orientation
 static auto x_0 = 0.0, y_0 = 0.0, theta_0 = 0.0;
+
+// current position and orientation
 static auto x = 0.0, y = 0.0, theta = 0.0;
-static std::vector<double> obs_x{};
-static std::vector<double> obs_y{};
-static auto radius = 0.0;
-static auto height = 0.0;
-static auto lwheel_vel = 0;
-static auto rwheel_vel = 0;
+
+// obstacle x/y coord arrays
+static std::vector<double> obs_x;
+static std::vector<double> obs_y;
+
+// height and radius of cylindrical objects
+static double radius;
+static double height;
+
+// // left and right wheel velocities
+// static auto lwheel_vel = 0;
+// static auto rwheel_vel = 0;
+
+// x, y length and thickness of arena (walls)
+static auto x_length = 0.0;
+static auto y_length = 0.0;
+static auto w_thick = 0.1;
 
 /// \brief callback for reset service
 ///
@@ -71,11 +86,11 @@ bool teleportCallback(nusim::Teleport::Request & request, nusim::Teleport::Respo
 /// \brief callback for wheel_cmd subscriber
 /// \param msg - nuturtlebot_msgs/WheelCommands message obj
 /// receives motion commands for the turtlebot
-void cmdCallback(const nuturtlebot_msgs::WheelCommands & msg)
-{
-    lwheel_vel = msg.left_velocity;
-    rwheel_vel = msg.right_velocity;
-}
+// void cmdCallback(const nuturtlebot_msgs::WheelCommands & msg)
+// {
+//     lwheel_vel = msg.left_velocity;
+//     rwheel_vel = msg.right_velocity;
+// }
 
 int main(int argc, char * argv[])
 {
@@ -88,6 +103,9 @@ int main(int argc, char * argv[])
     nh_prv.param("x0", x_0, 0.0);
     nh_prv.param("y0", y_0, 0.0);
     nh_prv.param("theta0", theta_0, 0.0);
+    
+    nh_prv.param("x_length", x_length, 5.0);
+    nh_prv.param("y_length", y_length, 5.0);
 
     nh_prv.getParam("obstacles/obs_x", obs_x);
     nh_prv.getParam("obstacles/obs_y", obs_y);
@@ -103,9 +121,10 @@ int main(int argc, char * argv[])
     ros::Publisher pub_step = nh_prv.advertise<std_msgs::UInt64>("timestep", 1000);
     // ros::Publisher pub_joints = nh.advertise<sensor_msgs::JointState>("red/joint_states", 1000);
     ros::Publisher marker_pub = nh_prv.advertise<visualization_msgs::MarkerArray>("obstacles", 1, true);
-    ros::Publisher sensor_pub = nh.advertise<nuturtlebot_msgs::SensorData>("red/sensor_data", 1000);
+    ros::Publisher wall_pub = nh_prv.advertise<visualization_msgs::MarkerArray>("walls", 1, true);
+    // ros::Publisher sensor_pub = nh.advertise<nuturtlebot_msgs::SensorData>("red/sensor_data", 1000);
 
-    ros::Subscriber vel_sub = nh.subscribe("red/wheel_cmd", 1000, cmdCallback);
+    // ros::Subscriber vel_sub = nh.subscribe("red/wheel_cmd", 1000, cmdCallback);
 
     // sensor_msgs::JointState js;
 
@@ -115,6 +134,156 @@ int main(int argc, char * argv[])
     static tf2_ros::TransformBroadcaster br;
     geometry_msgs::TransformStamped transform;
     tf2::Quaternion q;
+
+    
+    visualization_msgs::MarkerArray wall_ma;
+
+    wall_ma.markers.resize(4);
+    for (int i=0; i<4; i++)
+    {
+        if (i == 3)
+        {
+            //set header and timestamp
+            wall_ma.markers[i].header.frame_id = "world";
+            wall_ma.markers[i].header.stamp = ros::Time::now();
+
+            //set id diff for each marker
+            wall_ma.markers[i].id = i;
+
+            //set color and action
+            wall_ma.markers[i].type = visualization_msgs::Marker::CUBE;
+            wall_ma.markers[i].action = visualization_msgs::Marker::ADD;
+
+            //set pose of marker
+            wall_ma.markers[i].pose.position.x = (x_length/2.0) + (w_thick/2.0);
+            wall_ma.markers[i].pose.position.y = 0;
+            wall_ma.markers[i].pose.position.z = 0;
+            wall_ma.markers[i].pose.orientation.x = 0;
+            wall_ma.markers[i].pose.orientation.y = 0;
+            wall_ma.markers[i].pose.orientation.z = 0;
+            wall_ma.markers[i].pose.orientation.w = 1;
+
+            //set size
+            wall_ma.markers[i].scale.x = w_thick;
+            wall_ma.markers[i].scale.y = y_length;
+            wall_ma.markers[i].scale.z = 0.25;
+
+
+            //set color
+            wall_ma.markers[i].color.r = 1.0;
+            wall_ma.markers[i].color.g = 0.0;
+            wall_ma.markers[i].color.b = 0.0;
+            wall_ma.markers[i].color.a = 1.0;
+        }
+
+        if (i == 2)
+        {
+            //set header and timestamp
+            wall_ma.markers[i].header.frame_id = "world";
+            wall_ma.markers[i].header.stamp = ros::Time::now();
+
+            //set id diff for each marker
+            wall_ma.markers[i].id = i;
+
+            //set color and action
+            wall_ma.markers[i].type = visualization_msgs::Marker::CUBE;
+            wall_ma.markers[i].action = visualization_msgs::Marker::ADD;
+
+            //set pose of marker
+            wall_ma.markers[i].pose.position.x = 0;
+            wall_ma.markers[i].pose.position.y = (y_length/2.0) + (w_thick/2.0);
+            wall_ma.markers[i].pose.position.z = 0;
+            wall_ma.markers[i].pose.orientation.x = 0;
+            wall_ma.markers[i].pose.orientation.y = 0;
+            wall_ma.markers[i].pose.orientation.z = 0;
+            wall_ma.markers[i].pose.orientation.w = 1;
+
+            //set size
+            wall_ma.markers[i].scale.x = x_length + 2*w_thick;
+            wall_ma.markers[i].scale.y = w_thick;
+            wall_ma.markers[i].scale.z = 0.25;
+
+
+            //set color
+            wall_ma.markers[i].color.r = 1.0;
+            wall_ma.markers[i].color.g = 0.0;
+            wall_ma.markers[i].color.b = 0.0;
+            wall_ma.markers[i].color.a = 1.0;
+        }
+
+        if (i == 1)
+        {
+            //set header and timestamp
+            wall_ma.markers[i].header.frame_id = "world";
+            wall_ma.markers[i].header.stamp = ros::Time::now();
+
+            //set id diff for each marker
+            wall_ma.markers[i].id = i;
+
+            //set color and action
+            wall_ma.markers[i].type = visualization_msgs::Marker::CUBE;
+            wall_ma.markers[i].action = visualization_msgs::Marker::ADD;
+
+            //set pose of marker
+            wall_ma.markers[i].pose.position.x = -(x_length/2.0) - (w_thick/2.0);
+            wall_ma.markers[i].pose.position.y = 0;
+            wall_ma.markers[i].pose.position.z = 0;
+            wall_ma.markers[i].pose.orientation.x = 0;
+            wall_ma.markers[i].pose.orientation.y = 0;
+            wall_ma.markers[i].pose.orientation.z = 0;
+            wall_ma.markers[i].pose.orientation.w = 1;
+
+            //set size
+            wall_ma.markers[i].scale.x = w_thick;
+            wall_ma.markers[i].scale.y = y_length;
+            wall_ma.markers[i].scale.z = 0.25;
+
+
+            //set color
+            wall_ma.markers[i].color.r = 1.0;
+            wall_ma.markers[i].color.g = 0.0;
+            wall_ma.markers[i].color.b = 0.0;
+            wall_ma.markers[i].color.a = 1.0;
+        }
+
+        if (i == 0)
+        {
+            //set header and timestamp
+            wall_ma.markers[i].header.frame_id = "world";
+            wall_ma.markers[i].header.stamp = ros::Time::now();
+
+            //set id diff for each marker
+            wall_ma.markers[i].id = i;
+
+            //set color and action
+            wall_ma.markers[i].type = visualization_msgs::Marker::CUBE;
+            wall_ma.markers[i].action = visualization_msgs::Marker::ADD;
+
+            //set pose of marker
+            wall_ma.markers[i].pose.position.x = 0;
+            wall_ma.markers[i].pose.position.y = - (y_length/2.0) - (w_thick/2.0);
+            wall_ma.markers[i].pose.position.z = 0;
+            wall_ma.markers[i].pose.orientation.x = 0;
+            wall_ma.markers[i].pose.orientation.y = 0;
+            wall_ma.markers[i].pose.orientation.z = 0;
+            wall_ma.markers[i].pose.orientation.w = 1;
+
+            //set size
+            wall_ma.markers[i].scale.x = x_length + 2*w_thick;
+            wall_ma.markers[i].scale.y = w_thick;
+            wall_ma.markers[i].scale.z = 0.25;
+
+
+            //set color
+            wall_ma.markers[i].color.r = 1.0;
+            wall_ma.markers[i].color.g = 0.0;
+            wall_ma.markers[i].color.b = 0.0;
+            wall_ma.markers[i].color.a = 1.0;
+        }
+
+    }
+
+    wall_pub.publish(wall_ma);
 
     visualization_msgs::MarkerArray ma;
 
