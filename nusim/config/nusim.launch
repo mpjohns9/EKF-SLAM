@@ -9,5 +9,6 @@
     <include file="$(find nuturtle_description)/launch/load.launch">
         <arg name="color" value="red"/>
         <arg name="config" value="$(find nusim)/config/nusim.rviz"/>
+        <arg name="fixed_frame" value="world"/>
     </include>
 </launch>
