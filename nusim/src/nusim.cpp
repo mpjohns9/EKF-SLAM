@@ -47,8 +47,8 @@ static std::vector<double> obs_x;
 static std::vector<double> obs_y;
 
 // height and radius of cylindrical objects
-static double radius;
-static double height;
+static double radius = 0.0;
+static double height = 0.0;
 
 // left and right wheel velocities
 static auto lwheel_vel = 0;
@@ -86,7 +86,7 @@ bool teleportCallback(nusim::Teleport::Request & request, nusim::Teleport::Respo
 /// \brief callback for wheel_cmd subscriber
 /// \param msg - nuturtlebot_msgs/WheelCommands message obj
 /// receives motion commands for the turtlebot
-void cmdCallback(const nuturtlebot_msgs::WheelCommands & msg)
+void wheelCallback(const nuturtlebot_msgs::WheelCommands & msg)
 {
     lwheel_vel = msg.left_velocity;
     rwheel_vel = msg.right_velocity;
@@ -124,7 +124,7 @@ int main(int argc, char * argv[])
     ros::Publisher wall_pub = nh_prv.advertise<visualization_msgs::MarkerArray>("walls", 1, true);
     // ros::Publisher sensor_pub = nh.advertise<nuturtlebot_msgs::SensorData>("red/sensor_data", 1000);
 
-    ros::Subscriber vel_sub = nh.subscribe("red/wheel_cmd", 1000, cmdCallback);
+    ros::Subscriber wheel_sub = nh.subscribe("red/wheel_cmd", 1000, wheelCallback);
 
     // sensor_msgs::JointState js;
 
