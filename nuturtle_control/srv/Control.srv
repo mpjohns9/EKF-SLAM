@@ -1,0 +1,2 @@
+float64 velocity    # angular velocity, positive for counter-clockwise, negative is clockwise
+float64 radius      # the radius of the arc
