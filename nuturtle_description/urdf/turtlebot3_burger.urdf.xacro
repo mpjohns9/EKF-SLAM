@@ -61,8 +61,8 @@
       </inertial>
     </link>
 
-    <joint name="wheel_left_joint" type="continuous">
-      <parent link="${color}_base_link"/>
+    <joint name="${color}_wheel_left_joint" type="continuous">
+      <parent link="${color}_base_link"/> 
       <child link="${color}_wheel_left_link"/>
       <origin xyz="0.0 ${track_width/2} 0.023" rpy="-1.57 0 0"/>
       <axis xyz="0 0 1"/>
