@@ -10,6 +10,8 @@
 turtlelib::diffDrive dd;
 turtlelib::Transform2D tf;
 
+static auto rate = 0;
+
 static auto x = 0;
 static auto y = 0;
 static auto theta = 0;

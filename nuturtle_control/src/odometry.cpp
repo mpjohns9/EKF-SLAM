@@ -8,6 +8,8 @@
 #include "turtlelib/rigid2d.hpp"
 #include "turtlelib/diff_drive.hpp"
 
+static auto rate = 0;
+
 static auto body_id = "";
 static auto odom_id = "";
 
@@ -40,7 +42,7 @@ bool poseCallback(geometry_msgs::Pose::Request & request, geometry_msgs::Pose::R
 
 int main(int argc, char * argv[])
 {
-    ros::init(argc, argv, "turtle_interface");
+    ros::init(argc, argv, "odometry");
     ros::NodeHandle nh_prv("~");
     ros::NodeHandle nh;
     ros::Rate r(nh_prv.param("rate", rate, 500));
