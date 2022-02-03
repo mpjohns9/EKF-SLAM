@@ -12,7 +12,7 @@ turtlelib::Transform2D tf;
 
 static auto x = 0;
 static auto y = 0;
-static auto ang = 0;
+static auto theta = 0;
 
 static auto lwheel_vel = 0;
 static auto rwheel_vel = 0;
@@ -71,7 +71,7 @@ int main(int argc, char * argv[])
         js.name = ["wheel_left_joint", "wheel_right_joint"];
         js.position = [lwheel_pos, rwheel_pos];
         js.velocity = [lwheel_vel, rwheel_vel];
-
+        joint_pub.publish(js);
 
         ros::spinOnce();
         r.sleep();
