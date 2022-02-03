@@ -87,12 +87,12 @@ namespace turtlelib
 
     Transform2D Transform2D::integrate_twist(Twist2D V)
     {
-        double x = 0.0;
-        double y = 0.0;
+        double x = V.x;
+        double y = V.y;
         
         if (V.ang != 0.0) 
         {
-            x = -V.y/V.ang;
+            x = V.y/V.ang;
             y = -V.x/V.ang;
         }
 
