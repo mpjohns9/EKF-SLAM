@@ -58,8 +58,8 @@ int main(int argc, char * argv[])
     ros::Publisher wheel_pub = nh.advertise<nuturtlebot_msgs::WheelCommands>("wheel_cmd", 1000);
     ros::Publisher joint_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1000);
 
-    ros::Subscriber vel_sub = nh.subscribe("geometry_msgs/Twist", 1000, velCallback);
-    ros::Subscriber sensor_sub = nh.subscribe("nuturtlebot_msgs/SensorData", 1000, sensorCallback);
+    ros::Subscriber vel_sub = nh.subscribe("cmd_vel", 1000, velCallback);
+    ros::Subscriber sensor_sub = nh.subscribe("sensor_data", 1000, sensorCallback);
 
 
     while(ros::ok())
