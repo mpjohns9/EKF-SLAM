@@ -61,10 +61,11 @@ namespace turtlelib
         /// \param V - given twist
         /// \return wheel velocities of robot
         WheelPos inv_kin(Twist2D V);
-        
+
     private:
         Config config;
         WheelPos wheel_pos;
+        WheelVel wheel_vel;
     };
 
 }

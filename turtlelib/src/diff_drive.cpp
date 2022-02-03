@@ -35,16 +35,16 @@ namespace turtlelib
         return c;
     }
 
-    WheelPos inv_kin(Twist2D V)
+    WheelVel inv_kin(Twist2D V)
     {
         if (V.y == 0.0)
         {
-            WheelPos p;
+            WheelVel vel;
 
-            p.l_wheel = (-D*V.ang + V.x)/r;
-            p.r_wheel = (D*V.ang + V.x)/r;
+            vel.l_wheel = (-D*V.ang + V.x)/r;
+            vel.r_wheel = (D*V.ang + V.x)/r;
 
-            return p;
+            return vel;
         }
         else
         {
