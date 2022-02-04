@@ -1,6 +1,9 @@
 /// \file
 /// \brief enables control of the turtlebot
 
+/// PARAMETERS: 
+///     ticks_to_rad: radians per encoder tick
+
 #include "ros/ros.h"
 #include <sensor_msgs/JointState.h>
 #include <geometry_msgs/Twist.h>
@@ -71,7 +74,7 @@ int main(int argc, char * argv[])
 
         sensor_msgs::JointState js;
         js.name = ["wheel_left_joint", "wheel_right_joint"];
-        js.position = [lwheel_pos, rwheel_pos];
+        js.position = [lwheel_pos*ticks_to_rad, rwheel_pos*ticks_to_rad];
         js.velocity = [lwheel_vel, rwheel_vel];
         joint_pub.publish(js);
 
