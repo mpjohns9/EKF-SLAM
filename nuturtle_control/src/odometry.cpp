@@ -1,10 +1,26 @@
 /// \file
 /// \brief publishes odometry messages and transform
 
+/// PARAMETERS:
+///     body_id: name of robot body frame
+///     odom_id: name of odometry frame
+///     wheel_left: name of left wheel joint
+///     wheel_right: name of right wheel joint
+///
+/// PUBLISHES: 
+///     odom_pub (nav_msgs/Odometry): publishes to odom
+///
+/// SUBSCRIBES:
+///     joint_sub (joint_states): subscribes to joint_states
+///
+/// SERVICES: 
+///     set_pose (geometry_msgs/Pose): provides configuration of robot
+
 #include "ros/ros.h"
 #include <sensor_msgs/JointState.h>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseWithCovariance.h>
 #include "turtlelib/rigid2d.hpp"
 #include "turtlelib/diff_drive.hpp"
 
@@ -23,6 +39,8 @@ static auto rwheel_vel = 0;
 static auto lwheel_pos = 0;
 static auto rwheel_pos = 0;
 
+/// \brief callback for the joint_states subscriber
+/// \param msg - sensor_msgs/JointState message obj
 void jointCallback(const sensor_msgs::JointState & msg)
 {
     lwheel_vel = msg.velocity[0];
@@ -91,7 +109,18 @@ int main(int argc, char * argv[])
 
     while(ros::ok())
     {
+        geometry_msgs::PoseWithCovariance p;
+        p.position.x = x;
+        p.position.y = y;
+        p.position.z = 0.0;
+
+        // geometry_msgs::TwistWithCovariance t;
+        // t.position.x = x;
+        // t.position.y = y;
+        // t.position.z = 0.0;
+
         nav_msgs::Odometry odom;
+        /// HOW TO GET THE TWIST?
 
         transform.header.stamp = ros::Time::now();
 

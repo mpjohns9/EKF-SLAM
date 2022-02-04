@@ -4,13 +4,14 @@
 /// PARAMETERS: 
 ///     ticks_to_rad: radians per encoder tick
 ///
-/// SUBSCRIBES: 
-///     vel_sub (geometry_msgs/Twist): subscribes to cmd_vel
-///     sensor_sub (nuturtlebot_msgs/SensorData): subscribes to sensor_data
-///
 /// PUBLISHES:
 ///     wheel_pub (nuturtlebot_msgs/WheelCommands): publishes wheel_cmd
 ///     joint_pub (sensor_msgs/JointState): publishes joint_states
+///
+/// SUBSCRIBES: 
+///     vel_sub (geometry_msgs/Twist): subscribes to cmd_vel
+///     sensor_sub (nuturtlebot_msgs/SensorData): subscribes to sensor_data
+
 
 #include "ros/ros.h"
 #include <sensor_msgs/JointState.h>
