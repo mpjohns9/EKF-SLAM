@@ -1,6 +1,17 @@
 /// \file
 /// \brief publishes odometry messages and transform
 
+/// PARAMETERS:
+///     frequency: publishing frequency
+///     
+/// PUBLISHES: 
+///     vel_pub (geometry_msgs/Twist): publishes to cmd_vel
+///
+/// SERVICES:
+///     control (nuturtle_control/Control): updates linear and angular velocities
+///     reverse (std_srvs/Empty): reverses direction of robot
+///     stop (std_srvs/Empty): stops motion of robot    
+
 #include "ros/ros.h"
 #include <std_msgs/Empty.h>
 #include <geometry_msgs/Twist.h>
@@ -15,6 +26,9 @@ static auto lin_vel = 0;
 static auto ang_vel = 0;
 static auto radius = 0;
 
+/// \brief callback for control service
+/// 
+/// Takes radius and velocity and updates angular and linear velocity of robot
 bool controlCallback(nuturtle_control::Control::Request & request, nuturtle_control::Control::Response & response)
 {
     state = State::CTRL;
@@ -24,6 +38,9 @@ bool controlCallback(nuturtle_control::Control::Request & request, nuturtle_cont
     return true;
 }
 
+/// \brief callback for reverse service
+///
+/// Flips velocities to reverse direction of motion
 bool reverseCallback(std_srvs::Empty::Request & request, std_srvs::Empty::Response & response)
 {
     state = State::REV;
@@ -32,6 +49,9 @@ bool reverseCallback(std_srvs::Empty::Request & request, std_srvs::Empty::Respon
     return true;
 }
 
+/// \brief callback for stop service
+///
+/// Sets velocities to zero to stop motion
 bool stopCallback(std_srvs::Empty::Request & request, std_srvs::Empty::Response & response)
 {
     state = State::STOP;
