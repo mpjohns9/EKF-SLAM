@@ -1,5 +1,6 @@
 #include "catch_ros/catch.hpp"
 #include "turtlelib/rigid2d.hpp"
+#include "turtlelib/diff_drive.hpp"
 #include<sstream>
 
 /// \file
@@ -180,7 +181,6 @@ TEST_CASE("Test Output stream", "[transform]") { //Marco Morales
     std::stringstream ss;
     std::string s("deg: 90 x: 0 y: 1");
     ss << "deg: " << 90 << " x: "<< 0 << " y: " << 1; 
-    REQUIRE(s == ss.str());
-} 
-
+    REQUIRE(s == ss.str()); 
+}
 
