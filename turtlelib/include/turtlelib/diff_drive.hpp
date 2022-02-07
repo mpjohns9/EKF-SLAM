@@ -8,9 +8,6 @@
 
 namespace turtlelib
 {
-    /// \brief PI.  Not in C++ standard until C++20.
-    constexpr double PI=3.14159265358979323846; 
-
     /// \brief Track width
     constexpr double D = 0.08;
 
@@ -60,7 +57,7 @@ namespace turtlelib
         /// move at a given twist
         /// \param V - given twist
         /// \return wheel velocities of robot
-        WheelPos inv_kin(Twist2D V);
+        WheelVel inv_kin(Twist2D V);
 
     private:
         Config config;

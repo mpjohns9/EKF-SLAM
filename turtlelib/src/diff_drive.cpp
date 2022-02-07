@@ -12,8 +12,8 @@ namespace turtlelib
         double dtheta = 0.0;
         double vx = 0.0;
 
-        dtheta = r*(pos.r_wheel - pos.l_wheel)/2*D;
-        vx = r*(ros.r_wheel + pos.l_wheel)/2;
+        dtheta = r*(pos.r_pos - pos.l_pos)/2*D;
+        vx = r*(pos.r_pos + pos.l_pos)/2;
 
         Twist2D V;
         V.ang = dtheta;
@@ -24,25 +24,27 @@ namespace turtlelib
         old_v.x = config.x;
         old_v.y = config.y;
 
-        Transform2D new_T = Transform2D::integrate_twist(V);
+        Transform2D T;
+        Transform2D new_T = T.integrate_twist(V);
 
         Vector2D new_v = new_T(old_v);
 
-        c.ang = new_T.ang + ang;
+        Config c;
+        c.ang = new_T.rotation() + config.ang;
         c.x = new_v.x + old_v.x;
         c.y = new_v.y + old_v.y;
 
         return c;
     }
 
-    WheelVel inv_kin(Twist2D V)
+    WheelVel diffDrive::inv_kin(Twist2D V)
     {
         if (V.y == 0.0)
         {
             WheelVel vel;
 
-            vel.l_wheel = (-D*V.ang + V.x)/r;
-            vel.r_wheel = (D*V.ang + V.x)/r;
+            vel.l_vel = (-D*V.ang + V.x)/r;
+            vel.r_vel = (D*V.ang + V.x)/r;
 
             return vel;
         }
