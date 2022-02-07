@@ -100,7 +100,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
- LIBRARIES turtlelib
+ LIBRARIES ${PROJECT_NAME}
  CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
 )
@@ -117,7 +117,8 @@ ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-add_library(${PROJECT_NAME} src/rigid2d.cpp)
+add_library(${PROJECT_NAME} src/diff_drive.cpp src/rigid2d.cpp)
+
 
 
 ## Add cmake target dependencies of the library
@@ -135,7 +136,6 @@ target_link_libraries(
     ${PROJECT_NAME}
     ${catkin_LIBRARIES}
 )
-
 
 
 ## Rename C++ executable without prefix
@@ -218,7 +218,7 @@ install(TARGETS ${PROJECT_NAME}
 
 catch_add_test(${PROJECT_NAME}_test
     tests/tests.cpp
-    src/rigid2d.cpp
+    tests/diff_drive_tests.cpp
 )
 
 target_link_libraries(

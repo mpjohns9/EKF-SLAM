@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
     std_msgs
     std_srvs
     tf2_ros
+    turtlelib
 )
 
 ## System dependencies are found with CMake's conventions
@@ -64,6 +65,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(
   FILES
   Control.srv
+  SetPose.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -78,6 +80,7 @@ generate_messages(
   DEPENDENCIES
   geometry_msgs
   nav_msgs
+  nuturtlebot_msgs
   sensor_msgs
   std_msgs  # Or other packages containing msgs
 )
@@ -114,7 +117,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES nuturtle_control
- CATKIN_DEPENDS geometry_msgs message_runtime nav_msgs roscpp sensor_msgs std_msgs
+ CATKIN_DEPENDS geometry_msgs message_runtime nav_msgs nuturtlebot_msgs roscpp sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
 
@@ -130,8 +133,9 @@ ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/nuturtle_control.cpp
+# add_library(turtlelib
+#   src/diff_drive.cpp
+#   src/rigid2d.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -142,23 +146,26 @@ ${catkin_INCLUDE_DIRS}
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(circle_node src/circle.cpp)
+add_executable(circle src/circle.cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(circle_node
+target_link_libraries(circle
   ${catkin_LIBRARIES}
+  turtlelib
 )
 
-add_executable(odometry_node src/odometry.cpp)
+add_executable(odometry src/odometry.cpp)
 
-target_link_libraries(odometry_node
+target_link_libraries(odometry
   ${catkin_LIBRARIES}
+  turtlelib
 )
 
-add_executable(turtle_interface_node src/turtle_interface.cpp)
+add_executable(turtle_interface src/turtle_interface.cpp)
 
-target_link_libraries(turtle_interface_node
+target_link_libraries(turtle_interface
   ${catkin_LIBRARIES}
+  turtlelib
 )
 
 ## Rename C++ executable without prefix
@@ -189,7 +196,7 @@ target_link_libraries(turtle_interface_node
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-install(TARGETS circle_node odometry_node turtle_interface_node
+install(TARGETS circle odometry turtle_interface
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
