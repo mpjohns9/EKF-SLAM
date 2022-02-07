@@ -1,0 +1,14 @@
+<launch>
+
+    <rosparam command="load" file="$(find nusim)/config/basic_world.yaml"/>
+  
+    <node pkg="nusim" type="nusim" name="nusim">
+        <param name="rate" type="int" value="500"/>
+    </node>
+
+    <include file="$(find nuturtle_description)/launch/load.launch">
+        <arg name="color" value="red"/>
+        <arg name="config" value="$(find nusim)/config/nusim.rviz"/>
+        <arg name="fixed_frame" value="world"/>
+    </include>
+</launch>
