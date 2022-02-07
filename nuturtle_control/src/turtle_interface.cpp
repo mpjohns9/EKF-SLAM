@@ -14,8 +14,11 @@
 
 
 #include "ros/ros.h"
+#include <vector>
 #include <sensor_msgs/JointState.h>
 #include <geometry_msgs/Twist.h>
+#include <nuturtlebot_msgs/WheelCommands.h>
+#include <nuturtlebot_msgs/SensorData.h>
 #include "turtlelib/rigid2d.hpp"
 #include "turtlelib/diff_drive.hpp"
 
@@ -24,7 +27,7 @@ turtlelib::diffDrive dd;
 turtlelib::Transform2D tf;
 
 // publishing rate 
-static auto rate = 0;
+static int rate = 500;
 
 // robot configuration
 static auto x = 0;
@@ -47,10 +50,11 @@ static auto ticks_to_rad = 0;
 /// Uses the diffDrive library to convert twist to wheel velocities
 void velCallback(const geometry_msgs::Twist & msg)
 {
-    tf::Twist2D V{msg.angular.z, msg.linear.x, msg.linear.y};
-    dd::WheelVel vel = dd::inv_kin(V);
-    lwheel_vel = vel.l_wheel;
-    rwheel_vel = vel.r_wheel;
+    turtlelib::Twist2D V{msg.angular.z, msg.linear.x, msg.linear.y};
+    turtlelib::WheelVel vel;
+    vel = dd.inv_kin(V);
+    lwheel_vel = vel.l_vel;
+    rwheel_vel = vel.r_vel;
 }
 
 /// \brief callback for the sensor_data subscriber
@@ -67,7 +71,12 @@ int main(int argc, char * argv[])
     ros::init(argc, argv, "turtle_interface");
     ros::NodeHandle nh_prv("~");
     ros::NodeHandle nh;
-    ros::Rate r(nh_prv.param("rate", rate, 500));
+    
+    nh_prv.param("rate", rate, 500);
+    ros::Rate r(rate);
+
+    ROS_DEBUG_STREAM("rate" << rate);
+
 
     // get encoder ticks conversion param
     // if it doesn't exist, throw an error
@@ -96,9 +105,14 @@ int main(int argc, char * argv[])
         wheel_pub.publish(cmd);
 
         sensor_msgs::JointState js;
-        js.name = ["wheel_left_joint", "wheel_right_joint"];
-        js.position = [lwheel_pos*ticks_to_rad, rwheel_pos*ticks_to_rad];
-        js.velocity = [lwheel_vel, rwheel_vel];
+        std::vector<std::string> joint_names {"wheel_left_joint", "wheel_right_joint"};
+        js.name = joint_names;
+
+        std::vector<double> wheel_positions {lwheel_pos*ticks_to_rad, rwheel_pos*ticks_to_rad};
+        js.position = wheel_positions;
+
+        std::vector<double> wheel_velocities {lwheel_vel, rwheel_vel};
+        js.velocity = wheel_velocities;
         joint_pub.publish(js);
 
         ros::spinOnce();

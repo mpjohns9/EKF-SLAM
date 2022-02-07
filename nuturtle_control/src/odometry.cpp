@@ -19,25 +19,29 @@
 #include "ros/ros.h"
 #include <sensor_msgs/JointState.h>
 #include <nav_msgs/Odometry.h>
-#include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseWithCovariance.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include "nuturtle_control/SetPose.h"
 #include "turtlelib/rigid2d.hpp"
 #include "turtlelib/diff_drive.hpp"
 
 static auto rate = 0;
 
-static auto body_id = "";
-static auto odom_id = "";
+static std::string body_id = "";
+static std::string odom_id = "";
+static std::string wheel_left = "";
+static std::string wheel_right = "";
 
-static auto x = 0;
-static auto y = 0;
-static auto theta = 0;
+static auto x = 0.0;
+static auto y = 0.0;
+static auto theta = 0.0;
 
-static auto lwheel_vel = 0;
-static auto rwheel_vel = 0;
+static auto lwheel_vel = 0.0;
+static auto rwheel_vel = 0.0;
 
-static auto lwheel_pos = 0;
-static auto rwheel_pos = 0;
+static auto lwheel_pos = 0.0;
+static auto rwheel_pos = 0.0;
 
 /// \brief callback for the joint_states subscriber
 /// \param msg - sensor_msgs/JointState message obj
@@ -50,11 +54,11 @@ void jointCallback(const sensor_msgs::JointState & msg)
     rwheel_pos = msg.position[1];
 }
 
-bool poseCallback(geometry_msgs::Pose::Request & request, geometry_msgs::Pose::Response & response)
+bool poseCallback(nuturtle_control::SetPose::Request & request, nuturtle_control::SetPose::Response & response)
 {
-    x = request.position.x;
-    y = request.position.y;
-    theta = request.orientation.theta;
+    x = request.x;
+    y = request.y;
+    theta = request.theta;
     return true;
 }
 
@@ -63,7 +67,9 @@ int main(int argc, char * argv[])
     ros::init(argc, argv, "odometry");
     ros::NodeHandle nh_prv("~");
     ros::NodeHandle nh;
-    ros::Rate r(nh_prv.param("rate", rate, 500));
+
+    nh_prv.param("rate", rate, 500);
+    ros::Rate r(rate);
 
     if (!nh.hasParam("body_id"))
     {
@@ -95,7 +101,7 @@ int main(int argc, char * argv[])
         nh.getParam("wheel_right", wheel_right);
     }
 
-    nh.param("odom_id", odom_id, "odom");
+    nh.param<std::string>("odom_id", odom_id, "odom");
 
     ros::Publisher odom_pub = nh.advertise<nav_msgs::Odometry>("odom", 1000);
 
@@ -110,9 +116,9 @@ int main(int argc, char * argv[])
     while(ros::ok())
     {
         geometry_msgs::PoseWithCovariance p;
-        p.position.x = x;
-        p.position.y = y;
-        p.position.z = 0.0;
+        p.pose.position.x = x;
+        p.pose.position.y = y;
+        p.pose.position.z = 0.0;
 
         // geometry_msgs::TwistWithCovariance t;
         // t.position.x = x;

@@ -13,7 +13,7 @@
 ///     stop (std_srvs/Empty): stops motion of robot    
 
 #include "ros/ros.h"
-#include <std_msgs/Empty.h>
+#include <std_srvs/Empty.h>
 #include <geometry_msgs/Twist.h>
 #include "nuturtle_control/Control.h"
 
@@ -65,7 +65,9 @@ int main(int argc, char * argv[])
     ros::init(argc, argv, "circle");
     ros::NodeHandle nh_prv("~");
     ros::NodeHandle nh;
-    ros::Rate r(nh_prv.param("frequency", frequency, 100));
+
+    nh_prv.param("frequency", frequency, 100);
+    ros::Rate r(frequency);
 
     ros::Publisher vel_pub = nh.advertise<geometry_msgs::Twist>("cmd_vel", 1000);
 
@@ -82,17 +84,17 @@ int main(int argc, char * argv[])
             t.linear.x = 0;
             t.angular.z = 0;
 
-            vel_pub.publish(t)
+            vel_pub.publish(t);
             state = State::STOPPED;
         }
         
-        else if (state != STOPPED)
+        else if (state != State::STOPPED)
         {
             geometry_msgs::Twist t;
             t.linear.x = lin_vel;
             t.angular.z = ang_vel;
 
-            vel_pub.publish(t)
+            vel_pub.publish(t);
         }
         
         ros::spinOnce();
