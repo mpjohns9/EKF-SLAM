@@ -1,0 +1,14 @@
+<launch>
+    <arg name="cmd_src" default="circle"/>
+    <arg name="robot" default="nusim"/>
+    <arg name="rviz" default="true"/>
+
+    <rosparam command="load" file="$(find nuturtle_description)/config/diff_params.yaml"/>
+
+    <!-- <node name="nusim" pkg="nusim" type="nusim" if="$(eval arg('robot') == 'nusim')"/> -->
+    <include file="$(find nusim)/launch/nusim.launch" if="$(eval arg('robot') == 'nusim')"/>
+    <node name="odometry" pkg="nuturtle_control" type="odometry"/>
+    <node name="turtle_interface" pkg="nuturtle_control" type="turtle_interface" output="screen"/>
+    <node name="circle" pkg="nuturtle_control" type="circle" if="$(eval arg('cmd_src') == 'circle')"/>
+    <node name="turtlebot3_teleop_key" pkg="turtlebot3" type="turtlebot3_teleop_key" if="$(eval arg('cmd_src') == 'teleop')"/>
+</launch>
