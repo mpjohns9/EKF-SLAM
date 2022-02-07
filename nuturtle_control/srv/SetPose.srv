@@ -1,0 +1,3 @@
+float64 x       # the x-coordinate of robot
+float64 y       # the y-coordinate of robot
+float64 theta   # the orientation of robot
