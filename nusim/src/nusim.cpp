@@ -98,7 +98,9 @@ int main(int argc, char * argv[])
     ros::init(argc, argv, "nusim");
     ros::NodeHandle nh_prv("~");
     ros::NodeHandle nh;
-    ros::Rate r(nh_prv.param("rate", rate, 500));
+    
+    nh_prv.param("rate", rate, 500);
+    ros::Rate r(rate);
 
     nh_prv.param("x0", x_0, 0.0);
     nh_prv.param("y0", y_0, 0.0);
