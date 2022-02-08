@@ -10,9 +10,12 @@
 ///     radius (double): radius of obstacles
 ///     height (double): height of obstacles
 /// PUBLISHES:
-///     timestep (std_msgs/UInt64): publishes timestep of simulation
-///     red/joint_states (sensor_msgs/JointState): publishes joint states
-///     obstacles (visualization_msgs/MarkerArray): publishes array of cylindrical markers
+///     pub_step (std_msgs/UInt64): publishes timestep of simulation
+///     marker_pub (visualization_msgs/MarkerArray): publishes array of cylindrical markers
+///     wall_pub (visualization_msgs/MarkerArray): publishes array of cubes (walls)
+///     sensor_pub (nuturtlebot_msgs/SensorData): publishes updated wheel positions
+/// SUBSCRIBES:
+///     wheel_sub (nuturtlebot_msgs/WheelCommands): updates wheel velocities
 /// SERVICES:
 ///     reset (Empty): resets the timestep to 0 and robot to initial position
 ///     teleport (nusim/Teleport): teleports robot to x, y, theta position
@@ -31,7 +34,9 @@
 #include <ros/console.h>
 #include <nuturtlebot_msgs/WheelCommands.h>
 #include <nuturtlebot_msgs/SensorData.h>
+#include "turtlelib/diff_drive.hpp"
 
+turtlelib::diffDrive dd;
 
 static auto timestep = 0;
 static auto rate = 0;
@@ -50,9 +55,13 @@ static std::vector<double> obs_y;
 static double radius = 0.0;
 static double height = 0.0;
 
+// left and right wheel positions
+static auto lwheel_pos = 0.0;
+static auto rwheel_pos = 0.0;
+
 // left and right wheel velocities
-static auto lwheel_vel = 0;
-static auto rwheel_vel = 0;
+static auto lwheel_vel = 0.0;
+static auto rwheel_vel = 0.0;
 
 // x, y length and thickness of arena (walls)
 static auto x_length = 0.0;
@@ -88,8 +97,20 @@ bool teleportCallback(nusim::Teleport::Request & request, nusim::Teleport::Respo
 /// receives motion commands for the turtlebot
 void wheelCallback(const nuturtlebot_msgs::WheelCommands & msg)
 {
+    lwheel_pos += msg.left_velocity;
+    rwheel_pos += msg.right_velocity;
+
     lwheel_vel = msg.left_velocity;
     rwheel_vel = msg.right_velocity;
+
+    turtlelib::WheelPos pos {msg.left_velocity, msg.right_velocity};
+    turtlelib::Config c;
+
+    c = dd.fwd_kin(pos);
+
+    x = c.x;
+    y = c.y;
+    theta = c.ang;
 }
 
 int main(int argc, char * argv[])
@@ -124,7 +145,7 @@ int main(int argc, char * argv[])
     // ros::Publisher pub_joints = nh.advertise<sensor_msgs::JointState>("red/joint_states", 1000);
     ros::Publisher marker_pub = nh_prv.advertise<visualization_msgs::MarkerArray>("obstacles", 1, true);
     ros::Publisher wall_pub = nh_prv.advertise<visualization_msgs::MarkerArray>("walls", 1, true);
-    // ros::Publisher sensor_pub = nh.advertise<nuturtlebot_msgs::SensorData>("red/sensor_data", 1000);
+    ros::Publisher sensor_pub = nh.advertise<nuturtlebot_msgs::SensorData>("red/sensor_data", 1000);
 
     ros::Subscriber wheel_sub = nh.subscribe("red/wheel_cmd", 1000, wheelCallback);
 
@@ -363,6 +384,13 @@ int main(int argc, char * argv[])
         // js.name = {"red_wheel_left_joint", "red_wheel_right_joint"};
         // js.position = {0.0, 0.0};
         // pub_joints.publish(js);
+
+        nuturtlebot_msgs::SensorData sensor_data;
+        sensor_data.right_encoder = rwheel_pos;
+        sensor_data.left_encoder = lwheel_pos;
+
+        sensor_pub.publish(sensor_data);
+
         timestep++;
         ros::spinOnce();
         r.sleep();
