@@ -153,6 +153,7 @@ add_executable(${PROJECT_NAME} src/nusim.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
+   turtlelib
 )
 
 #############
