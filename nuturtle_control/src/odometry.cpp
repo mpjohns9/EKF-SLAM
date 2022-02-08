@@ -105,7 +105,7 @@ int main(int argc, char * argv[])
 
     ros::Publisher odom_pub = nh.advertise<nav_msgs::Odometry>("odom", 1000);
 
-    ros::Subscriber joint_sub = nh.subscribe("joint_states", 1000, jointCallback);
+    ros::Subscriber joint_sub = nh.subscribe("red/joint_states", 1000, jointCallback);
 
     ros::ServiceServer set_pose = nh.advertiseService("set_pose", poseCallback);
 
