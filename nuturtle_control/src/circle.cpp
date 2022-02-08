@@ -22,9 +22,9 @@ static State state = State::STOP;
 
 static auto frequency = 0;
 
-static auto lin_vel = 0;
-static auto ang_vel = 0;
-static auto radius = 0;
+static auto lin_vel = 0.0;
+static auto ang_vel = 0.0;
+static auto radius = 0.0;
 
 /// \brief callback for control service
 /// 
@@ -35,6 +35,9 @@ bool controlCallback(nuturtle_control::Control::Request & request, nuturtle_cont
     ang_vel = request.velocity;
     radius = request.radius;
     lin_vel = radius*ang_vel;
+    ROS_ERROR_STREAM("ANG VEL "  << ang_vel);
+    ROS_ERROR_STREAM("RADIUS "  << radius);
+    ROS_ERROR_STREAM("LIN VEL "  << lin_vel);
     return true;
 }
 
@@ -96,7 +99,8 @@ int main(int argc, char * argv[])
 
             vel_pub.publish(t);
         }
-        
+        // ROS_ERROR_STREAM("CIRCLE -- CMD_VEL PUBLISHED");
+
         ros::spinOnce();
         r.sleep();
     }

@@ -47,11 +47,13 @@ static auto rwheel_pos = 0.0;
 /// \param msg - sensor_msgs/JointState message obj
 void jointCallback(const sensor_msgs::JointState & msg)
 {
-    lwheel_vel = msg.velocity[0];
-    rwheel_vel = msg.velocity[1];
+    // ROS_ERROR_STREAM("VELOCITY " << msg.velocity[0] << " " << msg.velocity[1]);
+    lwheel_vel = msg.velocity.at(0);
+    rwheel_vel = msg.velocity.at(1);
     
-    lwheel_pos = msg.position[0];
-    rwheel_pos = msg.position[1];
+    // ROS_ERROR_STREAM("POSITION " << msg.position[0] << msg.position[1]);
+    lwheel_pos = msg.position.at(0);
+    rwheel_pos = msg.position.at(1);
 }
 
 bool poseCallback(nuturtle_control::SetPose::Request & request, nuturtle_control::SetPose::Response & response)
@@ -79,6 +81,7 @@ int main(int argc, char * argv[])
     else
     {
         nh.getParam("body_id", body_id);
+        ROS_ERROR_STREAM("BODY ID " << body_id);
     }
 
     if (!nh.hasParam("wheel_left"))
@@ -89,6 +92,7 @@ int main(int argc, char * argv[])
     else
     {
         nh.getParam("wheel_left", wheel_left);
+        ROS_ERROR_STREAM("WHEEL LEFT ID " << wheel_left);
     }
 
     if (!nh.hasParam("wheel_right"))
@@ -99,6 +103,7 @@ int main(int argc, char * argv[])
     else
     {
         nh.getParam("wheel_right", wheel_right);
+        ROS_ERROR_STREAM("WHEEL RIGHT ID " << wheel_right);
     }
 
     nh.param<std::string>("odom_id", odom_id, "odom");
@@ -146,7 +151,7 @@ int main(int argc, char * argv[])
         transform.transform.rotation.w = q.w();
 
         br.sendTransform(transform);
-
+        // ROS_ERROR_STREAM("THE END");
         ros::spinOnce();
         r.sleep();
     }

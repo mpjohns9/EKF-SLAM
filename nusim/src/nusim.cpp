@@ -390,6 +390,8 @@ int main(int argc, char * argv[])
         sensor_data.left_encoder = lwheel_pos;
 
         sensor_pub.publish(sensor_data);
+        // ROS_ERROR_STREAM("NUSIM -- SENSOR_DATA PUBLISHED");
+
 
         timestep++;
         ros::spinOnce();

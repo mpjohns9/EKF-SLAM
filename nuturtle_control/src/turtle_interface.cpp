@@ -113,7 +113,7 @@ int main(int argc, char * argv[])
         std::vector<double> wheel_velocities {lwheel_vel, rwheel_vel};
         js.velocity = wheel_velocities;
         joint_pub.publish(js);
-
+        // ROS_ERROR_STREAM("TURTLE_INTERFACE -- JOINT STATES PUBLISHED");
         ros::spinOnce();
         r.sleep();
     }
