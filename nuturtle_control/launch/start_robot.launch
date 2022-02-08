@@ -10,9 +10,9 @@
     <include file="$(find nusim)/launch/nusim.launch" if="$(eval arg('robot') == 'nusim')" pass_all_args="true">
         <arg name="config" value="$(find nuturtle_control)/config/nuturtle_control.rviz"/>
     </include>
-    <node name="odometry" pkg="nuturtle_control" type="odometry"/>
+    <node name="odometry" pkg="nuturtle_control" type="odometry" output="screen"/>
     <node name="turtle_interface" pkg="nuturtle_control" type="turtle_interface" output="screen"/>
-    <node name="circle" pkg="nuturtle_control" type="circle" if="$(eval arg('cmd_src') == 'circle')"/>
+    <node name="circle" pkg="nuturtle_control" type="circle" if="$(eval arg('cmd_src') == 'circle')" output="screen"/>
     <node name="turtlebot3_teleop_key" pkg="turtlebot3" type="turtlebot3_teleop_key" if="$(eval arg('cmd_src') == 'teleop')"/>
 
     <remap from="joint_states" to="red/joint_states"/>
