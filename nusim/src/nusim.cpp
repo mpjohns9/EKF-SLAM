@@ -68,6 +68,10 @@ static auto x_length = 0.0;
 static auto y_length = 0.0;
 static auto w_thick = 0.1;
 
+// initialize conversions
+static auto ticks_to_rad = 0.0;
+static auto cmd_to_radsec = 0.0;
+
 /// \brief callback for reset service
 ///
 /// resets timestep to 0 and robot to initial position
@@ -97,13 +101,18 @@ bool teleportCallback(nusim::Teleport::Request & request, nusim::Teleport::Respo
 /// receives motion commands for the turtlebot
 void wheelCallback(const nuturtlebot_msgs::WheelCommands & msg)
 {
-    lwheel_pos += msg.left_velocity;
-    rwheel_pos += msg.right_velocity;
+    lwheel_vel = msg.left_velocity*cmd_to_radsec/rate;
+    rwheel_vel = msg.right_velocity*cmd_to_radsec/rate;
 
-    lwheel_vel = msg.left_velocity;
-    rwheel_vel = msg.right_velocity;
+    // ROS_ERROR_STREAM("L VEL: " << msg.left_velocity);
+    // ROS_ERROR_STREAM("R VEL: " << msg.right_velocity);
 
-    turtlelib::WheelPos pos {msg.left_velocity, msg.right_velocity};
+    lwheel_pos += lwheel_vel;
+    rwheel_pos += rwheel_vel;
+
+    
+
+    turtlelib::WheelPos pos {lwheel_pos, rwheel_pos};
     turtlelib::Config c;
 
     c = dd.fwd_kin(pos);
@@ -111,6 +120,12 @@ void wheelCallback(const nuturtlebot_msgs::WheelCommands & msg)
     x = c.x;
     y = c.y;
     theta = c.ang;
+
+    turtlelib::WheelVel v;
+    v.l_vel = msg.left_velocity*cmd_to_radsec;
+    v.r_vel = msg.right_velocity*cmd_to_radsec;
+
+    dd = turtlelib::diffDrive(c, pos, v);
 }
 
 int main(int argc, char * argv[])
@@ -134,6 +149,30 @@ int main(int argc, char * argv[])
     nh_prv.getParam("obstacles/obs_y", obs_y);
     nh_prv.getParam("obstacles/radius", radius);
     nh_prv.getParam("obstacles/height", height);
+
+    // get encoder ticks conversion param
+    // if it doesn't exist, throw an error
+    if (!nh.hasParam("motor_cmd_to_radsec"))
+    {
+        ROS_ERROR_STREAM("No param named 'motor_cmd_to_radsec'.");
+        return 1;
+    }
+    else
+    {
+        nh.getParam("motor_cmd_to_radsec", cmd_to_radsec);
+    }
+
+    // get encoder ticks conversion param
+    // if it doesn't exist, throw an error
+    if (!nh.hasParam("encoder_ticks_to_rad"))
+    {
+        ROS_ERROR_STREAM("No param named 'encoder_ticks_to_rad'.");
+        return 1;
+    }
+    else
+    {
+        nh.getParam("encoder_ticks_to_rad", ticks_to_rad);
+    }
 
     x = x_0;
     y = y_0;
@@ -364,6 +403,10 @@ int main(int argc, char * argv[])
         transform.header.frame_id = "world";
         transform.child_frame_id = "red_base_footprint";
 
+        ROS_ERROR_STREAM("X: " << x);
+        ROS_ERROR_STREAM("Y: " << y);
+        ROS_ERROR_STREAM("THETA: " << theta);
+
         transform.transform.translation.x = x;
         transform.transform.translation.y = y;
         transform.transform.translation.z = 0.0;
@@ -385,9 +428,12 @@ int main(int argc, char * argv[])
         // js.position = {0.0, 0.0};
         // pub_joints.publish(js);
 
+
+        // ROS_ERROR_STREAM("LWHEEL POS: " << lwheel_pos*ticks_to_rad);
+        // ROS_ERROR_STREAM("RWHEEL POS: " << rwheel_pos*ticks_to_rad);
         nuturtlebot_msgs::SensorData sensor_data;
-        sensor_data.right_encoder = rwheel_pos;
-        sensor_data.left_encoder = lwheel_pos;
+        sensor_data.right_encoder = rwheel_pos/ticks_to_rad;
+        sensor_data.left_encoder = lwheel_pos/ticks_to_rad;
 
         sensor_pub.publish(sensor_data);
         // ROS_ERROR_STREAM("NUSIM -- SENSOR_DATA PUBLISHED");
