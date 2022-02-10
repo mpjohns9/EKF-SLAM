@@ -26,6 +26,8 @@
 #include "turtlelib/rigid2d.hpp"
 #include "turtlelib/diff_drive.hpp"
 
+turtlelib::diffDrive dd;
+
 static auto rate = 0;
 
 static std::string body_id = "";
@@ -54,8 +56,18 @@ void jointCallback(const sensor_msgs::JointState & msg)
     // ROS_ERROR_STREAM("POSITION " << msg.position[0] << msg.position[1]);
     lwheel_pos = msg.position.at(0);
     rwheel_pos = msg.position.at(1);
+
+    turtlelib::WheelPos pos {lwheel_pos, rwheel_pos};
+    turtlelib::Config c;
+
+    c = dd.fwd_kin(pos);
+
+    x = c.x;
+    y = c.y;
+    theta = c.ang;
 }
 
+/// \brief callback for set pose service
 bool poseCallback(nuturtle_control::SetPose::Request & request, nuturtle_control::SetPose::Response & response)
 {
     x = request.x;
@@ -81,7 +93,7 @@ int main(int argc, char * argv[])
     else
     {
         nh.getParam("body_id", body_id);
-        ROS_ERROR_STREAM("BODY ID " << body_id);
+        // ROS_ERROR_STREAM("BODY ID " << body_id);
     }
 
     if (!nh.hasParam("wheel_left"))
@@ -92,7 +104,7 @@ int main(int argc, char * argv[])
     else
     {
         nh.getParam("wheel_left", wheel_left);
-        ROS_ERROR_STREAM("WHEEL LEFT ID " << wheel_left);
+        // ROS_ERROR_STREAM("WHEEL LEFT ID " << wheel_left);
     }
 
     if (!nh.hasParam("wheel_right"))
@@ -103,7 +115,7 @@ int main(int argc, char * argv[])
     else
     {
         nh.getParam("wheel_right", wheel_right);
-        ROS_ERROR_STREAM("WHEEL RIGHT ID " << wheel_right);
+        // ROS_ERROR_STREAM("WHEEL RIGHT ID " << wheel_right);
     }
 
     nh.param<std::string>("odom_id", odom_id, "odom");
@@ -132,11 +144,16 @@ int main(int argc, char * argv[])
 
         nav_msgs::Odometry odom;
         /// HOW TO GET THE TWIST?
+        odom.header.stamp = ros::Time::now();
+        odom.header.frame_id = body_id;
+        odom.child_frame_id = odom_id;
+        odom.pose = p;
+        odom_pub.publish(odom);
 
         transform.header.stamp = ros::Time::now();
 
         transform.header.frame_id = odom_id;
-        transform.child_frame_id = body_id;
+        transform.child_frame_id = "blue_base_footprint";
 
         transform.transform.translation.x = x;
         transform.transform.translation.y = y;
