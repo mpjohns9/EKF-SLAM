@@ -42,19 +42,25 @@ static auto rwheel_vel = 0.0;
 static auto lwheel_pos = 0.0;
 static auto rwheel_pos = 0.0;
 
-// initialize ticks to radians conversion
+// initialize conversions
 static auto ticks_to_rad = 0.0;
+static auto cmd_to_radsec = 0.0;
+
 
 /// \brief callback for the cmd_vel subscriber
 /// \param msg - geometry_msgs/Twist message obj
 /// Uses the diffDrive library to convert twist to wheel velocities
 void velCallback(const geometry_msgs::Twist & msg)
 {
-    turtlelib::Twist2D V{msg.angular.z, msg.linear.x, msg.linear.y};
+    turtlelib::Twist2D V;
+    V.ang = msg.angular.z;
+    V.x = msg.linear.x;
+    V.y = msg.linear.y;
+
     turtlelib::WheelVel vel;
     vel = dd.inv_kin(V);
-    lwheel_vel = vel.l_vel;
-    rwheel_vel = vel.r_vel;
+    lwheel_vel = vel.l_vel/cmd_to_radsec;
+    rwheel_vel = vel.r_vel/cmd_to_radsec;
 }
 
 /// \brief callback for the sensor_data subscriber
@@ -74,6 +80,18 @@ int main(int argc, char * argv[])
 
     nh_prv.param("rate", rate, 500);
     ros::Rate r(rate);
+
+    // get encoder ticks conversion param
+    // if it doesn't exist, throw an error
+    if (!nh.hasParam("motor_cmd_to_radsec"))
+    {
+        ROS_ERROR_STREAM("No param named 'motor_cmd_to_radsec'.");
+        return 1;
+    }
+    else
+    {
+        nh.getParam("motor_cmd_to_radsec", cmd_to_radsec);
+    }
 
     // get encoder ticks conversion param
     // if it doesn't exist, throw an error
@@ -99,6 +117,9 @@ int main(int argc, char * argv[])
         nuturtlebot_msgs::WheelCommands cmd;
         cmd.left_velocity = lwheel_vel;
         cmd.right_velocity = rwheel_vel;
+
+        // ROS_ERROR_STREAM("LVEL: " << cmd.left_velocity);
+        // ROS_ERROR_STREAM("RVEL: " << cmd.right_velocity);
         wheel_pub.publish(cmd);
 
         sensor_msgs::JointState js;
