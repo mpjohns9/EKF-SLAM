@@ -31,13 +31,13 @@ static auto radius = 0.0;
 /// Takes radius and velocity and updates angular and linear velocity of robot
 bool controlCallback(nuturtle_control::Control::Request & request, nuturtle_control::Control::Response & response)
 {
-    state = State::CTRL;
     ang_vel = request.velocity;
     radius = request.radius;
+    ROS_ERROR_STREAM("RADIUS: " << radius);
+    ROS_ERROR_STREAM("ANG VEL: " << ang_vel);
     lin_vel = radius*ang_vel;
-    ROS_ERROR_STREAM("ANG VEL "  << ang_vel);
-    ROS_ERROR_STREAM("RADIUS "  << radius);
-    ROS_ERROR_STREAM("LIN VEL "  << lin_vel);
+    ROS_ERROR_STREAM("LIN VEL: " << lin_vel);
+    state = State::CTRL;
     return true;
 }
 
@@ -46,9 +46,9 @@ bool controlCallback(nuturtle_control::Control::Request & request, nuturtle_cont
 /// Flips velocities to reverse direction of motion
 bool reverseCallback(std_srvs::Empty::Request & request, std_srvs::Empty::Response & response)
 {
-    state = State::REV;
     ang_vel = -ang_vel;
     lin_vel = -lin_vel;
+    state = State::REV;
     return true;
 }
 
@@ -57,9 +57,9 @@ bool reverseCallback(std_srvs::Empty::Request & request, std_srvs::Empty::Respon
 /// Sets velocities to zero to stop motion
 bool stopCallback(std_srvs::Empty::Request & request, std_srvs::Empty::Response & response)
 {
-    state = State::STOP;
     ang_vel = 0;
     lin_vel = 0;
+    state = State::STOP;
     return true;
 }
 
@@ -81,25 +81,20 @@ int main(int argc, char * argv[])
 
     while(ros::ok())
     {
-        if (state == State::STOP)
+        if (state != State::STOPPED)
         {
-            geometry_msgs::Twist t;
-            t.linear.x = 0;
-            t.angular.z = 0;
-
-            vel_pub.publish(t);
-            state = State::STOPPED;
-        }
-        
-        else if (state != State::STOPPED)
-        {
+            
             geometry_msgs::Twist t;
             t.linear.x = lin_vel;
             t.angular.z = ang_vel;
 
             vel_pub.publish(t);
+
+            if (state == State::STOP)
+            {
+                state = State::STOPPED;
+            }
         }
-        // ROS_ERROR_STREAM("CIRCLE -- CMD_VEL PUBLISHED");
 
         ros::spinOnce();
         r.sleep();
