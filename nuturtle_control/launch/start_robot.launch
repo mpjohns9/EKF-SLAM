@@ -9,6 +9,12 @@
 
     <include file="$(find nusim)/launch/nusim.launch" if="$(eval arg('robot') == 'nusim')" pass_all_args="true">
         <arg name="config" value="$(find nuturtle_control)/config/nuturtle_control.rviz"/>
+        <arg name="use_rviz" value="$(arg rviz)"/>
+    </include>
+    <include file="$(find nuturtle_description)/launch/load.launch" if="$(eval arg('robot') == 'nusim')" pass_all_args="true">
+        <arg name="color" value="blue"/>
+        <arg name="use_jsp" value="true"/>
+        <arg name="use_rviz" value="false"/>
     </include>
     <node name="odometry" pkg="nuturtle_control" type="odometry" output="screen"/>
     <node name="turtle_interface" pkg="nuturtle_control" type="turtle_interface" output="screen"/>
