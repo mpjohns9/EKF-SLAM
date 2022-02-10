@@ -403,9 +403,9 @@ int main(int argc, char * argv[])
         transform.header.frame_id = "world";
         transform.child_frame_id = "red_base_footprint";
 
-        ROS_ERROR_STREAM("X: " << x);
-        ROS_ERROR_STREAM("Y: " << y);
-        ROS_ERROR_STREAM("THETA: " << theta);
+        // ROS_ERROR_STREAM("X: " << x);
+        // ROS_ERROR_STREAM("Y: " << y);
+        // ROS_ERROR_STREAM("THETA: " << theta);
 
         transform.transform.translation.x = x;
         transform.transform.translation.y = y;
