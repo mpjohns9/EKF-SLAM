@@ -1,19 +1,42 @@
 #include "turtlelib/diff_drive.hpp"
 #include "turtlelib/rigid2d.hpp"
 #include <stdexcept>
+#include <iostream>
 
 /// \file 
 /// \brief Kinematic modeling differential drive robot implementation
 
 namespace turtlelib
 {
+    diffDrive::diffDrive() 
+    {
+        config = {0, 0, 0};
+        wheel_pos = {0.0, 0.0};
+        wheel_vel = {0.0, 0.0};
+    }
+
+    diffDrive::diffDrive(Config c)
+    {
+        config = c;
+    }
+
+    diffDrive::diffDrive(Config c, WheelPos w_p, WheelVel w_v)
+    {
+        config = c;
+        wheel_pos = w_p;
+        wheel_vel = w_v;
+    }
+
     Config diffDrive::fwd_kin(WheelPos pos)
     {        
-        double dtheta = 0.0;
-        double vx = 0.0;
+        double l_vel = pos.l_pos - wheel_pos.l_pos;
+        double r_vel = pos.r_pos - wheel_pos.r_pos;
 
-        dtheta = r*(pos.r_pos - pos.l_pos)/2*D;
-        vx = r*(pos.r_pos + pos.l_pos)/2;
+        wheel_pos.l_pos = pos.l_pos;
+        wheel_pos.r_pos = pos.r_pos;
+
+        double dtheta = r*(r_vel - l_vel)/(2.0*D);
+        double vx = r*(r_vel + l_vel)/2.0;
 
         Twist2D V;
         V.ang = dtheta;
@@ -24,15 +47,28 @@ namespace turtlelib
         old_v.x = config.x;
         old_v.y = config.y;
 
-        Transform2D T;
-        Transform2D new_T = T.integrate_twist(V);
+        Transform2D T_bbp = integrate_twist(V);
 
-        Vector2D new_v = new_T(old_v);
+        Transform2D Twb(old_v, config.ang);
+
+        Transform2D Twbp = Twb*T_bbp;
+
+        config.ang = Twbp.rotation();
+        config.x = Twbp.translation().x;
+        config.y = Twbp.translation().y;
+
+        
+
+        // std::cout << "ANGLE " << T_bbp.rotation() << std::endl;
+        // std::cout << "X " << T_bbp.translation().x << std::endl;
+        // std::cout << "Y " << T_bbp.translation().y << std::endl;
 
         Config c;
-        c.ang = new_T.rotation() + config.ang;
-        c.x = new_v.x + old_v.x;
-        c.y = new_v.y + old_v.y;
+        c.ang = Twbp.rotation();
+        Vector2D trans = Twbp.translation();
+
+        c.x = trans.x;
+        c.y = trans.y;
 
         return c;
     }

@@ -48,6 +48,12 @@ namespace turtlelib
     class diffDrive
     {
     public:
+        diffDrive();
+
+        diffDrive(Config c);
+
+        diffDrive(Config c, WheelPos w_p, WheelVel w_v);
+
         /// \brief calculates new config given wheel position
         /// \param pos - position of wheels
         /// \return new robot configuration
