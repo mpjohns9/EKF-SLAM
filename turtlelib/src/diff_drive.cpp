@@ -75,7 +75,7 @@ namespace turtlelib
 
     WheelVel diffDrive::inv_kin(Twist2D V)
     {
-        if (V.y == 0.0)
+        if (almost_equal(V.y, 0.0))
         {
             WheelVel vel;
 

@@ -89,7 +89,7 @@ namespace turtlelib
     {
         Vector2D v;
         
-        if (V.ang != 0.0) 
+        if (!almost_equal(V.ang, 0.0))
         {
             v.x = V.y/V.ang;
             v.y = -V.x/V.ang;
