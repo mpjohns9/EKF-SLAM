@@ -254,12 +254,6 @@ namespace turtlelib
         /// \return the angular displacement, in radians
         double rotation() const;
 
-        /// \brief computes the transformation corresponding to a rigid body 
-        /// following a constant twist for one time-unit
-        /// \param V - the constant twist
-        /// \return the resulting transform
-        Transform2D integrate_twist(Twist2D V);
-
         /// \brief \see operator<<(...) (declared outside this class)
         /// for a description
         friend std::ostream & operator<<(std::ostream & os, const Transform2D & tf);
@@ -269,6 +263,11 @@ namespace turtlelib
         double ang;
     };
 
+    /// \brief computes the transformation corresponding to a rigid body 
+    /// following a constant twist for one time-unit
+    /// \param V - the constant twist
+    /// \return the resulting transform
+    Transform2D integrate_twist(Twist2D V);
 
     /// \brief should print a human readable version of the transform:
     /// An example output:
