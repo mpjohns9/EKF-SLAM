@@ -65,6 +65,12 @@ void jointCallback(const sensor_msgs::JointState & msg)
     x = c.x;
     y = c.y;
     theta = c.ang;
+
+    turtlelib::WheelVel v;
+    v.l_vel = msg.velocity.at(0);
+    v.r_vel = msg.velocity.at(1);
+
+    dd = turtlelib::diffDrive(c, pos, v);
 }
 
 /// \brief callback for set pose service
@@ -125,7 +131,7 @@ int main(int argc, char * argv[])
 
     ros::Publisher odom_pub = nh.advertise<nav_msgs::Odometry>("odom", 1000);
 
-    ros::Subscriber joint_sub = nh.subscribe("red/joint_states", 1000, jointCallback);
+    ros::Subscriber joint_sub = nh.subscribe("joint_states", 1000, jointCallback);
 
     ros::ServiceServer set_pose = nh.advertiseService("set_pose", poseCallback);
 
