@@ -73,6 +73,9 @@ bool poseCallback(nuturtle_control::SetPose::Request & request, nuturtle_control
     x = request.x;
     y = request.y;
     theta = request.theta;
+
+    turtlelib::Config c = {theta, x, y};
+    dd = turtlelib::diffDrive(c);
     return true;
 }
 

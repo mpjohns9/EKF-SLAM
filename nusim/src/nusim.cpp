@@ -81,6 +81,8 @@ bool resetCallback(std_srvs::TriggerRequest & request, std_srvs::TriggerResponse
     x = 0.0;
     y = 0.0;
     theta = 0.0;
+
+    dd = turtlelib::diffDrive();
     return true;
 }
 
@@ -93,6 +95,9 @@ bool teleportCallback(nusim::Teleport::Request & request, nusim::Teleport::Respo
     x = request.x;
     y = request.y;
     theta = request.theta;
+
+    turtlelib::Config c = {theta, x, y};
+    dd = turtlelib::diffDrive(c);
     return true;
 }
 
