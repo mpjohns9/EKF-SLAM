@@ -67,10 +67,13 @@
   <build_export_depend>sensor_msgs</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
   <exec_depend>message_runtime</exec_depend>
-  <exec_depend>nuturtle_description</exec_depend>
-  <exec_depend>tf2_ros</exec_depend>
   <exec_depend>nusim</exec_depend>
+  <exec_depend>nuturtle_description</exec_depend>
+  <exec_depend>rosserial_python</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
   <exec_depend>turtlebot3</exec_depend>
+  <exec_depend>turtlebot3_teleop</exec_depend>
+
   
 
 
