@@ -15,6 +15,7 @@
 
 #include "ros/ros.h"
 #include <vector>
+#include <cmath>
 #include <sensor_msgs/JointState.h>
 #include <geometry_msgs/Twist.h>
 #include <nuturtlebot_msgs/WheelCommands.h>
@@ -61,6 +62,8 @@ void velCallback(const geometry_msgs::Twist & msg)
     vel = dd.inv_kin(V);
     lwheel_vel = vel.l_vel/cmd_to_radsec;
     rwheel_vel = vel.r_vel/cmd_to_radsec;
+    ROS_ERROR_STREAM("LVEL: " << lwheel_vel);
+    ROS_ERROR_STREAM("RVEL: " << rwheel_vel);
 }
 
 /// \brief callback for the sensor_data subscriber
@@ -105,18 +108,55 @@ int main(int argc, char * argv[])
         nh.getParam("encoder_ticks_to_rad", ticks_to_rad);
     }
 
-    ros::Publisher wheel_pub = nh.advertise<nuturtlebot_msgs::WheelCommands>("red/wheel_cmd", 1000);
-    ros::Publisher joint_pub = nh.advertise<sensor_msgs::JointState>("red/joint_states", 1000);
+    ros::Publisher wheel_pub = nh.advertise<nuturtlebot_msgs::WheelCommands>("wheel_cmd", 1000);
+    ros::Publisher joint_pub = nh.advertise<sensor_msgs::JointState>("joint_states", 1000);
 
     ros::Subscriber vel_sub = nh.subscribe("cmd_vel", 1000, velCallback);
-    ros::Subscriber sensor_sub = nh.subscribe("red/sensor_data", 1000, sensorCallback);
+    ros::Subscriber sensor_sub = nh.subscribe("sensor_data", 1000, sensorCallback);
 
 
     while(ros::ok())
     {
         nuturtlebot_msgs::WheelCommands cmd;
-        cmd.left_velocity = lwheel_vel;
-        cmd.right_velocity = rwheel_vel;
+
+        if (std::abs(lwheel_vel) > std::abs(rwheel_vel))
+        {
+            if (lwheel_vel < -256)
+            {
+                cmd.right_velocity = rwheel_vel*(-256/lwheel_vel);
+                cmd.left_velocity = -256;
+            }
+            else if (lwheel_vel > 256)
+            {
+                cmd.right_velocity = rwheel_vel*(256/lwheel_vel);
+                cmd.left_velocity = 256;
+            }
+            else
+            {
+                cmd.right_velocity = rwheel_vel;
+                cmd.left_velocity = lwheel_vel;
+            }
+        }
+        else
+        {
+            if (rwheel_vel < -256)
+            {
+                cmd.left_velocity = lwheel_vel*(-256/rwheel_vel);
+                cmd.right_velocity = -256;
+            }
+            else if (rwheel_vel > 256)
+            {
+                cmd.left_velocity = lwheel_vel*(256/rwheel_vel);
+                cmd.right_velocity = 256;
+            }
+            else
+            {
+                cmd.left_velocity = lwheel_vel;
+                cmd.right_velocity = rwheel_vel;
+            }
+        }
+        // cmd.left_velocity = lwheel_vel;
+        // cmd.right_velocity = rwheel_vel;
 
         // ROS_ERROR_STREAM("LVEL: " << cmd.left_velocity);
         // ROS_ERROR_STREAM("RVEL: " << cmd.right_velocity);
