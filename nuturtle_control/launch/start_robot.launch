@@ -3,27 +3,59 @@
     <arg name="robot" default="nusim"/>
     <arg name="rviz" default="true"/>
 
+    <remap from="red/joint_states" to="joint_states"/>
+    <remap from="red/wheel_cmd" to="wheel_cmd" />
+    <remap from="red/sensor_data" to="sensor_data"/>
+
     <rosparam command="load" file="$(find nuturtle_description)/config/diff_params.yaml"/>
+
+    <node name="circle" pkg="nuturtle_control" type="circle" if="$(eval arg('cmd_src') == 'circle')" output="screen"/>
+    <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" if="$(eval arg('cmd_src') == 'teleop')">
+        <arg name="model" value="burger"></arg>
+    </include>
 
     <node pkg="tf2_ros" type="static_transform_publisher" name="world_odom_br" args="0 0 0 0 0 0 world odom"/>
 
-    <include file="$(find nusim)/launch/nusim.launch" if="$(eval arg('robot') == 'nusim')" pass_all_args="true">
-        <arg name="config" value="$(find nuturtle_control)/config/nuturtle_control.rviz"/>
-        <arg name="use_rviz" value="$(arg rviz)"/>
-    </include>
-    <include file="$(find nuturtle_description)/launch/load.launch" if="$(eval arg('robot') == 'nusim')" pass_all_args="true">
-        <arg name="color" value="blue"/>
-        <arg name="use_jsp" value="true"/>
-        <arg name="use_rviz" value="false"/>
-    </include>
-    <node name="odometry" pkg="nuturtle_control" type="odometry" output="screen"/>
-    <node name="turtle_interface" pkg="nuturtle_control" type="turtle_interface" output="screen"/>
-    <node name="circle" pkg="nuturtle_control" type="circle" if="$(eval arg('cmd_src') == 'circle')" output="screen"/>
-    <node name="turtlebot3_teleop_key" pkg="turtlebot3" type="turtlebot3_teleop_key" if="$(eval arg('cmd_src') == 'teleop')"/>
+    <group if="$(eval arg('robot') == 'nusim')">
+        <include file="$(find nusim)/launch/nusim.launch" pass_all_args="true">
+            <arg name="config" value="$(find nuturtle_control)/config/nuturtle_control.rviz"/>
+            <arg name="use_rviz" value="$(arg rviz)"/>
+        </include>
+        <include file="$(find nuturtle_description)/launch/load.launch" pass_all_args="true">
+            <arg name="color" value="blue"/>
+            <arg name="use_jsp" value="true"/>
+            <arg name="use_rviz" value="false"/>
+        </include>
+        <node name="odometry" pkg="nuturtle_control" type="odometry" output="screen"/>
+        <node name="turtle_interface" pkg="nuturtle_control" type="turtle_interface" output="screen"/>
+    </group>
 
-    <remap from="joint_states" to="red/joint_states"/>
-    <remap from="wheel_cmd" to="red/wheel_cmd"/>
-    <remap from="sensor_data" to="red/sensor_data"/>
+    <group if="$(eval arg('robot') != 'nusim')">
+        
+        <include file="$(find nuturtle_description)/launch/load.launch" pass_all_args="true">
+            <arg name="color" value="blue"/>
+            <arg name="use_jsp" value="true"/>
+            <arg name="use_rviz" value="true"/>
+            <arg name="config" value="$(find nusim)/config/nusim.rviz"/>
+            <arg name="fixed_frame" value="world"/>
+        </include>
+
+        <group if="$(eval arg('robot') == 'localhost')">
+            <node name="odometry" pkg="nuturtle_control" type="odometry" machine="turtlebot"/>
+            <node name="turtle_interface" pkg="nuturtle_control" type="turtle_interface" machine="turtlebot"/>
+            <include file="$(find nuturtle_control)/launch/basic_remote.launch">
+                <arg name="robot" value="localhost"/>
+            </include>
+        </group>
+
+        <group unless="$(eval arg('robot') == 'localhost')">
+            <node name="odometry" pkg="nuturtle_control" type="odometry" machine="turtlebot"/>
+            <node name="turtle_interface" pkg="nuturtle_control" type="turtle_interface" machine="turtlebot"/>
+            <include file="$(find nuturtle_control)/launch/basic_remote.launch">
+                <arg name="robot" value="$(arg robot)"/>
+            </include>
+        </group>
+    </group>
 
 
 </launch>
