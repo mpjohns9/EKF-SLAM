@@ -189,9 +189,9 @@ int main(int argc, char * argv[])
     // ros::Publisher pub_joints = nh.advertise<sensor_msgs::JointState>("red/joint_states", 1000);
     ros::Publisher marker_pub = nh_prv.advertise<visualization_msgs::MarkerArray>("obstacles", 1, true);
     ros::Publisher wall_pub = nh_prv.advertise<visualization_msgs::MarkerArray>("walls", 1, true);
-    ros::Publisher sensor_pub = nh.advertise<nuturtlebot_msgs::SensorData>("red/sensor_data", 1000);
+    ros::Publisher sensor_pub = nh.advertise<nuturtlebot_msgs::SensorData>("sensor_data", 1000);
 
-    ros::Subscriber wheel_sub = nh.subscribe("red/wheel_cmd", 1000, wheelCallback);
+    ros::Subscriber wheel_sub = nh.subscribe("wheel_cmd", 1000, wheelCallback);
 
     // sensor_msgs::JointState js;
 
