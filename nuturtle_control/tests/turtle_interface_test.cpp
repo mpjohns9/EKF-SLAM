@@ -46,10 +46,8 @@ TEST_CASE("turtle_interface tests", "[turtle_interface]") {
 
             vel_pub.publish(t);
             ros::spinOnce();
-            // ROS_ERROR_STREAM("CHECK");
         }
 
-        // ros::Duration(60.0).sleep();
         CHECK(lwheel_vel == Approx(256));
         CHECK(rwheel_vel == Approx(256));
     }
@@ -68,17 +66,15 @@ TEST_CASE("turtle_interface tests", "[turtle_interface]") {
 
             vel_pub.publish(t);
             ros::spinOnce();
-            // ROS_ERROR_STREAM("CHECK");
         }
 
-        // ros::Duration(60.0).sleep();
         CHECK(lwheel_vel == Approx(-101));
         CHECK(rwheel_vel == Approx(101));
     }
     SECTION("sensor_data test") {
         ros::Duration(3.0).sleep();
         ros::NodeHandle nh;
-        ros::Subscriber joint_sub = nh.subscribe("joint_states", 1000, jointCallback);
+        ros::Subscriber joint_sub = nh.subscribe("red/joint_states", 1000, jointCallback);
         ros::Publisher sensor_pub = nh.advertise<nuturtlebot_msgs::SensorData>("sensor_data", 1000);
 
         nuturtlebot_msgs::SensorData sd;
@@ -89,10 +85,9 @@ TEST_CASE("turtle_interface tests", "[turtle_interface]") {
 
             sensor_pub.publish(sd);
             ros::spinOnce();
-            // ROS_ERROR_STREAM("CHECK");
+
         }
 
-        // ros::Duration(60.0).sleep();
         CHECK(lwheel_pos == Approx(0.00153398));
         CHECK(rwheel_pos == Approx(0.00153398));
     }
