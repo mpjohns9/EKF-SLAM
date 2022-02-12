@@ -9,7 +9,9 @@
 
     <rosparam command="load" file="$(find nuturtle_description)/config/diff_params.yaml"/>
 
-    <node name="circle" pkg="nuturtle_control" type="circle" if="$(eval arg('cmd_src') == 'circle')" output="screen"/>
+    <node name="circle" pkg="nuturtle_control" type="circle" if="$(eval arg('cmd_src') == 'circle')" output="screen">
+        <param name="frequency" value="100"/>
+    </node>
     <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" if="$(eval arg('cmd_src') == 'teleop')">
         <arg name="model" value="burger"></arg>
     </include>
