@@ -34,6 +34,15 @@ void jointCallback(const sensor_msgs::JointState & msg)
 TEST_CASE("turtle_interface tests", "[turtle_interface]") {
 
     SECTION("cmd_vel translation test") {
+        // reset wheel velocities
+        lwheel_vel = 0.0;
+        rwheel_vel = 0.0;
+
+        // reset wheel positions
+        lwheel_pos = 0.0;
+        rwheel_pos = 0.0;
+
+        ros::Duration(3.0).sleep();
         ros::NodeHandle nh;
         ros::Subscriber wheel_sub = nh.subscribe("wheel_cmd", 1000, wheelCallback);
         ros::Publisher vel_pub = nh.advertise<geometry_msgs::Twist>("cmd_vel", 1000);
@@ -53,6 +62,15 @@ TEST_CASE("turtle_interface tests", "[turtle_interface]") {
     }
 
     SECTION("cmd_vel rotation test") {
+
+        // reset wheel velocities
+        lwheel_vel = 0.0;
+        rwheel_vel = 0.0;
+
+        // reset wheel positions
+        lwheel_pos = 0.0;
+        rwheel_pos = 0.0;
+
         ros::Duration(3.0).sleep();
         ros::NodeHandle nh;
         ros::Subscriber wheel_sub = nh.subscribe("wheel_cmd", 1000, wheelCallback);
@@ -72,6 +90,15 @@ TEST_CASE("turtle_interface tests", "[turtle_interface]") {
         CHECK(rwheel_vel == Approx(101));
     }
     SECTION("sensor_data test") {
+
+        // reset wheel velocities
+        lwheel_vel = 0.0;
+        rwheel_vel = 0.0;
+
+        // reset wheel positions
+        lwheel_pos = 0.0;
+        rwheel_pos = 0.0;
+
         ros::Duration(3.0).sleep();
         ros::NodeHandle nh;
         ros::Subscriber joint_sub = nh.subscribe("red/joint_states", 1000, jointCallback);

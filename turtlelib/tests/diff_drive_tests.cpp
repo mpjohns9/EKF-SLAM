@@ -8,7 +8,64 @@ using namespace turtlelib;
 
 // Collaborators: Marco Morales & Devesh Bhura
 
-// TEST_CASE("Integrate twist")
+TEST_CASE("Integrate twist -- translation","[diffDrive]"){ 
+
+    turtlelib::Twist2D V;
+    V.x = 1.0;
+    V.y = 1.0;
+
+    turtlelib::Transform2D T;
+    T = turtlelib::integrate_twist(V);
+
+    turtlelib::Vector2D v;
+    v = T.translation();
+    double ang = T.rotation();
+
+    REQUIRE(turtlelib::almost_equal(v.x, V.x, 0.01));
+    REQUIRE(turtlelib::almost_equal(v.y, V.y, 0.01));
+    REQUIRE(turtlelib::almost_equal(ang, 0.0, 0.01));
+
+}
+
+TEST_CASE("Integrate twist -- rotation","[diffDrive]"){ 
+
+    turtlelib::Twist2D V;
+    V.ang = 1.0;
+
+    turtlelib::Transform2D T;
+    T = turtlelib::integrate_twist(V);
+
+    turtlelib::Vector2D v;
+    v = T.translation();
+    double ang = T.rotation();
+
+    REQUIRE(turtlelib::almost_equal(v.x, 0.0, 0.01));
+    REQUIRE(turtlelib::almost_equal(v.y, 0.0, 0.01));
+    REQUIRE(turtlelib::almost_equal(ang, V.ang, 0.01));
+
+}
+
+TEST_CASE("Integrate twist -- both","[diffDrive]"){ 
+
+    turtlelib::Twist2D V;
+    V.x = 1.0;
+    V.y = 1.0;
+
+    double PI = turtlelib::PI;
+    V.ang = PI;
+
+    turtlelib::Transform2D T;
+    T = turtlelib::integrate_twist(V);
+
+    turtlelib::Vector2D v;
+    v = T.translation();
+    double ang = T.rotation();
+
+    CHECK(v.x == Approx(-0.6366197724));
+    CHECK(v.y == Approx(0.6366197724));
+    CHECK(ang == Approx(PI));
+
+}
 
 TEST_CASE("FKin -- forward", "[diffDrive]") {
     Config c, new_c;
