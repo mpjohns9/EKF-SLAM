@@ -18,7 +18,7 @@
 #include "nuturtle_control/Control.h"
 
 enum class State{CTRL, REV, STOP, STOPPED};
-static State state = State::STOP;
+static State state = State::CTRL;
 
 static auto frequency = 0;
 
