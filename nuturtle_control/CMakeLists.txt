@@ -249,3 +249,35 @@ install(DIRECTORY launch/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+if(CATKIN_ENABLE_TESTING)
+
+    find_package(rostest REQUIRED)
+
+    catch_add_rostest_node(turtle_interface_test
+    tests/turtle_interface_test.cpp
+    )
+
+    target_link_libraries(
+        turtle_interface_test 
+        ${catkin_LIBRARIES}
+        ${turtlelib_LIBRARIES}
+    )
+    add_rostest(launch/turtle_interface.test DEPENDENCIES turtle_interface_test)
+
+    catch_add_rostest_node(turtle_odom_test
+    tests/turtle_odom_test_node.cpp
+    )
+
+    target_link_libraries(
+        turtle_odom_test 
+        ${catkin_LIBRARIES}
+        ${turtlelib_LIBRARIES}
+    )
+    add_rostest(launch/turtle_odom.test DEPENDENCIES turtle_odom_test)
+
+    add_rostest(launch/turtle_circle.test)
+
+    
+
+endif()
