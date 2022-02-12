@@ -3,10 +3,9 @@
 * Winter 2022
 
 # Package List
-This repository consists of several ROS packages:  
-
+This repository consists of several ROS packages:
 - nusim: simulator and visualizer
 - nuturtle_description: display multiple turtlebots in rviz
 - turtlelib: library for performing 2D rigid body transformtions along with other functionality  
-    - rigid2d: two-dimensional rigid body transformations
-    - diff_drive: models kinematics of differential drive robot
+- rigid2d: two-dimensional rigid body transformations
+- diff_drive: models kinematics of differential drive robot
