@@ -35,8 +35,8 @@ namespace turtlelib
         wheel_pos.l_pos = pos.l_pos;
         wheel_pos.r_pos = pos.r_pos;
 
-        double dtheta = r*(r_vel - l_vel)/(2.0*D);
-        double vx = r*(r_vel + l_vel)/2.0;
+        double dtheta = r*(r_vel - l_vel)/(2.0*D); // EQUATION 3 FROM Kinematics.pdf
+        double vx = r*(r_vel + l_vel)/2.0; // EQUATION 4 FROM Kinematics.pdf
 
         Twist2D V;
         V.ang = dtheta;
@@ -79,8 +79,8 @@ namespace turtlelib
         {
             WheelVel vel;
 
-            vel.l_vel = (-D*V.ang + V.x)/r;
-            vel.r_vel = (D*V.ang + V.x)/r;
+            vel.l_vel = (-D*V.ang + V.x)/r; // EQUATION 1 FROM Kinematics.pdf
+            vel.r_vel = (D*V.ang + V.x)/r; // EQUATION 2 FROM Kinematics.pdf
 
             return vel;
         }
