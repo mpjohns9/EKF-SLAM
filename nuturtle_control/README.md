@@ -25,23 +25,34 @@ controlling real-life motion of a turtlebot.
 
 **Real-world:** https://youtu.be/OZtiVYpRCfk
 
-**Simulation:** https://youtu.be/zCq7UXUxPhI
+**Simulation:** https://youtu.be/zCq7UXUxPhI  
+
+The final position was recorded as (0, 0.0015, 0)
 
 ## Rotation Only
 
 **Real-world:** https://youtu.be/bfPDctbZdXg
 
-**Simulation:** https://youtu.be/L8e5fMKe1tY
+**Simulation:** https://youtu.be/L8e5fMKe1tY  
+
+The final position was recorded as (0, 0, 0)
+
 
 ## Circle Path
 
 **Real-world:** https://youtu.be/vQjXq2rNg9s
 
-**Simulation:** https://youtu.be/8U03lX5KjsE
+**Simulation:** https://youtu.be/8U03lX5KjsE  
+
+The final position was recorded as (0.015, -0.07, 0)
+
 
 ## Attempt at Worse Result
 
 **Real-world:** https://youtu.be/dL4bgiMu9FU
 
-**Simulation:** https://youtu.be/hBRwvl_i8C0
+**Simulation:** https://youtu.be/hBRwvl_i8C0  
+
+The final position was recorded as (0, 0.032, 0)
+
 
