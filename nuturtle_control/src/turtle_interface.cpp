@@ -24,7 +24,7 @@
 #include "turtlelib/diff_drive.hpp"
 
 // initialize classes
-turtlelib::diffDrive dd;
+turtlelib::diffDrive dd; //# these should be static
 turtlelib::Transform2D tf;
 
 // publishing rate 
@@ -36,7 +36,7 @@ static auto y = 0.0;
 static auto theta = 0.0;
 
 // wheel velocities
-static auto lwheel_vel = 0.0;
+static auto lwheel_vel = 0.0; // # should these be doubles or ints?, looks like you are comparing them to 256 so they should be ints
 static auto rwheel_vel = 0.0;
 
 // wheel positions
@@ -121,7 +121,7 @@ int main(int argc, char * argv[])
     {
         nuturtlebot_msgs::WheelCommands cmd;
 
-        if (std::abs(lwheel_vel) > std::abs(rwheel_vel))
+        if (std::abs(lwheel_vel) > std::abs(rwheel_vel)) 
         {
             if (lwheel_vel < -256)
             {

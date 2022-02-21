@@ -1,0 +1,11 @@
+catkin_lint -W2
+catkin_make
+- unaddressed compiler warnings
+- One test throws an out_of_range error and exits prematurely
+- Some C++ comments
+Task A.
+Task B
+Task D
+Task E
+Task C
+Task F

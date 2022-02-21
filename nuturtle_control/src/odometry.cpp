@@ -26,7 +26,7 @@
 #include "turtlelib/rigid2d.hpp"
 #include "turtlelib/diff_drive.hpp"
 
-turtlelib::diffDrive dd;
+turtlelib::diffDrive dd; //# static
 
 static auto rate = 0;
 

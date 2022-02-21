@@ -9,7 +9,7 @@
 namespace turtlelib
 {
     /// \brief Track width
-    constexpr double D = 0.08;
+    constexpr double D = 0.08; //# by hardcoding these as constexpr, they aren't read from the parameter server and the code is less widely applicable
 
     /// \brief Wheel radius
     constexpr double r = 0.033;
@@ -50,7 +50,7 @@ namespace turtlelib
     public:
         diffDrive();
 
-        diffDrive(Config c);
+        diffDrive(Config c); // # single argument constructor should be explicit
 
         diffDrive(Config c, WheelPos w_p, WheelVel w_v);
 
