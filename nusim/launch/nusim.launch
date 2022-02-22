@@ -1,5 +1,6 @@
 <launch>
     <arg name="config" default="$(find nusim)/config/nusim.rviz"/>
+    <arg name="yaml" default="$(find nusim)/config/basic_world.yaml"/>
 
     <rosparam command="load" file="$(find nusim)/config/basic_world.yaml"/>
   
