@@ -8,11 +8,11 @@
 
 namespace turtlelib
 {
-    /// \brief Track width
-    constexpr double D = 0.08;
+    // /// \brief Track width
+    // constexpr double D = 0.08;
 
-    /// \brief Wheel radius
-    constexpr double r = 0.033;
+    // /// \brief Wheel radius
+    // constexpr double r = 0.033;
 
     /// \brief configuration of robot
     struct Config {
@@ -69,6 +69,8 @@ namespace turtlelib
         Config config;
         WheelPos wheel_pos;
         WheelVel wheel_vel;
+        double D = 0.08;
+        double r = 0.033;
     };
 
 }
