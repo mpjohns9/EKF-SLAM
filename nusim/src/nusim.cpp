@@ -14,6 +14,7 @@
 ///     marker_pub (visualization_msgs/MarkerArray): publishes array of cylindrical markers
 ///     wall_pub (visualization_msgs/MarkerArray): publishes array of cubes (walls)
 ///     sensor_pub (nuturtlebot_msgs/SensorData): publishes updated wheel positions
+///     path_pub (nav_msgs/Path): publishes path of robot
 /// SUBSCRIBES:
 ///     wheel_sub (nuturtlebot_msgs/WheelCommands): updates wheel velocities
 /// SERVICES:
@@ -37,8 +38,11 @@
 #include <nuturtlebot_msgs/SensorData.h>
 #include "turtlelib/diff_drive.hpp"
 #include <nav_msgs/Path.h>
+#include <sensor_msgs/LaserScan.h>
 
 turtlelib::diffDrive dd;
+
+static auto pi = turtlelib::PI;
 
 static auto timestep = 0;
 static auto rate = 0;
@@ -205,7 +209,11 @@ int main(int argc, char * argv[])
     geometry_msgs::TransformStamped transform;
     tf2::Quaternion q;
 
-    
+    nav_msgs::Path path;
+    geometry_msgs::PoseStamped ps;
+
+    sensor_msgs::LaserScan laser;
+
     visualization_msgs::MarkerArray wall_ma;
 
     wall_ma.markers.resize(4);
@@ -403,9 +411,7 @@ int main(int argc, char * argv[])
     marker_pub.publish(ma);
 
     
-    timestep = 0;
-    nav_msgs::Path path;
-    
+    timestep = 0;    
     while(ros::ok())
     {
 
@@ -435,7 +441,6 @@ int main(int argc, char * argv[])
         step.data = timestep;
         pub_step.publish(step);
 
-        geometry_msgs::PoseStamped ps;
         ps.header.stamp = ros::Time::now();
         ps.header.frame_id = "world";
 
@@ -448,6 +453,18 @@ int main(int argc, char * argv[])
         path.poses.push_back(ps);
 
         path_pub.publish(path);
+
+        laser.header.stamp = ros::Time::now();
+        laser.header.frame_id = "world";
+
+        laser.angle_min = 0;
+        laser.angle_max = 2*pi;
+        laser.angle_increment = (2*pi)/360.0;
+        laser.time_increment = 1/1800;
+        laser.scan_time = 5;
+        laser.range_min = 0.12;
+        laser.range_max = 3.5;
+
 
 
         // js.name = {"red_wheel_left_joint", "red_wheel_right_joint"};
