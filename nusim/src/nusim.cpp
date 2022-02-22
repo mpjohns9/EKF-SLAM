@@ -28,6 +28,7 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
+#include <geometry_msgs/PoseStamped.h>
 #include "nusim/Teleport.h"
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
@@ -35,6 +36,7 @@
 #include <nuturtlebot_msgs/WheelCommands.h>
 #include <nuturtlebot_msgs/SensorData.h>
 #include "turtlelib/diff_drive.hpp"
+#include <nav_msgs/Path.h>
 
 turtlelib::diffDrive dd;
 
@@ -190,6 +192,7 @@ int main(int argc, char * argv[])
     ros::Publisher marker_pub = nh_prv.advertise<visualization_msgs::MarkerArray>("obstacles", 1, true);
     ros::Publisher wall_pub = nh_prv.advertise<visualization_msgs::MarkerArray>("walls", 1, true);
     ros::Publisher sensor_pub = nh.advertise<nuturtlebot_msgs::SensorData>("sensor_data", 1000);
+    ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("robot_path", 1000);
 
     ros::Subscriber wheel_sub = nh.subscribe("wheel_cmd", 1000, wheelCallback);
 
@@ -401,8 +404,11 @@ int main(int argc, char * argv[])
 
     
     timestep = 0;
+    nav_msgs::Path path;
+    
     while(ros::ok())
     {
+
         transform.header.stamp = ros::Time::now();
 
         transform.header.frame_id = "world";
@@ -428,6 +434,21 @@ int main(int argc, char * argv[])
 
         step.data = timestep;
         pub_step.publish(step);
+
+        geometry_msgs::PoseStamped ps;
+        ps.header.stamp = ros::Time::now();
+        ps.header.frame_id = "world";
+
+        ps.pose.position.x = x;
+        ps.pose.position.y = y;
+
+        path.header.stamp = ros::Time::now();
+        path.header.frame_id = "world";
+
+        path.poses.push_back(ps);
+
+        path_pub.publish(path);
+
 
         // js.name = {"red_wheel_left_joint", "red_wheel_right_joint"};
         // js.position = {0.0, 0.0};
