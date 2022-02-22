@@ -39,6 +39,7 @@
 #include "turtlelib/diff_drive.hpp"
 #include <nav_msgs/Path.h>
 #include <sensor_msgs/LaserScan.h>
+#include <random>
 
 turtlelib::diffDrive dd;
 
@@ -78,6 +79,20 @@ static auto w_thick = 0.1;
 static auto ticks_to_rad = 0.0;
 static auto cmd_to_radsec = 0.0;
 
+/// \brief RNG seeding function
+///
+/// ensures random number generator is only seeded once
+//  source: https://nu-msr.github.io/navigation_site/lectures/gaussian.html
+std::mt19937 & get_random()
+ {
+     // static variables inside a function are created once and persist for the remainder of the program
+     static std::random_device rd{}; 
+     static std::mt19937 mt{rd()};
+     // we return a reference to the pseudo-random number genrator object. This is always the
+     // same object every time get_random is called
+     return mt;
+ }
+
 /// \brief callback for reset service
 ///
 /// resets timestep to 0 and robot to initial position
@@ -111,9 +126,21 @@ bool teleportCallback(nusim::Teleport::Request & request, nusim::Teleport::Respo
 /// \param msg - nuturtlebot_msgs/WheelCommands message obj
 /// receives motion commands for the turtlebot
 void wheelCallback(const nuturtlebot_msgs::WheelCommands & msg)
-{
-    lwheel_vel = msg.left_velocity*cmd_to_radsec/rate;
-    rwheel_vel = msg.right_velocity*cmd_to_radsec/rate;
+{   
+    if (msg.left_velocity != 0) or (msg.right_velocity != 0) {
+        // To generate a gaussian variable:
+        std::normal_distribution<> n(1, 1);
+        n(get_random());
+    }
+    else {
+        n = 0;
+    }
+
+    lvel_noisy = msg.left_velocity + n;
+    rvel_noisy = msg.right_velocity + n;
+
+    lwheel_vel = lvel_noisy*cmd_to_radsec/rate;
+    rwheel_vel = rvel_noisy*cmd_to_radsec/rate;
 
     // ROS_ERROR_STREAM("L VEL: " << msg.left_velocity);
     // ROS_ERROR_STREAM("R VEL: " << msg.right_velocity);
@@ -133,8 +160,8 @@ void wheelCallback(const nuturtlebot_msgs::WheelCommands & msg)
     theta = c.ang;
 
     turtlelib::WheelVel v;
-    v.l_vel = msg.left_velocity*cmd_to_radsec;
-    v.r_vel = msg.right_velocity*cmd_to_radsec;
+    v.l_vel = lvel_noisy*cmd_to_radsec;
+    v.r_vel = rvel_noisy*cmd_to_radsec;
 
     dd = turtlelib::diffDrive(c, pos, v);
 }
