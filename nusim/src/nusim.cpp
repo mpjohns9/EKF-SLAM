@@ -79,6 +79,12 @@ static auto w_thick = 0.1;
 static auto ticks_to_rad = 0.0;
 static auto cmd_to_radsec = 0.0;
 
+// initialize noise params
+static auto vnoise_mean = 0.0;
+static auto vnoise_stddev = 0.0;
+static auto slip_min = 0.0;
+static auto slip_max = 0.0;
+
 /// \brief RNG seeding function
 ///
 /// ensures random number generator is only seeded once
@@ -127,28 +133,31 @@ bool teleportCallback(nusim::Teleport::Request & request, nusim::Teleport::Respo
 /// receives motion commands for the turtlebot
 void wheelCallback(const nuturtlebot_msgs::WheelCommands & msg)
 {   
-    if (msg.left_velocity != 0) or (msg.right_velocity != 0) {
-        // To generate a gaussian variable:
-        std::normal_distribution<> n(1, 1);
-        n(get_random());
-    }
-    else {
-        n = 0;
-    }
-
-    lvel_noisy = msg.left_velocity + n;
-    rvel_noisy = msg.right_velocity + n;
-
-    lwheel_vel = lvel_noisy*cmd_to_radsec/rate;
-    rwheel_vel = rvel_noisy*cmd_to_radsec/rate;
-
-    // ROS_ERROR_STREAM("L VEL: " << msg.left_velocity);
-    // ROS_ERROR_STREAM("R VEL: " << msg.right_velocity);
-
-    lwheel_pos += lwheel_vel;
-    rwheel_pos += rwheel_vel;
-
+    double vel_noise = 0.0;
+    double pos_noise = 1.0;
     
+    if ((msg.left_velocity != 0) or (msg.right_velocity != 0)) {
+        // To generate a gaussian variable:
+        std::normal_distribution<double> vn(vnoise_mean, vnoise_stddev);
+        vel_noise = vn(get_random());
+
+        std::uniform_real_distribution<double> pn(slip_min, slip_max);
+        pos_noise = pn(get_random());
+    }
+
+    lwheel_vel = msg.left_velocity*cmd_to_radsec/rate;
+    rwheel_vel = msg.right_velocity*cmd_to_radsec/rate;
+
+    double lvel_noisy = lwheel_vel + vel_noise;
+    double rvel_noisy = rwheel_vel + vel_noise;
+
+
+    lwheel_pos += lvel_noisy;
+    rwheel_pos += rvel_noisy;
+
+    ROS_ERROR_STREAM("NOISE L POS: " << lwheel_pos);
+    ROS_ERROR_STREAM("NOISE R POS: " << rwheel_pos);
+    ROS_ERROR_STREAM("-----");
 
     turtlelib::WheelPos pos {lwheel_pos, rwheel_pos};
     turtlelib::Config c;
@@ -163,7 +172,17 @@ void wheelCallback(const nuturtlebot_msgs::WheelCommands & msg)
     v.l_vel = lvel_noisy*cmd_to_radsec;
     v.r_vel = rvel_noisy*cmd_to_radsec;
 
+    lwheel_pos += (pos_noise*lvel_noisy);
+    rwheel_pos += (pos_noise*rvel_noisy);
+
+    ROS_ERROR_STREAM("SLIP L POS: " << lwheel_pos);
+    ROS_ERROR_STREAM("SLIP R POS: " << rwheel_pos);
+    ROS_ERROR_STREAM("-----");
+
+    pos = {lwheel_pos, rwheel_pos};
+
     dd = turtlelib::diffDrive(c, pos, v);
+    
 }
 
 int main(int argc, char * argv[])
@@ -187,6 +206,12 @@ int main(int argc, char * argv[])
     nh_prv.getParam("obstacles/obs_y", obs_y);
     nh_prv.getParam("obstacles/radius", radius);
     nh_prv.getParam("obstacles/height", height);
+
+    nh_prv.getParam("vnoise_mean", vnoise_mean);
+    nh_prv.getParam("vnoise_stddev", vnoise_stddev);
+    nh_prv.getParam("slip_min", slip_min);
+    nh_prv.getParam("slip_max", slip_max);
+
 
     // get encoder ticks conversion param
     // if it doesn't exist, throw an error
@@ -449,6 +474,7 @@ int main(int argc, char * argv[])
 
         // ROS_ERROR_STREAM("X: " << x);
         // ROS_ERROR_STREAM("Y: " << y);
+        // ROS_ERROR_STREAM("-----");
         // ROS_ERROR_STREAM("THETA: " << theta);
 
         transform.transform.translation.x = x;
@@ -504,6 +530,8 @@ int main(int argc, char * argv[])
         nuturtlebot_msgs::SensorData sensor_data;
         sensor_data.right_encoder = rwheel_pos/ticks_to_rad;
         sensor_data.left_encoder = lwheel_pos/ticks_to_rad;
+
+        // ROS_ERROR_STREAM("SENSOR DATA: " << sensor_data);
 
         sensor_pub.publish(sensor_data);
         // ROS_ERROR_STREAM("NUSIM -- SENSOR_DATA PUBLISHED");
