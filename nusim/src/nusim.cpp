@@ -40,10 +40,10 @@
 #include <nav_msgs/Path.h>
 #include <sensor_msgs/LaserScan.h>
 #include <random>
+#include <cmath>
+#include <vector>
 
 turtlelib::diffDrive dd;
-
-static auto pi = turtlelib::PI;
 
 static auto timestep = 0;
 static auto rate = 0;
@@ -85,6 +85,26 @@ static auto vnoise_stddev = 0.0;
 static auto slip_min = 0.0;
 static auto slip_max = 0.0;
 
+// initialize sensor params
+static auto angle_min = 0.0;
+static auto angle_max = 0.0;
+static auto angle_inc = 0.0;
+static auto time_inc = 0.0;
+static auto scan_time = 0.0;
+static auto range_min = 0.0;
+static auto range_max = 0.0;
+static auto num_samples = 0.0;
+
+static auto basic_sensor_variance = 0.0;
+
+static auto collision_rad = 0.0;
+
+visualization_msgs::MarkerArray fake_ma;
+sensor_msgs::LaserScan laser;
+static auto fake_sensor_flag = false;
+static auto scan_flag = false;
+static auto collision_flag = false;
+
 /// \brief RNG seeding function
 ///
 /// ensures random number generator is only seeded once
@@ -98,6 +118,9 @@ std::mt19937 & get_random()
      // same object every time get_random is called
      return mt;
  }
+
+std::normal_distribution<double> on(0.0, basic_sensor_variance);
+double obs_noise = on(get_random());
 
 /// \brief callback for reset service
 ///
@@ -155,18 +178,48 @@ void wheelCallback(const nuturtlebot_msgs::WheelCommands & msg)
     lwheel_pos += lvel_noisy;
     rwheel_pos += rvel_noisy;
 
-    ROS_ERROR_STREAM("NOISE L POS: " << lwheel_pos);
-    ROS_ERROR_STREAM("NOISE R POS: " << rwheel_pos);
-    ROS_ERROR_STREAM("-----");
-
     turtlelib::WheelPos pos {lwheel_pos, rwheel_pos};
     turtlelib::Config c;
 
     c = dd.fwd_kin(pos);
 
-    x = c.x;
-    y = c.y;
-    theta = c.ang;
+    double new_x = c.x;
+    double new_y = c.y;
+    double new_theta = c.ang;
+
+    for (int i=0;i<int(obs_x.size());i++)
+    {
+        double x_obstacle = obs_x[i] + obs_noise;
+        double y_obstacle = obs_y[i] + obs_noise;
+
+        double distance = std::sqrt(std::pow(x_obstacle - new_x, 2) + std::pow(y_obstacle - new_y, 2));
+        double tan_dist = (radius + collision_rad);
+
+        // ROS_ERROR_STREAM("DISTANCE: " << distance);
+        // ROS_ERROR_STREAM("TAN DISTANCE: " << tan_dist);
+        // ROS_ERROR_STREAM("_______________");
+
+        if (distance < tan_dist and !collision_flag)
+        {
+            // ROS_ERROR_STREAM("----------------COLLISION DETECTED--------------------");
+            c.x = x;
+            c.y = y;
+            c.ang = theta;
+            collision_flag = true;
+            break;
+        //     double t = (tan_dist-distance)/distance;
+        //     x = ((1 - t)*x_obstacle) + t*x;
+        //     y = ((1 - t)*y_obstacle) + t*y;
+        }
+        collision_flag = false;
+    }
+
+    if (!collision_flag)
+    {
+        x = new_x;
+        y = new_y;
+        theta = new_theta;
+    }
 
     turtlelib::WheelVel v;
     v.l_vel = lvel_noisy*cmd_to_radsec;
@@ -175,14 +228,269 @@ void wheelCallback(const nuturtlebot_msgs::WheelCommands & msg)
     lwheel_pos += (pos_noise*lvel_noisy);
     rwheel_pos += (pos_noise*rvel_noisy);
 
-    ROS_ERROR_STREAM("SLIP L POS: " << lwheel_pos);
-    ROS_ERROR_STREAM("SLIP R POS: " << rwheel_pos);
-    ROS_ERROR_STREAM("-----");
-
     pos = {lwheel_pos, rwheel_pos};
 
     dd = turtlelib::diffDrive(c, pos, v);
     
+}
+
+void marktimerCallback(const ros::TimerEvent&)
+{
+    std::vector<double> obs_vec;
+    fake_ma.markers.resize(obs_x.size());
+    for (int i=0;i<int(obs_x.size());i++)
+    {
+        turtlelib::Vector2D vec{x, y};
+        turtlelib::Transform2D Twb(vec, theta);
+        turtlelib::Transform2D Tbw = Twb.inv();
+
+        double x_obstacle = obs_x[i];
+        double y_obstacle = obs_y[i];
+
+        turtlelib::Vector2D obs_vec {x_obstacle, y_obstacle};
+        turtlelib::Vector2D obs_vec_b = Tbw(obs_vec);
+
+        double obs_theta = atan2(obs_vec_b.x, obs_vec_b.y) + obs_noise;
+        double r = std::sqrt(std::pow(obs_vec_b.x, 2) + std::pow(obs_vec_b.y, 2));
+
+        // double distance = std::sqrt(std::pow(x_obstacle - x, 2) + std::pow(y_obstacle - y, 2));
+        // visualization_msgs::Marker marker;
+
+        //set header and timestamp
+        fake_ma.markers[i].header.frame_id = "world";
+        fake_ma.markers[i].header.stamp = ros::Time::now();
+
+        //set id diff for each marker
+        fake_ma.markers[i].id = i;
+
+        //set color and action
+        fake_ma.markers[i].type = visualization_msgs::Marker::CYLINDER;
+        // ROS_ERROR_STREAM("r (Obstacle " << i << "): " << r);
+        if (abs(r) <= range_max)
+        {
+            fake_ma.markers[i].action = visualization_msgs::Marker::ADD;
+        }
+        else
+        {
+            fake_ma.markers[i].action = visualization_msgs::Marker::DELETE;
+        }
+        //set pose of marker
+        fake_ma.markers[i].pose.position.x = obs_x.at(i);
+        fake_ma.markers[i].pose.position.y = obs_y.at(i);
+        fake_ma.markers[i].pose.position.z = 0;
+        fake_ma.markers[i].pose.orientation.x = 0;
+        fake_ma.markers[i].pose.orientation.y = 0;
+        fake_ma.markers[i].pose.orientation.z = 0;
+        fake_ma.markers[i].pose.orientation.w = 1;
+
+        //set size
+        fake_ma.markers[i].scale.x = 2*radius;
+        fake_ma.markers[i].scale.y = 2*radius;
+        fake_ma.markers[i].scale.z = height;
+
+
+        //set color
+        fake_ma.markers[i].color.r = 0.0;
+        fake_ma.markers[i].color.g = 1.0;
+        fake_ma.markers[i].color.b = 0.0;
+        fake_ma.markers[i].color.a = 1.0;
+
+        // ma.markers[i].lifetime = ros::Duration();
+
+
+        // ma.markers.push_back(marker);
+    }
+    fake_sensor_flag = true;
+
+}
+
+void scantimerCallback (const ros::TimerEvent&)
+{
+    laser.header.stamp = ros::Time::now();
+    laser.header.frame_id = "red_base_scan";
+
+    laser.angle_min = angle_min;
+    laser.angle_max = angle_max;
+    laser.angle_increment = angle_inc;
+    laser.time_increment = time_inc;
+    laser.scan_time = scan_time;
+    laser.range_min = range_min;
+    laser.range_max = range_max;
+
+    laser.ranges.resize(num_samples);
+    double ang = 0.0;
+    for (int j=0;j<num_samples;j++)
+    {   
+        ROS_ERROR_STREAM("ANGLE " << ang);
+        std::vector<double> int_vec;
+        for (int i=0;i<int(obs_x.size());i++)
+        {
+            ROS_ERROR_STREAM("OBSTACLE " << i);
+            double r_min = range_min;
+            double xb1 = r_min*cos(ang);
+            double yb1 = r_min*sin(ang);
+
+            double r_max = range_max;
+            double xb2 = r_max*cos(ang);
+            double yb2 = r_max*sin(ang);
+
+            turtlelib::Vector2D obs_vec{obs_x[i], obs_y[i]};
+            turtlelib::Vector2D b1_vec{xb1, yb1};
+            turtlelib::Vector2D b2_vec{xb2, yb2};
+
+            turtlelib::Vector2D v{x, y};
+
+            turtlelib::Transform2D Twb(v, theta);
+            turtlelib::Transform2D Two(obs_vec);
+            turtlelib::Transform2D Tob = (Two.inv())*Twb;
+
+            turtlelib::Vector2D o1_vec = Tob(b1_vec);
+            turtlelib::Vector2D o2_vec = Tob(b2_vec);
+
+            // ROS_ERROR_STREAM("VEC 1: " << o1_vec);
+            // ROS_ERROR_STREAM("VEC 2: " << o2_vec);
+
+            double dx = o2_vec.x - o1_vec.  x;
+            double dy = o2_vec.y - o1_vec.y;
+            ROS_ERROR_STREAM("DX: " << dx);
+            ROS_ERROR_STREAM("DY: " << dy);
+            double dr = sqrt(pow(dx, 2) + pow(dy, 2));
+
+            double D = (o1_vec.x*o2_vec.y) - (o2_vec.x*o1_vec.y);
+            // ROS_ERROR_STREAM("D: " << D);
+
+            double disc = (pow(collision_rad, 2)*pow(dr, 2)) - pow(D, 2);
+            ROS_ERROR_STREAM("DISC " << disc);
+
+            if (turtlelib::almost_equal(disc, 0.0) or disc > 0)
+            {
+                auto sgn = 0;
+                if (dy < 0.0)
+                {
+                    sgn = -1;
+                }
+                else
+                {
+                    sgn = 1;
+                }
+                
+                double x_int1 = ((D*dy) + (sgn*dx*sqrt(disc)))/pow(dr, 2);
+                double y_int1 = ((-D*dx) + (abs(dy)*sqrt(disc)))/pow(dr, 2);
+                turtlelib::Vector2D int1_vec{x_int1, y_int1};
+                turtlelib::Vector2D int1_vec_b = Tob.inv()(int1_vec);
+    
+                ROS_ERROR_STREAM("_____________________________________");
+                ROS_ERROR_STREAM("DX: " << dx);
+                ROS_ERROR_STREAM("DY: " << dy);
+                ROS_ERROR_STREAM("_____________________________________");
+
+                double dist1 = sqrt(pow(int1_vec_b.x, 2) + pow(int1_vec_b.y, 2));
+                double ref_dist = sqrt(pow(int1_vec_b.x - b1_vec.x, 2) + pow(int1_vec_b.y - b1_vec.y, 2));
+
+                ROS_ERROR_STREAM("DIST1: " << dist1);
+                ROS_ERROR_STREAM("REF_DIST1: " << ref_dist);
+
+
+                if (ref_dist < dist1)
+                {
+                    int_vec.push_back(dist1);
+                }
+                // ROS_ERROR_STREAM("D1: " << dist1);
+
+
+                double x_int2 = ((D*dy) - (sgn*dx*sqrt(disc)))/pow(dr, 2);
+                double y_int2 = ((-D*dx) - (abs(dy)*sqrt(disc)))/pow(dr, 2);
+                turtlelib::Vector2D int2_vec{x_int2, y_int2};
+                turtlelib::Vector2D int2_vec_b = Tob.inv()(int2_vec);
+
+                double dist2 = sqrt(pow(int2_vec_b.x, 2) + pow(int2_vec_b.y, 2));
+                ref_dist = sqrt(pow(int2_vec_b.x - b1_vec.x, 2) + pow(int2_vec_b.y - b1_vec.y, 2));
+
+                ROS_ERROR_STREAM("DIST2: " << dist1);
+                ROS_ERROR_STREAM("REF_DIST2: " << ref_dist);
+
+                if (ref_dist < dist2)
+                {
+                    int_vec.push_back(dist2);
+                }
+                // ROS_ERROR_STREAM("D2: " << dist2);
+
+            }
+
+        }
+
+        // double x_wall = (x_length/2) - (w_thick/2);
+        // double y_wall = (y_length/2) - (w_thick/2);
+        // std::vector<double> x_wall_vec {x_wall, x_wall, -x_wall, -x_wall};
+        // std::vector<double> y_wall_vec {y_wall, -y_wall, -y_wall, y_wall};
+        // for (int i =0;i<4;i++)
+        // {
+        //     // ROS_ERROR_STREAM("WALL " << i);
+        //     if (i == 3)
+        //     {
+        //         double x_w1 = x_wall_vec[i];
+        //         double y_w1 = y_wall_vec[i];
+
+        //         double x_w2 = x_wall_vec[0];
+        //         double y_w2 = y_wall_vec[0];
+        //     }
+
+        //     double x_w1 = x_wall_vec[i];
+        //     double y_w1 = y_wall_vec[i];
+
+        //     double x_w2 = x_wall_vec[i+1];
+        //     double y_w2 = y_wall_vec[i+1];
+
+        //     double dx_wall = x_w2 - x_w1;
+        //     double dy_wall = y_w2 - y_w1;
+            
+        //     double dx_robot = range_max*cos(ang);
+        //     double dy_robot = range_max*sin(ang);
+
+        //     double m_wall = dy_wall/dx_wall;
+        //     double m_robot = dy_robot/dx_robot;
+
+        //     double c_wall = y_w1 - (m_wall*x_w1);
+        //     double c_robot = y - (m_robot*x);
+
+        //     if (!turtlelib::almost_equal(m_wall, m_robot))
+        //     {
+        //         double x_int = (c_wall - c_robot)/(m_robot - m_wall);
+        //         double y_int = (m_robot*x_int) + c_robot;
+        //         double dist = std::sqrt(std::pow(x_w1 - x_w2, 2) + std::pow(y_w1 - y_w2, 2));
+        //         int_vec.push_back(dist);
+        //         // ROS_ERROR_STREAM("DWALL: " << dist);
+        //     }
+            
+            
+        // }
+        int_vec.push_back(range_max);
+
+        
+        scan_flag = true;
+        double min = *min_element(int_vec.begin(), int_vec.end());
+        laser.ranges[j] = min;
+        ang += angle_inc;
+        if (ang > angle_max)
+        {
+            ang = 0.0;
+        }
+        if (min < 3.4)
+        {
+            // ROS_ERROR_STREAM("ANGLE " << ang);
+            // ROS_ERROR_STREAM("-----------------");
+            // ROS_ERROR_STREAM("VECTOR: ");
+            // ROS_ERROR_STREAM("-----------------");
+            // ROS_ERROR_STREAM("MIN: " << min);
+            for (int k=0; k<int_vec.size();k++)
+            {
+                ROS_ERROR_STREAM(int_vec[k]);
+            }
+            
+        }
+        // ROS_ERROR_STREAM("LASER MSG " << laser);
+    }
+
 }
 
 int main(int argc, char * argv[])
@@ -211,6 +519,20 @@ int main(int argc, char * argv[])
     nh_prv.getParam("vnoise_stddev", vnoise_stddev);
     nh_prv.getParam("slip_min", slip_min);
     nh_prv.getParam("slip_max", slip_max);
+
+    nh_prv.getParam("sensor/angle_min", angle_min);
+    nh_prv.getParam("sensor/angle_max", angle_max);
+    nh_prv.getParam("sensor/angle_increment", angle_inc);
+    nh_prv.getParam("sensor/time_increment", time_inc);
+    nh_prv.getParam("sensor/scan_time", scan_time);
+    nh_prv.getParam("sensor/range_min", range_min);
+    nh_prv.getParam("sensor/range_max", range_max);
+    nh_prv.getParam("sensor/num_samples", num_samples);
+
+
+    nh.getParam("collision_radius", collision_rad);
+
+    nh_prv.getParam("basic_sensor_variance", basic_sensor_variance);
 
 
     // get encoder ticks conversion param
@@ -249,6 +571,8 @@ int main(int argc, char * argv[])
     ros::Publisher wall_pub = nh_prv.advertise<visualization_msgs::MarkerArray>("walls", 1, true);
     ros::Publisher sensor_pub = nh.advertise<nuturtlebot_msgs::SensorData>("sensor_data", 1000);
     ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("robot_path", 1000);
+    ros::Publisher fake_sensor_pub = nh.advertise<visualization_msgs::MarkerArray>("fake_sensor", 1000);
+    ros::Publisher scan_pub = nh.advertise<sensor_msgs::LaserScan>("laser_scan", 1000);
 
     ros::Subscriber wheel_sub = nh.subscribe("wheel_cmd", 1000, wheelCallback);
 
@@ -257,14 +581,15 @@ int main(int argc, char * argv[])
     ros::ServiceServer reset = nh_prv.advertiseService("reset", resetCallback);
     ros::ServiceServer teleport = nh_prv.advertiseService("teleport", teleportCallback);
 
+    ros::Timer fake_marker_timer = nh.createTimer(ros::Duration(0.2), marktimerCallback);
+    ros::Timer scanner_timer = nh.createTimer(ros::Duration(0.2), scantimerCallback);
+
     static tf2_ros::TransformBroadcaster br;
     geometry_msgs::TransformStamped transform;
     tf2::Quaternion q;
 
     nav_msgs::Path path;
     geometry_msgs::PoseStamped ps;
-
-    sensor_msgs::LaserScan laser;
 
     visualization_msgs::MarkerArray wall_ma;
 
@@ -416,9 +741,8 @@ int main(int argc, char * argv[])
     wall_pub.publish(wall_ma);
 
     visualization_msgs::MarkerArray ma;
-
     ma.markers.resize(obs_x.size());
-    for (int i=0;i<obs_x.size();i++)
+    for (int i=0;i<int(obs_x.size());i++)
     {
         // visualization_msgs::Marker marker;
 
@@ -507,19 +831,6 @@ int main(int argc, char * argv[])
 
         path_pub.publish(path);
 
-        laser.header.stamp = ros::Time::now();
-        laser.header.frame_id = "world";
-
-        laser.angle_min = 0;
-        laser.angle_max = 2*pi;
-        laser.angle_increment = (2*pi)/360.0;
-        laser.time_increment = 1/1800;
-        laser.scan_time = 5;
-        laser.range_min = 0.12;
-        laser.range_max = 3.5;
-
-
-
         // js.name = {"red_wheel_left_joint", "red_wheel_right_joint"};
         // js.position = {0.0, 0.0};
         // pub_joints.publish(js);
@@ -536,6 +847,17 @@ int main(int argc, char * argv[])
         sensor_pub.publish(sensor_data);
         // ROS_ERROR_STREAM("NUSIM -- SENSOR_DATA PUBLISHED");
 
+        if (fake_sensor_flag)
+        {
+            fake_sensor_pub.publish(fake_ma);
+            fake_sensor_flag = false;
+        }
+
+        if (scan_flag)
+        {
+            scan_pub.publish(laser);
+            scan_flag = false;
+        }
 
         timestep++;
         ros::spinOnce();
