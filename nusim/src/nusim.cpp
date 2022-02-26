@@ -325,7 +325,7 @@ void scantimerCallback (const ros::TimerEvent&)
         std::vector<double> int_vec;
         for (int i=0;i<int(obs_x.size());i++)
         {
-            ROS_ERROR_STREAM("OBSTACLE " << i);
+            // ROS_ERROR_STREAM("OBSTACLE " << i);
             double r_min = range_min;
             double xb1 = r_min*cos(ang);
             double yb1 = r_min*sin(ang);
@@ -352,15 +352,15 @@ void scantimerCallback (const ros::TimerEvent&)
 
             double dx = o2_vec.x - o1_vec.  x;
             double dy = o2_vec.y - o1_vec.y;
-            ROS_ERROR_STREAM("DX: " << dx);
-            ROS_ERROR_STREAM("DY: " << dy);
+            // ROS_ERROR_STREAM("DX: " << dx);
+            // ROS_ERROR_STREAM("DY: " << dy);
             double dr = sqrt(pow(dx, 2) + pow(dy, 2));
 
             double D = (o1_vec.x*o2_vec.y) - (o2_vec.x*o1_vec.y);
             // ROS_ERROR_STREAM("D: " << D);
 
             double disc = (pow(collision_rad, 2)*pow(dr, 2)) - pow(D, 2);
-            ROS_ERROR_STREAM("DISC " << disc);
+            // ROS_ERROR_STREAM("DISC " << disc);
 
             if (turtlelib::almost_equal(disc, 0.0) or disc > 0)
             {
@@ -379,16 +379,16 @@ void scantimerCallback (const ros::TimerEvent&)
                 turtlelib::Vector2D int1_vec{x_int1, y_int1};
                 turtlelib::Vector2D int1_vec_b = Tob.inv()(int1_vec);
     
-                ROS_ERROR_STREAM("_____________________________________");
-                ROS_ERROR_STREAM("DX: " << dx);
-                ROS_ERROR_STREAM("DY: " << dy);
-                ROS_ERROR_STREAM("_____________________________________");
+                // ROS_ERROR_STREAM("_____________________________________");
+                // ROS_ERROR_STREAM("DX: " << dx);
+                // ROS_ERROR_STREAM("DY: " << dy);
+                // ROS_ERROR_STREAM("_____________________________________");
 
                 double dist1 = sqrt(pow(int1_vec_b.x, 2) + pow(int1_vec_b.y, 2));
                 double ref_dist = sqrt(pow(int1_vec_b.x - b1_vec.x, 2) + pow(int1_vec_b.y - b1_vec.y, 2));
 
-                ROS_ERROR_STREAM("DIST1: " << dist1);
-                ROS_ERROR_STREAM("REF_DIST1: " << ref_dist);
+                // ROS_ERROR_STREAM("DIST1: " << dist1);
+                // ROS_ERROR_STREAM("REF_DIST1: " << ref_dist);
 
 
                 if (ref_dist < dist1)
@@ -406,8 +406,8 @@ void scantimerCallback (const ros::TimerEvent&)
                 double dist2 = sqrt(pow(int2_vec_b.x, 2) + pow(int2_vec_b.y, 2));
                 ref_dist = sqrt(pow(int2_vec_b.x - b1_vec.x, 2) + pow(int2_vec_b.y - b1_vec.y, 2));
 
-                ROS_ERROR_STREAM("DIST2: " << dist1);
-                ROS_ERROR_STREAM("REF_DIST2: " << ref_dist);
+                // ROS_ERROR_STREAM("DIST2: " << dist1);
+                // ROS_ERROR_STREAM("REF_DIST2: " << ref_dist);
 
                 if (ref_dist < dist2)
                 {
@@ -419,51 +419,100 @@ void scantimerCallback (const ros::TimerEvent&)
 
         }
 
-        // double x_wall = (x_length/2) - (w_thick/2);
-        // double y_wall = (y_length/2) - (w_thick/2);
-        // std::vector<double> x_wall_vec {x_wall, x_wall, -x_wall, -x_wall};
-        // std::vector<double> y_wall_vec {y_wall, -y_wall, -y_wall, y_wall};
-        // for (int i =0;i<4;i++)
-        // {
-        //     // ROS_ERROR_STREAM("WALL " << i);
-        //     if (i == 3)
-        //     {
-        //         double x_w1 = x_wall_vec[i];
-        //         double y_w1 = y_wall_vec[i];
+        double x_wall = (x_length/2) - (w_thick/2);
+        double y_wall = (y_length/2) - (w_thick/2);
+        std::vector<double> x_wall_vec {x_wall, x_wall, -x_wall, -x_wall};
+        std::vector<double> y_wall_vec {y_wall, -y_wall, -y_wall, y_wall};
+        for (int i =0;i<4;i++)
+        {
+            double x_w1 = 0.0;
+            double x_w2 = 0.0;
+            double y_w1 = 0.0;
+            double y_w2 = 0.0;
 
-        //         double x_w2 = x_wall_vec[0];
-        //         double y_w2 = y_wall_vec[0];
-        //     }
+            // ROS_ERROR_STREAM("WALL " << i);
+            if (i == 3)
+            {
+                x_w1 = x_wall_vec.at(i);
+                y_w1 = y_wall_vec.at(i);
 
-        //     double x_w1 = x_wall_vec[i];
-        //     double y_w1 = y_wall_vec[i];
+                x_w2 = x_wall_vec.at(0);
+                y_w2 = y_wall_vec.at(0);
+            }
+            else
+            {
+                x_w1 = x_wall_vec.at(i);
+                y_w1 = y_wall_vec.at(i);
 
-        //     double x_w2 = x_wall_vec[i+1];
-        //     double y_w2 = y_wall_vec[i+1];
+                x_w2 = x_wall_vec.at(i+1);
+                y_w2 = y_wall_vec.at(i+1);
 
-        //     double dx_wall = x_w2 - x_w1;
-        //     double dy_wall = y_w2 - y_w1;
+            }
+           
+            double x_robot2 = x + range_max*cos(ang);
+            double y_robot2 = y + range_max*sin(ang);
+
+            double dnm = ((x_w1 - x_w2)*(y - y_robot2)) - ((y_w1 - y_w2)*(x - x_robot2));
+
+            if (!turtlelib::almost_equal(dnm, 0.0))
+            {
+                
+
+                double line_int_x = (((x_w1*y_w2) - (y_w1*x_w2))*(x - x_robot2) - ((x_w1 - x_w2)*(x*y_robot2 - y*x_robot2)))/dnm;
+
+                double line_int_y = (((x_w1*y_w2) - (y_w1*x_w2))*(y - y_robot2) - ((y_w1 - y_w2)*(x*y_robot2 - y*x_robot2)))/dnm;
+                
+                double dist = sqrt(pow(x - line_int_x, 2) + pow(y - line_int_y, 2));
+
+                ROS_ERROR_STREAM("_____________________________________");
+
+                ROS_ERROR_STREAM("DENOM: " << dnm);
+                ROS_ERROR_STREAM("DIST: " << dist);
+
+
+                ROS_ERROR_STREAM("WALL " << i);
+                ROS_ERROR_STREAM("XINTWALL: " << line_int_x);
+                ROS_ERROR_STREAM("YINTWALL: " << line_int_y);
+
+                ROS_ERROR_STREAM("X ROBOT 1: " << x);
+                ROS_ERROR_STREAM("Y ROBOT 1: " << y);
+                ROS_ERROR_STREAM("X ROBOT 2: " << x_robot2);
+                ROS_ERROR_STREAM("Y ROBOT 2: " << y_robot2);
+
+                ROS_ERROR_STREAM("X WALL 1: " << x_w1);
+                ROS_ERROR_STREAM("Y WALL 1: " << y_w1);
+                ROS_ERROR_STREAM("X WALL 2: " << x_w2);
+                ROS_ERROR_STREAM("Y WALL 2: " << y_w2);
+
+                ROS_ERROR_STREAM("_____________________________________");
+
+                int_vec.push_back(dist);
+                // ROS_ERROR_STREAM("DWALL: " << dist);
+            }
+
+            // double dx_wall = x_w2 - x_w1;
+            // double dy_wall = y_w2 - y_w1;
             
-        //     double dx_robot = range_max*cos(ang);
-        //     double dy_robot = range_max*sin(ang);
+            // double dx_robot = range_max*cos(ang);
+            // double dy_robot = range_max*sin(ang);
 
-        //     double m_wall = dy_wall/dx_wall;
-        //     double m_robot = dy_robot/dx_robot;
+            // double m_wall = dy_wall/dx_wall;
+            // double m_robot = dy_robot/dx_robot;
 
-        //     double c_wall = y_w1 - (m_wall*x_w1);
-        //     double c_robot = y - (m_robot*x);
+            // double c_wall = y_w1 - (m_wall*x_w1);
+            // double c_robot = y - (m_robot*x);
 
-        //     if (!turtlelib::almost_equal(m_wall, m_robot))
-        //     {
-        //         double x_int = (c_wall - c_robot)/(m_robot - m_wall);
-        //         double y_int = (m_robot*x_int) + c_robot;
-        //         double dist = std::sqrt(std::pow(x_w1 - x_w2, 2) + std::pow(y_w1 - y_w2, 2));
-        //         int_vec.push_back(dist);
-        //         // ROS_ERROR_STREAM("DWALL: " << dist);
-        //     }
+            // if (!turtlelib::almost_equal(m_wall, m_robot))
+            // {
+            //     double x_int = (c_wall - c_robot)/(m_robot - m_wall);
+            //     double y_int = (m_robot*x_int) + c_robot;
+            //     double dist = std::sqrt(std::pow(x - x_int, 2) + std::pow(y - y_int, 2));
+            //     int_vec.push_back(dist);
+            //     // ROS_ERROR_STREAM("DWALL: " << dist);
+            // }
             
             
-        // }
+        }
         int_vec.push_back(range_max);
 
         
