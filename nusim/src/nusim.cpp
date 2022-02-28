@@ -423,6 +423,8 @@ void scantimerCallback (const ros::TimerEvent&)
         double y_wall = (y_length/2) - (w_thick/2);
         std::vector<double> x_wall_vec {x_wall, x_wall, -x_wall, -x_wall};
         std::vector<double> y_wall_vec {y_wall, -y_wall, -y_wall, y_wall};
+        // std::vector<double> x_wall_vec {-x_wall, x_wall, x_wall};
+        // std::vector<double> y_wall_vec {y_wall, y_wall, -y_wall};
         for (int i =0;i<4;i++)
         {
             double x_w1 = 0.0;
@@ -449,8 +451,8 @@ void scantimerCallback (const ros::TimerEvent&)
 
             }
            
-            double x_robot2 = x + range_max*cos(ang);
-            double y_robot2 = y + range_max*sin(ang);
+            double x_robot2 = x + range_max*cos(theta + ang);
+            double y_robot2 = y + range_max*sin(theta + ang);
 
             double dnm = ((x_w1 - x_w2)*(y - y_robot2)) - ((y_w1 - y_w2)*(x - x_robot2));
 
@@ -486,7 +488,11 @@ void scantimerCallback (const ros::TimerEvent&)
 
                 ROS_ERROR_STREAM("_____________________________________");
 
-                int_vec.push_back(dist);
+                double ref_dist = sqrt(pow(x_robot2 - line_int_x, 2) + pow(y_robot2 - line_int_y, 2));
+                if (ref_dist < dist)
+                {
+                    int_vec.push_back(dist);
+                }
                 // ROS_ERROR_STREAM("DWALL: " << dist);
             }
 
