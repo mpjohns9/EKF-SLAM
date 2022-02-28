@@ -50,9 +50,9 @@ namespace turtlelib
     public:
         diffDrive();
 
-        diffDrive(Config c);
+        explicit diffDrive(Config c);
 
-        diffDrive(Config c, WheelPos w_p, WheelVel w_v);
+        explicit diffDrive(Config c, WheelPos w_p, WheelVel w_v);
 
         /// \brief calculates new config given wheel position
         /// \param pos - position of wheels
