@@ -9,6 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
 )
 
+find_package(Armadillo)
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -114,10 +116,11 @@ catkin_package(
 include_directories(
 # include
 ${catkin_INCLUDE_DIRS}
+${ARMADILLO_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-add_library(${PROJECT_NAME} src/diff_drive.cpp src/rigid2d.cpp)
+add_library(${PROJECT_NAME} src/diff_drive.cpp src/rigid2d.cpp src/ekf.cpp)
 
 
 
@@ -219,10 +222,12 @@ install(TARGETS ${PROJECT_NAME}
 catch_add_test(${PROJECT_NAME}_test
     tests/tests.cpp
     tests/diff_drive_tests.cpp
+    tests/ekf_tests.cpp
 )
 
 target_link_libraries(
     ${PROJECT_NAME}_test 
     ${PROJECT_NAME}
     ${catkin_LIBRARIES}
+    ${ARMADILLO_LIBRARIES}
 )
