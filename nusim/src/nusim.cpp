@@ -181,7 +181,7 @@ void wheelCallback(const nuturtlebot_msgs::WheelCommands & msg)
     turtlelib::WheelPos pos {lwheel_pos, rwheel_pos};
     turtlelib::Config c;
 
-    c = dd.fwd_kin(pos);
+    c = std::get<0>(dd.fwd_kin(pos));
 
     double new_x = c.x;
     double new_y = c.y;

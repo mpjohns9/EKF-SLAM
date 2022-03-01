@@ -87,7 +87,7 @@ TEST_CASE("FKin -- forward", "[diffDrive]") {
     phi_new.l_pos = PI/4;
     phi_new.r_pos = PI/4;
 
-    new_c = dd.fwd_kin(phi_new);
+    new_c = std::get<0>(dd.fwd_kin(phi_new));
 
     CHECK(new_c.x == Approx(0.033*(PI/4))); 
     CHECK(new_c.y == Approx(0));
@@ -114,7 +114,7 @@ TEST_CASE("FKin -- rotation", "[diffDrive]") {
     phi_new.l_pos = PI/4;
     phi_new.r_pos = -PI/4;
 
-    new_c = dd.fwd_kin(phi_new);
+    new_c = std::get<0>(dd.fwd_kin(phi_new));
 
     CHECK(new_c.x == Approx(0.0)); 
     CHECK(new_c.y == Approx(0));
@@ -142,7 +142,7 @@ TEST_CASE("FKin -- arc", "[DiffDrive]") {
     phi_new.l_pos = 19.992;
     phi_new.r_pos = 27.6079;
 
-    new_c = dd.fwd_kin(phi_new);
+    new_c = std::get<0>(dd.fwd_kin(phi_new));
 
     CHECK(new_c.x == Approx(0.5)); 
     CHECK(new_c.y == Approx(0.5));

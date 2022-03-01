@@ -2,6 +2,7 @@
 #include "turtlelib/rigid2d.hpp"
 #include <stdexcept>
 #include <iostream>
+#include <tuple>
 
 /// \file 
 /// \brief Kinematic modeling differential drive robot implementation
@@ -27,7 +28,7 @@ namespace turtlelib
         wheel_vel = w_v;
     }
 
-    Config diffDrive::fwd_kin(WheelPos pos)
+    std::tuple<Config, Twist2D> diffDrive::fwd_kin(WheelPos pos)
     {        
         double l_vel = pos.l_pos - wheel_pos.l_pos;
         double r_vel = pos.r_pos - wheel_pos.r_pos;
@@ -70,7 +71,7 @@ namespace turtlelib
         c.x = trans.x;
         c.y = trans.y;
 
-        return c;
+        return std::make_tuple(c, V);
     }
 
     WheelVel diffDrive::inv_kin(Twist2D V)

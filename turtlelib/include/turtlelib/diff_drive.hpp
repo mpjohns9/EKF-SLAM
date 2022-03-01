@@ -57,7 +57,7 @@ namespace turtlelib
         /// \brief calculates new config given wheel position
         /// \param pos - position of wheels
         /// \return new robot configuration
-        Config fwd_kin(WheelPos pos);
+        std::tuple<Config, Twist2D> fwd_kin(WheelPos pos);
 
         /// \brief calculates wheel velocities required to make robot
         /// move at a given twist
