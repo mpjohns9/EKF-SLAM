@@ -42,6 +42,7 @@
 #include <random>
 #include <cmath>
 #include <vector>
+#include <tuple>
 
 turtlelib::diffDrive dd;
 
@@ -125,7 +126,7 @@ double obs_noise = on(get_random());
 /// \brief callback for reset service
 ///
 /// resets timestep to 0 and robot to initial position
-bool resetCallback(std_srvs::TriggerRequest & request, std_srvs::TriggerResponse & response)
+bool resetCallback(std_srvs::TriggerRequest & , std_srvs::TriggerResponse & )
 {
     timestep = 0;
     x = 0.0;
@@ -140,7 +141,7 @@ bool resetCallback(std_srvs::TriggerRequest & request, std_srvs::TriggerResponse
 /// \brief callback for teleport service
 ///
 /// teleports robot to x, y, theta position
-bool teleportCallback(nusim::Teleport::Request & request, nusim::Teleport::Response & response)
+bool teleportCallback(nusim::Teleport::Request & request, nusim::Teleport::Response & )
 {
     x = request.x;
     y = request.y;
@@ -537,7 +538,7 @@ void scantimerCallback (const ros::TimerEvent&)
             // ROS_ERROR_STREAM("VECTOR: ");
             // ROS_ERROR_STREAM("-----------------");
             // ROS_ERROR_STREAM("MIN: " << min);
-            for (int k=0; k<int_vec.size();k++)
+            for (int k=0; k<int(int_vec.size());k++)
             {
                 ROS_ERROR_STREAM(int_vec[k]);
             }
