@@ -39,6 +39,8 @@ static auto x = 0.0;
 static auto y = 0.0;
 static auto theta = 0.0;
 
+turtlelib::Twist2D u;
+
 static auto lwheel_vel = 0.0;
 static auto rwheel_vel = 0.0;
 
@@ -65,6 +67,8 @@ void jointCallback(const sensor_msgs::JointState & msg)
     x = c.x;
     y = c.y;
     theta = c.ang;
+
+    u = std::get<1>(dd.fwd_kin(pos));
 
     turtlelib::WheelVel v;
     v.l_vel = msg.velocity.at(0);
@@ -146,17 +150,17 @@ int main(int argc, char * argv[])
         p.pose.position.y = y;
         p.pose.position.z = 0.0;
 
-        // geometry_msgs::TwistWithCovariance t;
-        // t.position.x = x;
-        // t.position.y = y;
-        // t.position.z = 0.0;
+        geometry_msgs::TwistWithCovariance t;
+        t.twist.linear.x = u.x;
+        t.twist.linear.y = u.y;
+        t.twist.angular.z = u.ang;
 
         nav_msgs::Odometry odom;
-        /// HOW TO GET THE TWIST?
         odom.header.stamp = ros::Time::now();
         odom.header.frame_id = body_id;
         odom.child_frame_id = odom_id;
         odom.pose = p;
+        odom.twist = t;
         odom_pub.publish(odom);
 
         transform.header.stamp = ros::Time::now();
