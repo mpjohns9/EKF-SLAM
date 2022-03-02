@@ -1,186 +1,274 @@
-// /// \file
-// /// \brief publishes odometry messages and transform
+/// \file
+/// \brief publishes odometry messages and transform
 
-// /// PARAMETERS:
-// ///     body_id: name of robot body frame
-// ///     odom_id: name of odometry frame
-// ///     wheel_left: name of left wheel joint
-// ///     wheel_right: name of right wheel joint
-// ///
-// /// PUBLISHES: 
-// ///     odom_pub (nav_msgs/Odometry): publishes to odom
-// ///
-// /// SUBSCRIBES:
-// ///     joint_sub (joint_states): subscribes to joint_states
-// ///
-// /// SERVICES: 
-// ///     set_pose (geometry_msgs/Pose): provides configuration of robot
+/// PARAMETERS:
+///     body_id: name of robot body frame
+///     odom_id: name of odometry frame
+///     wheel_left: name of left wheel joint
+///     wheel_right: name of right wheel joint
+///
+/// PUBLISHES: 
+///     odom_pub (nav_msgs/Odometry): publishes to odom
+///
+/// SUBSCRIBES:
+///     joint_sub (joint_states): subscribes to joint_states
+///
+/// SERVICES: 
+///     set_pose (geometry_msgs/Pose): provides configuration of robot
 
-// #include "ros/ros.h"
-// #include <sensor_msgs/JointState.h>
-// #include <nav_msgs/Odometry.h>
-// #include <geometry_msgs/PoseWithCovariance.h>
-// #include <tf2/LinearMath/Quaternion.h>
-// #include <tf2_ros/transform_broadcaster.h>
-// #include "nuturtle_control/SetPose.h"
-// #include "turtlelib/rigid2d.hpp"
-// #include "turtlelib/diff_drive.hpp"
+#include "ros/ros.h"
+#include <sensor_msgs/JointState.h>
+#include <nav_msgs/Odometry.h>
+#include <geometry_msgs/PoseWithCovariance.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include "nuturtle_control/SetPose.h"
+#include "turtlelib/rigid2d.hpp"
+#include "turtlelib/diff_drive.hpp"
 
-// turtlelib::diffDrive dd;
+turtlelib::diffDrive dd;
+turtlelib::EKF e;
 
-// static auto rate = 0;
+static auto rate = 0;
 
-// static std::string body_id = "";
-// static std::string odom_id = "";
-// static std::string wheel_left = "";
-// static std::string wheel_right = "";
+static std::string body_id = "";
+static std::string odom_id = "";
+static std::string wheel_left = "";
+static std::string wheel_right = "";
 
-// static auto x = 0.0;
-// static auto y = 0.0;
-// static auto theta = 0.0;
+static auto x = 0.0;
+static auto y = 0.0;
+static auto theta = 0.0;
 
-// static auto lwheel_vel = 0.0;
-// static auto rwheel_vel = 0.0;
+turtlelib::Twist2D u;
 
-// static auto lwheel_pos = 0.0;
-// static auto rwheel_pos = 0.0;
+static auto lwheel_vel = 0.0;
+static auto rwheel_vel = 0.0;
 
-// /// \brief callback for the joint_states subscriber
-// /// \param msg - sensor_msgs/JointState message obj
-// void jointCallback(const sensor_msgs::JointState & msg)
-// {
-//     // ROS_ERROR_STREAM("VELOCITY " << msg.velocity[0] << " " << msg.velocity[1]);
-//     lwheel_vel = msg.velocity.at(0);
-//     rwheel_vel = msg.velocity.at(1);
+static auto lwheel_pos = 0.0;
+static auto rwheel_pos = 0.0;
+
+/// \brief callback for the joint_states subscriber
+/// \param msg - sensor_msgs/JointState message obj
+void jointCallback(const sensor_msgs::JointState & msg)
+{
+    // ROS_ERROR_STREAM("VELOCITY " << msg.velocity[0] << " " << msg.velocity[1]);
+    lwheel_vel = msg.velocity.at(0);
+    rwheel_vel = msg.velocity.at(1);
     
-//     // ROS_ERROR_STREAM("POSITION " << msg.position[0] << msg.position[1]);
-//     lwheel_pos = msg.position.at(0);
-//     rwheel_pos = msg.position.at(1);
+    // ROS_ERROR_STREAM("POSITION " << msg.position[0] << msg.position[1]);
+    lwheel_pos = msg.position.at(0);
+    rwheel_pos = msg.position.at(1);
 
-//     turtlelib::WheelPos pos {lwheel_pos, rwheel_pos};
-//     turtlelib::Config c;
+    turtlelib::WheelPos pos {lwheel_pos, rwheel_pos};
+    turtlelib::Config c;
 
-//     c = dd.fwd_kin(pos);
+    c = std::get<0>(dd.fwd_kin(pos));
 
-//     x = c.x;
-//     y = c.y;
-//     theta = c.ang;
+    x = c.x;
+    y = c.y;
+    theta = c.ang;
 
-//     turtlelib::WheelVel v;
-//     v.l_vel = msg.velocity.at(0);
-//     v.r_vel = msg.velocity.at(1);
+    u = std::get<1>(dd.fwd_kin(pos));
 
-//     dd = turtlelib::diffDrive(c, pos, v);
-// }
+    turtlelib::WheelVel v;
+    v.l_vel = msg.velocity.at(0);
+    v.r_vel = msg.velocity.at(1);
 
-// /// \brief callback for set pose service
-// bool poseCallback(nuturtle_control::SetPose::Request & request, nuturtle_control::SetPose::Response & response)
-// {
-//     x = request.x;
-//     y = request.y;
-//     theta = request.theta;
+    dd = turtlelib::diffDrive(c, pos, v);
+}
 
-//     turtlelib::Config c = {theta, x, y};
-//     dd = turtlelib::diffDrive(c);
-//     return true;
-// }
+void sensorCallback(const visualization_msgs::MarkerArray & msg)
+{
+    int n = msg.markers.size()
 
-// int main(int argc, char * argv[])
-// {
-//     ros::init(argc, argv, "odometry");
-//     ros::NodeHandle nh_prv("~");
-//     ros::NodeHandle nh;
+    std::vector<double> obs_x(n);
+    std::vector<double> obs_y(n);
+    std::vector<double> z_sensor(n*2);
 
-//     nh_prv.param("rate", rate, 500);
-//     ros::Rate r(rate);
+    e.initialize_landmarks(obs_x, obs_y);
 
-//     if (!nh.hasParam("body_id"))
-//     {
-//         ROS_ERROR_STREAM("No param named 'body_id'.");
-//         return 1;
-//     }
-//     else
-//     {
-//         nh.getParam("body_id", body_id);
-//         // ROS_ERROR_STREAM("BODY ID " << body_id);
-//     }
+    int index = 0;
+    for (int i=0; i<n); i++)
+    {
+        double x = msg.markers.at(i).pose.position.x;
+        double y = msg.markers.at(i).pose.position.y;
 
-//     if (!nh.hasParam("wheel_left"))
-//     {
-//         ROS_ERROR_STREAM("No param named 'wheel_left'.");
-//         return 1;
-//     }
-//     else
-//     {
-//         nh.getParam("wheel_left", wheel_left);
-//         // ROS_ERROR_STREAM("WHEEL LEFT ID " << wheel_left);
-//     }
+        obs_x.at(i) = x;
+        obs_y.at(i) = y;
 
-//     if (!nh.hasParam("wheel_right"))
-//     {
-//         ROS_ERROR_STREAM("No param named 'wheel_right'.");
-//         return 1;
-//     }
-//     else
-//     {
-//         nh.getParam("wheel_right", wheel_right);
-//         // ROS_ERROR_STREAM("WHEEL RIGHT ID " << wheel_right);
-//     }
+        z_sensor.at(index) = x;
+        z_sensor.at(index + 1) = y;
+        index += 2;
 
-//     nh.param<std::string>("odom_id", odom_id, "odom");
+        e(n);
+        e.predict(u);
+        e.update(i, x, y);
+    }
+}
 
-//     ros::Publisher odom_pub = nh.advertise<nav_msgs::Odometry>("odom", 1000);
+/// \brief callback for set pose service
+bool poseCallback(nuturtle_control::SetPose::Request & request, nuturtle_control::SetPose::Response & response)
+{
+    x = request.x;
+    y = request.y;
+    theta = request.theta;
 
-//     ros::Subscriber joint_sub = nh.subscribe("joint_states", 1000, jointCallback);
+    turtlelib::Config c = {theta, x, y};
+    dd = turtlelib::diffDrive(c);
+    return true;
+}
 
-//     ros::ServiceServer set_pose = nh.advertiseService("set_pose", poseCallback);
+int main(int argc, char * argv[])
+{
+    ros::init(argc, argv, "odometry");
+    ros::NodeHandle nh_prv("~");
+    ros::NodeHandle nh;
 
-//     static tf2_ros::TransformBroadcaster br;
-//     geometry_msgs::TransformStamped transform;
-//     tf2::Quaternion q;
+    nh_prv.param("rate", rate, 500);
+    ros::Rate r(rate);
 
-//     while(ros::ok())
-//     {
-//         geometry_msgs::PoseWithCovariance p;
-//         p.pose.position.x = x;
-//         p.pose.position.y = y;
-//         p.pose.position.z = 0.0;
+    if (!nh.hasParam("body_id"))
+    {
+        ROS_ERROR_STREAM("No param named 'body_id'.");
+        return 1;
+    }
+    else
+    {
+        nh.getParam("body_id", body_id);
+        // ROS_ERROR_STREAM("BODY ID " << body_id);
+    }
 
-//         // geometry_msgs::TwistWithCovariance t;
-//         // t.position.x = x;
-//         // t.position.y = y;
-//         // t.position.z = 0.0;
+    if (!nh.hasParam("wheel_left"))
+    {
+        ROS_ERROR_STREAM("No param named 'wheel_left'.");
+        return 1;
+    }
+    else
+    {
+        nh.getParam("wheel_left", wheel_left);
+        // ROS_ERROR_STREAM("WHEEL LEFT ID " << wheel_left);
+    }
 
-//         nav_msgs::Odometry odom;
-//         /// HOW TO GET THE TWIST?
-//         odom.header.stamp = ros::Time::now();
-//         odom.header.frame_id = body_id;
-//         odom.child_frame_id = odom_id;
-//         odom.pose = p;
-//         odom_pub.publish(odom);
+    if (!nh.hasParam("wheel_right"))
+    {
+        ROS_ERROR_STREAM("No param named 'wheel_right'.");
+        return 1;
+    }
+    else
+    {
+        nh.getParam("wheel_right", wheel_right);
+        // ROS_ERROR_STREAM("WHEEL RIGHT ID " << wheel_right);
+    }
 
-//         transform.header.stamp = ros::Time::now();
+    nh.param<std::string>("odom_id", odom_id, "odom");
 
-//         transform.header.frame_id = odom_id;
-//         transform.child_frame_id = "blue_base_footprint";
+    ros::Publisher odom_pub = nh.advertise<nav_msgs::Odometry>("odom", 1000);
 
-//         transform.transform.translation.x = x;
-//         transform.transform.translation.y = y;
-//         transform.transform.translation.z = 0.0;
+    ros::Subscriber joint_sub = nh.subscribe("joint_states", 1000, jointCallback);
+    ros::Subscriber fake_sensor_sub = nh.subscribe("fake_sensor", 1000, sensorCallback);
 
-//         tf2::Quaternion q;
-//         q.setRPY(0, 0, theta);
+    ros::ServiceServer set_pose = nh.advertiseService("set_pose", poseCallback);
 
-//         transform.transform.rotation.x = q.x();
-//         transform.transform.rotation.y = q.y();
-//         transform.transform.rotation.z = q.z();
-//         transform.transform.rotation.w = q.w();
+    static tf2_ros::TransformBroadcaster br;
+    geometry_msgs::TransformStamped transform;
+    tf2::Quaternion q;
 
-//         br.sendTransform(transform);
-//         // ROS_ERROR_STREAM("THE END");
-//         ros::spinOnce();
-//         r.sleep();
-//     }
+    while(ros::ok())
+    {
+        geometry_msgs::PoseWithCovariance p;
+        p.pose.position.x = x;
+        p.pose.position.y = y;
+        p.pose.position.z = 0.0;
 
-//     return 0;
-// }
+        geometry_msgs::TwistWithCovariance t;
+        t.twist.linear.x = u.x;
+        t.twist.linear.y = u.y;
+        t.twist.angular.z = u.ang;
+
+        nav_msgs::Odometry odom;
+        odom.header.stamp = ros::Time::now();
+        odom.header.frame_id = body_id;
+        odom.child_frame_id = odom_id;
+        odom.pose = p;
+        odom.twist = t;
+        odom_pub.publish(odom);
+
+        transform.header.stamp = ros::Time::now();
+
+        transform.header.frame_id = "world";
+        transform.child_frame_id = "blue_base_footprint";
+
+        transform.transform.translation.x = x;
+        transform.transform.translation.y = y;
+        transform.transform.translation.z = 0.0;
+
+        tf2::Quaternion q;
+        q.setRPY(0, 0, theta);
+
+        transform.transform.rotation.x = q.x();
+        transform.transform.rotation.y = q.y();
+        transform.transform.rotation.z = q.z();
+        transform.transform.rotation.w = q.w();
+
+        br.sendTransform(transform);
+
+        nav_msgs::Odometry odom;
+        odom.header.stamp = ros::Time::now();
+        odom.header.frame_id = body_id;
+        odom.child_frame_id = odom_id;
+        odom.pose = p;
+        odom.twist = t;
+        odom_pub.publish(odom);
+
+        transform.header.stamp = ros::Time::now();
+
+        transform.header.frame_id = "odom";
+        transform.child_frame_id = "green_base_footprint";
+
+        transform.transform.translation.x = x;
+        transform.transform.translation.y = y;
+        transform.transform.translation.z = 0.0;
+
+        tf2::Quaternion q;
+        q.setRPY(0, 0, theta);
+
+        transform.transform.rotation.x = q.x();
+        transform.transform.rotation.y = q.y();
+        transform.transform.rotation.z = q.z();
+        transform.transform.rotation.w = q.w();
+
+        br.sendTransform(transform);
+
+        turtlelib::Vector2D xy{e.config().at(1), e.config.at(2)};
+        turtlelib::Transform2D Tmo(xy, e.config.at(0));
+        turtlelib::Transform2D Tob(turtlelib::Vector2D{x, y}, theta);
+
+        turtlelib::Transform2D Tmb = Tmo*Tob.inv();
+
+        transform.header.stamp = ros::Time::now();
+
+        transform.header.frame_id = "map";
+        transform.child_frame_id = "odom";
+
+        transform.transform.translation.x = Tmb.translation().x;
+        transform.transform.translation.y = Tmb.translation().y;
+        transform.transform.translation.z = 0.0;
+
+        tf2::Quaternion q;
+        q.setRPY(0, 0, Tmb.rotation());
+
+        transform.transform.rotation.x = q.x();
+        transform.transform.rotation.y = q.y();
+        transform.transform.rotation.z = q.z();
+        transform.transform.rotation.w = q.w();
+
+
+
+        // ROS_ERROR_STREAM("THE END");
+        ros::spinOnce();
+        r.sleep();
+    }
+
+    return 0;
+}
