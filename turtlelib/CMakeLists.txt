@@ -140,6 +140,12 @@ target_link_libraries(
     ${catkin_LIBRARIES}
 )
 
+target_link_libraries(${PROJECT_NAME}
+    ${catkin_LIBRARIES}
+    ${ARMADILLO_LIBRARIES}
+)
+
+
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
