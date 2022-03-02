@@ -30,9 +30,11 @@ namespace turtlelib
 
         std::tuple<arma::mat, arma::mat, arma::mat> sigmas();
 
+        Config config();
+
         void predict(Twist2D u);
         
-        void update(int j, std::vector<double> z_sensor);
+        void update(int j, double x, double y);
 
 
     

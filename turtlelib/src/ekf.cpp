@@ -1,6 +1,8 @@
 #include "turtlelib/diff_drive.hpp"
 #include "turtlelib/ekf.hpp"
+#include <armadillo>
 #include <cmath>
+// #include <tuple>
 
 /// \file 
 /// \brief Extended Kalman Filter implementation
@@ -50,6 +52,7 @@ namespace turtlelib
         }
 
         xi_prev = arma::join_cols(q, obstacles);
+        return xi_prev;
     }
 
     arma::vec EKF::calc_h(int j)
@@ -86,7 +89,7 @@ namespace turtlelib
         };
 
         H.submat(0, 0, 1, 2) = h_q;
-        H.submat(0, 3 + (2*(j-1)), 1, 4 + (2*(j-1))) = h_m;
+        H.submat(0, 3 + (2*j), 1, 4 + (2*j)) = h_m;
 
         return H;
     }
@@ -144,11 +147,16 @@ namespace turtlelib
         return std::make_tuple(sigma_prev, sigma_minus, sigma_plus);
     }
 
+    Config EKF::config()
+    {
+        return Config{xi_plus.at(0), xi_plus.at(1), xi_plus.at(2)};
+    }
+
     void EKF::predict(Twist2D u)
     {
         int n = num_obstacles;
         arma::mat Q = arma::eye(3, 3);
-        arma::mat Q_bar (3+(2*n), 3+(2*n), arma::fill::zeros);
+        arma::mat Q_bar(3+(2*n), 3+(2*n), arma::fill::zeros);
         Q_bar.submat(0, 0, 2, 2) = Q;
 
         xi_minus = update_state(u);
@@ -157,14 +165,18 @@ namespace turtlelib
         sigma_minus = (A*sigma_prev*A.t()) + Q_bar;
     }
 
-    void EKF::update(int j, std::vector<double> z_sensor)
+    void EKF::update(int j, double x, double y)
     {
         arma::mat I = arma::eye(3+(2*num_obstacles), 3+(2*num_obstacles));
 
         arma::mat H = calc_H(j);
         arma::mat R = arma::eye(2, 2);
 
-        arma::vec z = z_sensor;
+        double r = sqrt(pow(x, 2) + pow(y, 2));
+        double phi = atan2(y, x);
+
+        arma::vec z = {r, phi};
+
         arma::vec z_hat = calc_h(j);
         arma::mat K = sigma_minus*H.t()*((H*sigma_minus*H.t()) + R).t();
         xi_plus = xi_minus + K*(z - z_hat);
