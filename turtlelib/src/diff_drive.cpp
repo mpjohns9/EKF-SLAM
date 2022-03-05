@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <tuple>
+#include "ros/ros.h"
 
 /// \file 
 /// \brief Kinematic modeling differential drive robot implementation
@@ -29,9 +30,13 @@ namespace turtlelib
     }
 
     std::tuple<Config, Twist2D> diffDrive::fwd_kin(WheelPos pos)
-    {        
+    {       
+        // ROS_ERROR_STREAM("******************************");
+        // ROS_ERROR_STREAM("FWD KIN");
         double l_vel = pos.l_pos - wheel_pos.l_pos;
         double r_vel = pos.r_pos - wheel_pos.r_pos;
+
+        
 
         wheel_pos.l_pos = pos.l_pos;
         wheel_pos.r_pos = pos.r_pos;
@@ -39,10 +44,14 @@ namespace turtlelib
         double dtheta = r*(r_vel - l_vel)/(2.0*D); // EQUATION 3 FROM Kinematics.pdf
         double vx = r*(r_vel + l_vel)/2.0; // EQUATION 4 FROM Kinematics.pdf
 
+        // ROS_ERROR_STREAM("r-l: " << r_vel-l_vel);
+
         Twist2D V;
         V.ang = dtheta;
         V.x = vx;
         V.y = 0.0;
+        // ROS_ERROR_STREAM("V DIFF DRIVE: " << V);
+        // ROS_ERROR_STREAM("******************************");
 
         Vector2D old_v;
         old_v.x = config.x;
