@@ -2,13 +2,23 @@ cmake_minimum_required(VERSION 3.0.2)
 project(nuslam)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++17 -Wall -Wextra)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-    # Armadillo
+    geometry_msgs
+    message_generation
+    message_runtime
+    nav_msgs
+    nuturtlebot_msgs
+    roscpp
+    sensor_msgs
+    std_msgs
+    std_srvs
+    tf2_ros
+    turtlelib
 )
 
 ## System dependencies are found with CMake's conventions
@@ -68,6 +78,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
+#   geometry_msgs
+#   nav_msgs
+#   nuturtlebot_msgs
+#   sensor_msgs
 #   std_msgs  # Or other packages containing msgs
 # )
 
@@ -103,7 +117,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES nuslam
-#  CATKIN_DEPENDS other_catkin_pkg
+    CATKIN_DEPENDS geometry_msgs message_runtime nav_msgs nuturtlebot_msgs roscpp sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
 
@@ -116,7 +130,7 @@ catkin_package(
 include_directories(
 # # include
 # ${ARMADILLO_INCLUDE_DIRS}
-# ${catkin_INCLUDE_DIRS}
+${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -132,7 +146,13 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/nuslam_node.cpp)
+add_executable(slam src/slam.cpp)
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(slam
+  ${catkin_LIBRARIES}
+  turtlelib
+)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -148,6 +168,10 @@ include_directories(
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
+
+## Add cmake target dependencies of the executable
+## same as for the library above
+add_dependencies(slam ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##
@@ -165,9 +189,9 @@ include_directories(
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-# install(TARGETS ${PROJECT_NAME}_node
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(TARGETS slam
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
@@ -190,6 +214,9 @@ include_directories(
 #   # myfile2
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
+
+# install(DIRECTORY launch/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
+
 
 #############
 ## Testing ##

@@ -120,7 +120,7 @@ ${ARMADILLO_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-add_library(${PROJECT_NAME} src/diff_drive.cpp src/rigid2d.cpp src/ekf.cpp)
+add_library(${PROJECT_NAME} src/diff_drive.cpp src/ekf.cpp src/rigid2d.cpp)
 
 
 
