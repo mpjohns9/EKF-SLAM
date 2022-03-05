@@ -190,8 +190,8 @@ void wheelCallback(const nuturtlebot_msgs::WheelCommands & msg)
 
     for (int i=0;i<int(obs_x.size());i++)
     {
-        double x_obstacle = obs_x[i] + obs_noise;
-        double y_obstacle = obs_y[i] + obs_noise;
+        double x_obstacle = obs_x.at(i) + obs_noise;
+        double y_obstacle = obs_y.at(i) + obs_noise;
 
         double distance = std::sqrt(std::pow(x_obstacle - new_x, 2) + std::pow(y_obstacle - new_y, 2));
         double tan_dist = (radius + collision_rad);
@@ -200,27 +200,21 @@ void wheelCallback(const nuturtlebot_msgs::WheelCommands & msg)
         // ROS_ERROR_STREAM("TAN DISTANCE: " << tan_dist);
         // ROS_ERROR_STREAM("_______________");
 
-        if (distance < tan_dist and !collision_flag)
+        if (distance < tan_dist)
         {
             // ROS_ERROR_STREAM("----------------COLLISION DETECTED--------------------");
-            c.x = x;
-            c.y = y;
-            c.ang = theta;
-            collision_flag = true;
-            break;
+            double theta_i = atan2(new_y-y_obstacle, new_x-x_obstacle);
+            c.x = x_obstacle + (tan_dist*cos(theta_i));
+            c.y = y_obstacle + (tan_dist*sin(theta_i));
         //     double t = (tan_dist-distance)/distance;
         //     x = ((1 - t)*x_obstacle) + t*x;
         //     y = ((1 - t)*y_obstacle) + t*y;
         }
-        collision_flag = false;
     }
 
-    if (!collision_flag)
-    {
-        x = new_x;
-        y = new_y;
-        theta = new_theta;
-    }
+    x = c.x;
+    y = c.y;
+    theta = c.ang;
 
     turtlelib::WheelVel v;
     v.l_vel = lvel_noisy*cmd_to_radsec;
@@ -258,7 +252,7 @@ void marktimerCallback(const ros::TimerEvent&)
         // visualization_msgs::Marker marker;
 
         //set header and timestamp
-        fake_ma.markers[i].header.frame_id = "world";
+        fake_ma.markers[i].header.frame_id = "red_base_footprint";
         fake_ma.markers[i].header.stamp = ros::Time::now();
 
         //set id diff for each marker
@@ -276,8 +270,8 @@ void marktimerCallback(const ros::TimerEvent&)
             fake_ma.markers[i].action = visualization_msgs::Marker::DELETE;
         }
         //set pose of marker
-        fake_ma.markers[i].pose.position.x = obs_x.at(i);
-        fake_ma.markers[i].pose.position.y = obs_y.at(i);
+        fake_ma.markers[i].pose.position.x = obs_vec_b.x;
+        fake_ma.markers[i].pose.position.y = obs_vec_b.y;
         fake_ma.markers[i].pose.position.z = 0;
         fake_ma.markers[i].pose.orientation.x = 0;
         fake_ma.markers[i].pose.orientation.y = 0;
@@ -291,7 +285,7 @@ void marktimerCallback(const ros::TimerEvent&)
 
 
         //set color
-        fake_ma.markers[i].color.r = 0.0;
+        fake_ma.markers[i].color.r = 1.0;
         fake_ma.markers[i].color.g = 1.0;
         fake_ma.markers[i].color.b = 0.0;
         fake_ma.markers[i].color.a = 1.0;
@@ -322,7 +316,7 @@ void scantimerCallback (const ros::TimerEvent&)
     double ang = 0.0;
     for (int j=0;j<num_samples;j++)
     {   
-        ROS_ERROR_STREAM("ANGLE " << ang);
+        // ROS_ERROR_STREAM("ANGLE " << ang);
         std::vector<double> int_vec;
         for (int i=0;i<int(obs_x.size());i++)
         {
@@ -467,27 +461,27 @@ void scantimerCallback (const ros::TimerEvent&)
                 
                 double dist = sqrt(pow(x - line_int_x, 2) + pow(y - line_int_y, 2));
 
-                ROS_ERROR_STREAM("_____________________________________");
+                // ROS_ERROR_STREAM("_____________________________________");
 
-                ROS_ERROR_STREAM("DENOM: " << dnm);
-                ROS_ERROR_STREAM("DIST: " << dist);
+                // ROS_ERROR_STREAM("DENOM: " << dnm);
+                // ROS_ERROR_STREAM("DIST: " << dist);
 
 
-                ROS_ERROR_STREAM("WALL " << i);
-                ROS_ERROR_STREAM("XINTWALL: " << line_int_x);
-                ROS_ERROR_STREAM("YINTWALL: " << line_int_y);
+                // ROS_ERROR_STREAM("WALL " << i);
+                // ROS_ERROR_STREAM("XINTWALL: " << line_int_x);
+                // ROS_ERROR_STREAM("YINTWALL: " << line_int_y);
 
-                ROS_ERROR_STREAM("X ROBOT 1: " << x);
-                ROS_ERROR_STREAM("Y ROBOT 1: " << y);
-                ROS_ERROR_STREAM("X ROBOT 2: " << x_robot2);
-                ROS_ERROR_STREAM("Y ROBOT 2: " << y_robot2);
+                // ROS_ERROR_STREAM("X ROBOT 1: " << x);
+                // ROS_ERROR_STREAM("Y ROBOT 1: " << y);
+                // ROS_ERROR_STREAM("X ROBOT 2: " << x_robot2);
+                // ROS_ERROR_STREAM("Y ROBOT 2: " << y_robot2);
 
-                ROS_ERROR_STREAM("X WALL 1: " << x_w1);
-                ROS_ERROR_STREAM("Y WALL 1: " << y_w1);
-                ROS_ERROR_STREAM("X WALL 2: " << x_w2);
-                ROS_ERROR_STREAM("Y WALL 2: " << y_w2);
+                // ROS_ERROR_STREAM("X WALL 1: " << x_w1);
+                // ROS_ERROR_STREAM("Y WALL 1: " << y_w1);
+                // ROS_ERROR_STREAM("X WALL 2: " << x_w2);
+                // ROS_ERROR_STREAM("Y WALL 2: " << y_w2);
 
-                ROS_ERROR_STREAM("_____________________________________");
+                // ROS_ERROR_STREAM("_____________________________________");
 
                 double ref_dist = sqrt(pow(x_robot2 - line_int_x, 2) + pow(y_robot2 - line_int_y, 2));
                 if (ref_dist < dist)
@@ -540,7 +534,7 @@ void scantimerCallback (const ros::TimerEvent&)
             // ROS_ERROR_STREAM("MIN: " << min);
             for (int k=0; k<int(int_vec.size());k++)
             {
-                ROS_ERROR_STREAM(int_vec[k]);
+                // ROS_ERROR_STREAM(int_vec[k]);
             }
             
         }
