@@ -12,6 +12,7 @@ namespace turtlelib
     class EKF
     {
     public:
+
         explicit EKF(int n);
 
         explicit EKF(Config s, int n);
@@ -31,6 +32,8 @@ namespace turtlelib
         std::tuple<arma::mat, arma::mat, arma::mat> sigmas();
 
         Config config();
+
+        std::vector<double>  obs_vec();
 
         void predict(Twist2D u);
         

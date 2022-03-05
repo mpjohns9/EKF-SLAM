@@ -2,6 +2,8 @@
 #include "turtlelib/ekf.hpp"
 #include <armadillo>
 #include <cmath>
+#include <iostream>
+#include <ros/ros.h>
 // #include <tuple>
 
 /// \file 
@@ -16,7 +18,16 @@ namespace turtlelib
         q = {state.ang, state.x, state.y};
         num_obstacles = n;
         obstacles = arma::vec(2*n);
-        xi_prev = arma::vec(3 + (2*n));
+        xi_prev = arma::vec(3 + (2*n), arma::fill::zeros);
+        xi_minus = arma::vec(3 + (2*n), arma::fill::zeros);
+        xi_plus = arma::vec(3 + (2*n), arma::fill::zeros);
+        sigma_minus = arma::mat(3+(2*n), 3+(2*n), arma::fill::zeros);
+        arma::mat sig_m = arma::eye(2*n, 2*n);
+        sig_m = sig_m*INT_MAX;
+        sigma_minus.submat(3, 3, 3+(2*n)-1, 3+(2*n)-1) = sig_m;
+        sigma_prev = sigma_minus;
+        // sigma_prev.print("SIGMA PREV");
+        sigma_plus = sigma_minus;
     }
 
     EKF::EKF(Config s, int n)
@@ -26,11 +37,12 @@ namespace turtlelib
         num_obstacles = n;
         obstacles = arma::vec(2*n);
         xi_prev = arma::vec(3 + (2*n), arma::fill::zeros);
+        xi_plus = xi_prev;
 
         sigma_minus = arma::mat(3+(2*n), 3+(2*n), arma::fill::zeros);
-        // arma::mat sig_m = arma::eye(2*n, 2*n);
-        // sig_m = sig_m*INFINITY;
-        // sigma_minus.submat(3, 3, 3+(2*n)-1, 3+(2*n)-1) = sig_m;
+        arma::mat sig_m = arma::eye(2*n, 2*n);
+        sig_m = sig_m*INT_MAX;
+        sigma_minus.submat(3, 3, 3+(2*n)-1, 3+(2*n)-1) = sig_m;
 
         sigma_prev = sigma_minus;
     }
@@ -40,11 +52,17 @@ namespace turtlelib
         int index = 0;
         for (int i=0; i<int(obs_x.size()); i++)
         {
+            // ROS_ERROR_STREAM("LAND X: " << obs_x.at(i));
+            // ROS_ERROR_STREAM("LAND Y: " << obs_y.at(i));
             double r = sqrt(pow(obs_x.at(i), 2) + pow(obs_y.at(i), 2));
+            // ROS_ERROR_STREAM("r: " << r);
             double phi = atan2(obs_y.at(i), obs_x.at(i));
+            // ROS_ERROR_STREAM("phi: " << r);
 
             double mx = state.x + r*cos(phi + state.ang);
+            // ROS_ERROR_STREAM("mx: " << r);
             double my = state.y + r*sin(phi + state.ang);
+            // ROS_ERROR_STREAM("my: " << r);
 
             obstacles.at(index) = mx;
             obstacles.at(index+1) = my;
@@ -52,6 +70,7 @@ namespace turtlelib
         }
 
         xi_prev = arma::join_cols(q, obstacles);
+        // ROS_ERROR_STREAM("XI PREV INIT: " << xi_prev);
         return xi_prev;
     }
 
@@ -70,11 +89,14 @@ namespace turtlelib
     {
         double mx = xi_minus.at(3+(2*j));
         double my = xi_minus.at(4+(2*j));
+        // ROS_ERROR_STREAM("MX: " << mx);
+        // ROS_ERROR_STREAM("MY: " << my);
 
         double dx = mx - xi_minus.at(1);
         double dy = my - xi_minus.at(2);
 
         double d = pow(dx, 2) + pow(dy, 2);
+        // ROS_ERROR_STREAM("d: " << d);
 
         arma::mat H (2, 3 + (2*num_obstacles), arma::fill::zeros);
 
@@ -91,6 +113,8 @@ namespace turtlelib
         H.submat(0, 0, 1, 2) = h_q;
         H.submat(0, 3 + (2*j), 1, 4 + (2*j)) = h_m;
 
+        // H.print("H");
+
         return H;
     }
 
@@ -98,6 +122,8 @@ namespace turtlelib
     {
         arma::mat I = arma::eye((3+(2*num_obstacles)), (3+(2*num_obstacles)));
         arma::mat mat((3+(2*num_obstacles)), (3+(2*num_obstacles)), arma::fill::zeros);
+
+        // ROS_ERROR_STREAM("TWIST: " << u);
 
         if (almost_equal(u.ang, 0.0))
         {
@@ -110,6 +136,8 @@ namespace turtlelib
             mat(2, 0) = ((-u.x/u.ang)*sin(xi_prev.at(0))) + ((u.x/u.ang)*sin(xi_prev.at(0) + u.ang));
         }
 
+        // mat.print("mat");
+
         arma::mat A = I + mat;
         return A;
     }
@@ -121,8 +149,10 @@ namespace turtlelib
             arma::vec ut(3+(2*num_obstacles), arma::fill::zeros);
             ut.at(1) = u.x*cos(xi_prev.at(0));
             ut.at(2) = u.x*sin(xi_prev.at(0));
+            // ROS_ERROR_STREAM("Ut: " << ut);
 
             xi_minus = xi_prev + ut;
+            // ROS_ERROR_STREAM("U = 0: " << xi_minus);
             return xi_minus;
         }
         else
@@ -133,6 +163,7 @@ namespace turtlelib
             ut.at(2) = ((-u.x/u.ang)*cos(xi_prev.at(0))) + ((u.x/u.ang)*cos(xi_prev.at(0) + u.ang));
 
             xi_minus = xi_prev + ut;
+            // ROS_ERROR_STREAM("U != 0: " << xi_minus);
             return xi_minus;
         }
     }
@@ -152,38 +183,66 @@ namespace turtlelib
         return Config{xi_plus.at(0), xi_plus.at(1), xi_plus.at(2)};
     }
 
+    std::vector<double> EKF::obs_vec()
+    {
+        std::vector<double> v;
+        v = arma::conv_to < std::vector<double> >::from(xi_plus);
+        std::vector<double> v_out = std::vector<double>(v.begin()+3, v.end());
+        return v_out;
+    }
+
     void EKF::predict(Twist2D u)
     {
         int n = num_obstacles;
         arma::mat Q = arma::eye(3, 3);
         arma::mat Q_bar(3+(2*n), 3+(2*n), arma::fill::zeros);
         Q_bar.submat(0, 0, 2, 2) = Q;
+        // Q_bar.print("Q");
 
         xi_minus = update_state(u);
+        // xi_minus.print("XI MINUS");
 
         arma::mat A = calc_A(u);
+        // A.print("A");
         sigma_minus = (A*sigma_prev*A.t()) + Q_bar;
     }
 
     void EKF::update(int j, double x, double y)
     {
+        // xi_plus.print("XI INIT");
         arma::mat I = arma::eye(3+(2*num_obstacles), 3+(2*num_obstacles));
 
         arma::mat H = calc_H(j);
         arma::mat R = arma::eye(2, 2);
 
+        // ROS_ERROR_STREAM("X: " << x);
+        // ROS_ERROR_STREAM("Y: " << y);
         double r = sqrt(pow(x, 2) + pow(y, 2));
-        double phi = atan2(y, x);
+        double phi = normalize_angle(atan2(y, x));
 
         arma::vec z = {r, phi};
+        // z.print("Z");
 
         arma::vec z_hat = calc_h(j);
-        arma::mat K = sigma_minus*H.t()*((H*sigma_minus*H.t()) + R).t();
-        xi_plus = xi_minus + K*(z - z_hat);
+        z_hat.at(1) = normalize_angle(z_hat.at(1));
+        // z_hat.print("Z HAT");
+        // R.print("R");
+        // H.print("H");
+        // sigma_minus.print("SIG MIN");
+        arma::mat K = (sigma_minus*H.t())*(((H*sigma_minus*H.t()) + R).i());
+        // K.print("K"); 
+        arma::vec z_diff = z - z_hat;
+        // z_diff.print("Z DIFF");
+        z_diff.at(1) = normalize_angle(z_diff.at(1));
+        // z_diff.print("Z DIFF NORMAL");
+        
+        xi_plus = xi_minus + K*(z_diff);
         sigma_plus = (I - (K*H))*sigma_minus;
 
         xi_prev = xi_plus;
+        // xi_prev.print("XI PREV");
         sigma_prev = sigma_plus;
+        // xi_plus.print("XI");
     }
 
 
