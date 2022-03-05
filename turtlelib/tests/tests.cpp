@@ -1,7 +1,7 @@
 #include "catch_ros/catch.hpp"
 #include "turtlelib/rigid2d.hpp"
 #include "turtlelib/diff_drive.hpp"
-#include<sstream>
+#include <sstream>
 
 /// \file
 /// \brief Test file for Transform2D class
