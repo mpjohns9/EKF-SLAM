@@ -151,81 +151,81 @@ bool poseCallback(nuturtle_control::SetPose::Request & request, nuturtle_control
     return true;
 }
 
-// void markerCallback(const ros::TimerEvent&)
-// {
-//     ma.markers.resize(obstacles_slam.size());
-//     for (int i=0;i<int(obstacles_slam.size());i+=1)
-//     {
-//         // ROS_ERROR_STREAM("obstacles_slam: " << obstacles_slam);
-//         // ROS_ERROR_STREAM("id: " << i);
-//         // turtlelib::Vector2D vec{x, y};
-//         // turtlelib::Transform2D Twb(vec, theta);
-//         // turtlelib::Transform2D Tbw = Twb.inv();
+void markerCallback(const ros::TimerEvent&)
+{
+    ma.markers.resize(obstacles_slam.size()/2);
+    ROS_ERROR_STREAM("SIZE: " << int(obstacles_slam.size()));
+    for (int i=0;i<int(obstacles_slam.size()/2);i++)
+    {
+        // ROS_ERROR_STREAM("obstacles_slam: " << obstacles_slam);
+        // ROS_ERROR_STREAM("id: " << i);
+        // turtlelib::Vector2D vec{x, y};
+        // turtlelib::Transform2D Twb(vec, theta);
+        // turtlelib::Transform2D Tbw = Twb.inv();
 
-//         double x_obstacle = obstacles_slam.at(2*i);
-//         double y_obstacle = obstacles_slam.at((2*i)+1);
+        double x_obstacle = obstacles_slam.at(2*i);
+        double y_obstacle = obstacles_slam.at((2*i)+1);
 
-//         // turtlelib::Vector2D obs_vec {x_obstacle, y_obstacle};
-//         // turtlelib::Vector2D obs_vec_b = Tbw(obs_vec);
+        // turtlelib::Vector2D obs_vec {x_obstacle, y_obstacle};
+        // turtlelib::Vector2D obs_vec_b = Tbw(obs_vec);
 
-//         // double obs_theta = atan2(obs_vec_b.x, obs_vec_b.y) + obs_noise;
-//         double dx = x_obstacle-e.config().x;
-//         double dy = y_obstacle-e.config().y;
-//         double r = std::sqrt(std::pow(dx, 2) + std::pow(dy, 2));
+        // double obs_theta = atan2(obs_vec_b.x, obs_vec_b.y) + obs_noise;
+        double dx = x_obstacle-e.config().x;
+        double dy = y_obstacle-e.config().y;
+        double r = std::sqrt(std::pow(dx, 2) + std::pow(dy, 2));
 
-//         // double distance = std::sqrt(std::pow(x_obstacle - x, 2) + std::pow(y_obstacle - y, 2));
-//         // visualization_msgs::Marker marker;
+        // double distance = std::sqrt(std::pow(x_obstacle - x, 2) + std::pow(y_obstacle - y, 2));
+        // visualization_msgs::Marker marker;
 
-//         //set header and timestamp
-//         ma.markers[i].header.frame_id = "map";
-//         ma.markers[i].header.stamp = ros::Time::now();
+        //set header and timestamp
+        ma.markers[i].header.frame_id = "map";
+        ma.markers[i].header.stamp = ros::Time::now();
 
-//         //set id diff for each marker
-//         ma.markers[i].id = i;
+        //set id diff for each marker
+        ma.markers[i].id = i;
 
-//         //set color and action
-//         ma.markers[i].type = visualization_msgs::Marker::CYLINDER;
-//         // ROS_ERROR_STREAM("r (Obstacle " << i << "): " << r);
-//         if (r <= range_max)
-//         {
-//             ma.markers[i].action = visualization_msgs::Marker::ADD;
-//         }
-//         else
-//         {
-//             ma.markers[i].action = visualization_msgs::Marker::DELETE;
-//         }
-//         //set pose of marker
-//         ma.markers[i].pose.position.x = x_obstacle;
-//         ma.markers[i].pose.position.y = y_obstacle;
-//         ma.markers[i].pose.position.z = 0;
-//         ma.markers[i].pose.orientation.x = 0;
-//         ma.markers[i].pose.orientation.y = 0;
-//         ma.markers[i].pose.orientation.z = 0;
-//         ma.markers[i].pose.orientation.w = 1;
+        //set color and action
+        ma.markers[i].type = visualization_msgs::Marker::CYLINDER;
+        ROS_ERROR_STREAM("r (Obstacle " << i << "): " << r);
+        ROS_ERROR_STREAM("range_max (Obstacle " << i << "): " << range_max);
+        if (r <= range_max)
+        {
+            ma.markers[i].action = visualization_msgs::Marker::ADD;
+        }
+        else
+        {
+            ma.markers[i].action = visualization_msgs::Marker::DELETE;
+        }
+        //set pose of marker
+        ma.markers[i].pose.position.x = x_obstacle;
+        ma.markers[i].pose.position.y = y_obstacle;
+        ma.markers[i].pose.position.z = 0;
+        ma.markers[i].pose.orientation.x = 0;
+        ma.markers[i].pose.orientation.y = 0;
+        ma.markers[i].pose.orientation.z = 0;
+        ma.markers[i].pose.orientation.w = 1;
 
-//         //set size
-//         ma.markers[i].scale.x = 2*radius;
-//         ma.markers[i].scale.y = 2*radius;
-//         ma.markers[i].scale.z = height;
-
-
-//         //set color
-//         ma.markers[i].color.r = 0.0;
-//         ma.markers[i].color.g = 1.0;
-//         ma.markers[i].color.b = 0.0;
-//         ma.markers[i].color.a = 1.0;
-
-//         ROS_ERROR_STREAM("MARKER: " << ma);
-
-//         // ma.markers[i].lifetime = ros::Duration();
+        //set size
+        ma.markers[i].scale.x = 2*radius;
+        ma.markers[i].scale.y = 2*radius;
+        ma.markers[i].scale.z = height;
 
 
-//         // ma.markers.push_back(marker);
-//         i += 1;
-//     }
-//     marker_flag = true;
+        //set color
+        ma.markers[i].color.r = 0.0;
+        ma.markers[i].color.g = 1.0;
+        ma.markers[i].color.b = 0.0;
+        ma.markers[i].color.a = 1.0;
 
-// }
+        // ma.markers[i].lifetime = ros::Duration();
+
+
+        // ma.markers.push_back(marker);
+    }
+    // ROS_ERROR_STREAM("MARKER: " << ma);
+    marker_flag = true;
+
+}
 
 int main(int argc, char * argv[])
 {
@@ -271,20 +271,20 @@ int main(int argc, char * argv[])
 
     nh.param<std::string>("odom_id", odom_id, "odom");
 
-    nh_prv.getParam("obstacles/radius", radius);
-    nh_prv.getParam("obstacles/height", height);
-    nh_prv.getParam("sensor/range_max", range_max);
+    nh.getParam("nusim/obstacles/radius", radius);
+    nh.getParam("nusim/obstacles/height", height);
+    nh.getParam("nusim/sensor/range_max", range_max);
 
 
     ros::Publisher odom_pub = nh.advertise<nav_msgs::Odometry>("odom", 1000);
-    // ros::Publisher marker_pub = nh.advertise<visualization_msgs::MarkerArray>("slam_markers", 1000);
+    ros::Publisher marker_pub = nh.advertise<visualization_msgs::MarkerArray>("slam_markers", 1000);
 
     ros::Subscriber joint_sub = nh.subscribe("joint_states", 1000, jointCallback);
     ros::Subscriber fake_sensor_sub = nh.subscribe("fake_sensor", 1000, sensorCallback);
 
     ros::ServiceServer set_pose = nh.advertiseService("set_pose", poseCallback);
 
-    // ros::Timer marker_timer = nh.createTimer(ros::Duration(0.2), markerCallback);
+    ros::Timer marker_timer = nh.createTimer(ros::Duration(0.2), markerCallback);
 
     tf2_ros::TransformBroadcaster br;
     
@@ -385,11 +385,11 @@ int main(int argc, char * argv[])
 
         br.sendTransform(odom_green_tf);
 
-        // if (marker_flag)
-        // {
-        //     marker_pub.publish(ma);
-        //     marker_flag = false;
-        // }
+        if (marker_flag)
+        {
+            marker_pub.publish(ma);
+            marker_flag = false;
+        }
 
 
         // ROS_ERROR_STREAM("THE END");
