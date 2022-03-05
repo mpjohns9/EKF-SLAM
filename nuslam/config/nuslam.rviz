@@ -8,6 +8,7 @@ Panels:
         - /Status1
         - /TF1/Frames1
         - /Path1
+        - /RobotModel3
       Splitter Ratio: 0.5
     Tree Height: 1568
   - Class: rviz/Selection
@@ -169,9 +170,17 @@ Visualization Manager:
           Value: false
         blue_imu_link:
           Value: false
-        blue_wheel_left_link:
+        green_base_footprint:
           Value: true
-        blue_wheel_right_link:
+        green_base_link:
+          Value: true
+        green_base_scan:
+          Value: true
+        green_caster_back_link:
+          Value: true
+        green_imu_link:
+          Value: true
+        map:
           Value: true
         odom:
           Value: true
@@ -195,19 +204,24 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
-          odom:
-            blue_base_footprint:
-              blue_base_link:
-                blue_base_scan:
-                  {}
-                blue_caster_back_link:
-                  {}
-                blue_imu_link:
-                  {}
-                blue_wheel_left_link:
-                  {}
-                blue_wheel_right_link:
-                  {}
+          blue_base_footprint:
+            blue_base_link:
+              blue_base_scan:
+                {}
+              blue_caster_back_link:
+                {}
+              blue_imu_link:
+                {}
+          map:
+            odom:
+              green_base_footprint:
+                green_base_link:
+                  green_base_scan:
+                    {}
+                  green_caster_back_link:
+                    {}
+                  green_imu_link:
+                    {}
           red_base_footprint:
             red_base_link:
               red_base_scan:
@@ -327,6 +341,55 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Alpha: 1
+      Class: rviz/RobotModel
+      Collision Enabled: false
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+        green_base_footprint:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        green_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        green_base_scan:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        green_caster_back_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        green_imu_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        green_wheel_left_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        green_wheel_right_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+      Name: RobotModel
+      Robot Description: green/robot_description
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
