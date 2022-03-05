@@ -22,12 +22,14 @@
 #include <geometry_msgs/PoseWithCovariance.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_broadcaster.h>
+#include <visualization_msgs/MarkerArray.h>
 #include "nuturtle_control/SetPose.h"
 #include "turtlelib/rigid2d.hpp"
 #include "turtlelib/diff_drive.hpp"
+#include "turtlelib/ekf.hpp"
 
 turtlelib::diffDrive dd;
-turtlelib::EKF e;
+turtlelib::EKF e(3);
 
 static auto rate = 0;
 
@@ -48,6 +50,18 @@ static auto rwheel_vel = 0.0;
 static auto lwheel_pos = 0.0;
 static auto rwheel_pos = 0.0;
 
+static auto landmark_flag = true;
+static auto marker_flag = false;
+
+static std::vector<double> obstacles_slam;
+
+visualization_msgs::MarkerArray ma;
+
+static auto radius = 0.0;
+static auto height = 0.0;
+static auto range_max = 0.0;
+
+
 /// \brief callback for the joint_states subscriber
 /// \param msg - sensor_msgs/JointState message obj
 void jointCallback(const sensor_msgs::JointState & msg)
@@ -63,13 +77,17 @@ void jointCallback(const sensor_msgs::JointState & msg)
     turtlelib::WheelPos pos {lwheel_pos, rwheel_pos};
     turtlelib::Config c;
 
-    c = std::get<0>(dd.fwd_kin(pos));
+    std::tie(c, u) = dd.fwd_kin(pos);
 
     x = c.x;
     y = c.y;
     theta = c.ang;
-
-    u = std::get<1>(dd.fwd_kin(pos));
+    // ROS_ERROR_STREAM("POSL: " << pos.l_pos);
+    // ROS_ERROR_STREAM("POSR: " << pos.r_pos);
+    // ROS_ERROR_STREAM("X: " << x);
+    // ROS_ERROR_STREAM("Y: " << y);
+    // ROS_ERROR_STREAM("THETA: " << theta);
+    // ROS_ERROR_STREAM("TWIST: " << u);
 
     turtlelib::WheelVel v;
     v.l_vel = msg.velocity.at(0);
@@ -80,16 +98,16 @@ void jointCallback(const sensor_msgs::JointState & msg)
 
 void sensorCallback(const visualization_msgs::MarkerArray & msg)
 {
-    int n = msg.markers.size()
+    int n = msg.markers.size();
 
     std::vector<double> obs_x(n);
     std::vector<double> obs_y(n);
-    std::vector<double> z_sensor(n*2);
+    // std::vector<double> z_sensor(n*2);
+    turtlelib::WheelPos pos {lwheel_pos, rwheel_pos};
+    u = std::get<1>(dd.fwd_kin(pos));
 
-    e.initialize_landmarks(obs_x, obs_y);
-
-    int index = 0;
-    for (int i=0; i<n); i++)
+    // int index = 0;
+    for (int i=0; i<n; i++)
     {
         double x = msg.markers.at(i).pose.position.x;
         double y = msg.markers.at(i).pose.position.y;
@@ -97,13 +115,27 @@ void sensorCallback(const visualization_msgs::MarkerArray & msg)
         obs_x.at(i) = x;
         obs_y.at(i) = y;
 
-        z_sensor.at(index) = x;
-        z_sensor.at(index + 1) = y;
-        index += 2;
+        // z_sensor.at(index) = x;
+        // z_sensor.at(index + 1) = y;
+        // index += 2;
+        // ROS_ERROR_STREAM("TWIST: " << u);
+    }
 
-        e(n);
+    if (landmark_flag)
+    {
+        e.initialize_landmarks(obs_x, obs_y);
+        landmark_flag = false;
+    }
+
+    for (int j=0; j<n; j++)
+    {
+        // ROS_ERROR_STREAM("OBSTACLE " << j);
+        // ROS_ERROR_STREAM("X: " << obs_x.at(j));
+        // ROS_ERROR_STREAM("Y: " << obs_y.at(j));
+        // ROS_ERROR_STREAM("TWIST: " << u);
         e.predict(u);
-        e.update(i, x, y);
+        e.update(j, obs_x.at(j), obs_y.at(j));
+        obstacles_slam = e.obs_vec();
     }
 }
 
@@ -119,9 +151,85 @@ bool poseCallback(nuturtle_control::SetPose::Request & request, nuturtle_control
     return true;
 }
 
+// void markerCallback(const ros::TimerEvent&)
+// {
+//     ma.markers.resize(obstacles_slam.size());
+//     for (int i=0;i<int(obstacles_slam.size());i+=1)
+//     {
+//         // ROS_ERROR_STREAM("obstacles_slam: " << obstacles_slam);
+//         // ROS_ERROR_STREAM("id: " << i);
+//         // turtlelib::Vector2D vec{x, y};
+//         // turtlelib::Transform2D Twb(vec, theta);
+//         // turtlelib::Transform2D Tbw = Twb.inv();
+
+//         double x_obstacle = obstacles_slam.at(2*i);
+//         double y_obstacle = obstacles_slam.at((2*i)+1);
+
+//         // turtlelib::Vector2D obs_vec {x_obstacle, y_obstacle};
+//         // turtlelib::Vector2D obs_vec_b = Tbw(obs_vec);
+
+//         // double obs_theta = atan2(obs_vec_b.x, obs_vec_b.y) + obs_noise;
+//         double dx = x_obstacle-e.config().x;
+//         double dy = y_obstacle-e.config().y;
+//         double r = std::sqrt(std::pow(dx, 2) + std::pow(dy, 2));
+
+//         // double distance = std::sqrt(std::pow(x_obstacle - x, 2) + std::pow(y_obstacle - y, 2));
+//         // visualization_msgs::Marker marker;
+
+//         //set header and timestamp
+//         ma.markers[i].header.frame_id = "map";
+//         ma.markers[i].header.stamp = ros::Time::now();
+
+//         //set id diff for each marker
+//         ma.markers[i].id = i;
+
+//         //set color and action
+//         ma.markers[i].type = visualization_msgs::Marker::CYLINDER;
+//         // ROS_ERROR_STREAM("r (Obstacle " << i << "): " << r);
+//         if (r <= range_max)
+//         {
+//             ma.markers[i].action = visualization_msgs::Marker::ADD;
+//         }
+//         else
+//         {
+//             ma.markers[i].action = visualization_msgs::Marker::DELETE;
+//         }
+//         //set pose of marker
+//         ma.markers[i].pose.position.x = x_obstacle;
+//         ma.markers[i].pose.position.y = y_obstacle;
+//         ma.markers[i].pose.position.z = 0;
+//         ma.markers[i].pose.orientation.x = 0;
+//         ma.markers[i].pose.orientation.y = 0;
+//         ma.markers[i].pose.orientation.z = 0;
+//         ma.markers[i].pose.orientation.w = 1;
+
+//         //set size
+//         ma.markers[i].scale.x = 2*radius;
+//         ma.markers[i].scale.y = 2*radius;
+//         ma.markers[i].scale.z = height;
+
+
+//         //set color
+//         ma.markers[i].color.r = 0.0;
+//         ma.markers[i].color.g = 1.0;
+//         ma.markers[i].color.b = 0.0;
+//         ma.markers[i].color.a = 1.0;
+
+//         ROS_ERROR_STREAM("MARKER: " << ma);
+
+//         // ma.markers[i].lifetime = ros::Duration();
+
+
+//         // ma.markers.push_back(marker);
+//         i += 1;
+//     }
+//     marker_flag = true;
+
+// }
+
 int main(int argc, char * argv[])
 {
-    ros::init(argc, argv, "odometry");
+    ros::init(argc, argv, "slam");
     ros::NodeHandle nh_prv("~");
     ros::NodeHandle nh;
 
@@ -163,15 +271,27 @@ int main(int argc, char * argv[])
 
     nh.param<std::string>("odom_id", odom_id, "odom");
 
+    nh_prv.getParam("obstacles/radius", radius);
+    nh_prv.getParam("obstacles/height", height);
+    nh_prv.getParam("sensor/range_max", range_max);
+
+
     ros::Publisher odom_pub = nh.advertise<nav_msgs::Odometry>("odom", 1000);
+    // ros::Publisher marker_pub = nh.advertise<visualization_msgs::MarkerArray>("slam_markers", 1000);
 
     ros::Subscriber joint_sub = nh.subscribe("joint_states", 1000, jointCallback);
     ros::Subscriber fake_sensor_sub = nh.subscribe("fake_sensor", 1000, sensorCallback);
 
     ros::ServiceServer set_pose = nh.advertiseService("set_pose", poseCallback);
 
-    static tf2_ros::TransformBroadcaster br;
-    geometry_msgs::TransformStamped transform;
+    // ros::Timer marker_timer = nh.createTimer(ros::Duration(0.2), markerCallback);
+
+    tf2_ros::TransformBroadcaster br;
+    
+    geometry_msgs::TransformStamped world_blue_tf;
+    geometry_msgs::TransformStamped odom_green_tf;
+    geometry_msgs::TransformStamped map_odom_tf;
+
     tf2::Quaternion q;
 
     while(ros::ok())
@@ -194,75 +314,82 @@ int main(int argc, char * argv[])
         odom.twist = t;
         odom_pub.publish(odom);
 
-        transform.header.stamp = ros::Time::now();
+        world_blue_tf.header.stamp = ros::Time::now();
 
-        transform.header.frame_id = "world";
-        transform.child_frame_id = "blue_base_footprint";
+        world_blue_tf.header.frame_id = "world";
+        world_blue_tf.child_frame_id = "blue_base_footprint";
 
-        transform.transform.translation.x = x;
-        transform.transform.translation.y = y;
-        transform.transform.translation.z = 0.0;
-
-        tf2::Quaternion q;
-        q.setRPY(0, 0, theta);
-
-        transform.transform.rotation.x = q.x();
-        transform.transform.rotation.y = q.y();
-        transform.transform.rotation.z = q.z();
-        transform.transform.rotation.w = q.w();
-
-        br.sendTransform(transform);
-
-        nav_msgs::Odometry odom;
-        odom.header.stamp = ros::Time::now();
-        odom.header.frame_id = body_id;
-        odom.child_frame_id = odom_id;
-        odom.pose = p;
-        odom.twist = t;
-        odom_pub.publish(odom);
-
-        transform.header.stamp = ros::Time::now();
-
-        transform.header.frame_id = "odom";
-        transform.child_frame_id = "green_base_footprint";
-
-        transform.transform.translation.x = x;
-        transform.transform.translation.y = y;
-        transform.transform.translation.z = 0.0;
+        world_blue_tf.transform.translation.x = x;
+        world_blue_tf.transform.translation.y = y;
+        world_blue_tf.transform.translation.z = 0.0;
 
         tf2::Quaternion q;
         q.setRPY(0, 0, theta);
 
-        transform.transform.rotation.x = q.x();
-        transform.transform.rotation.y = q.y();
-        transform.transform.rotation.z = q.z();
-        transform.transform.rotation.w = q.w();
+        world_blue_tf.transform.rotation.x = q.x();
+        world_blue_tf.transform.rotation.y = q.y();
+        world_blue_tf.transform.rotation.z = q.z();
+        world_blue_tf.transform.rotation.w = q.w();
+        br.sendTransform(world_blue_tf);
 
-        br.sendTransform(transform);
+        // ROS_ERROR_STREAM("X: " << e.config().x);
+        // ROS_ERROR_STREAM("Y: " << e.config().y);
+        // ROS_ERROR_STREAM("ANG: " << e.config().ang);
 
-        turtlelib::Vector2D xy{e.config().at(1), e.config.at(2)};
-        turtlelib::Transform2D Tmo(xy, e.config.at(0));
+        turtlelib::Vector2D xy{e.config().x, e.config().y};
+        turtlelib::Transform2D Tmb(xy, e.config().ang);
         turtlelib::Transform2D Tob(turtlelib::Vector2D{x, y}, theta);
 
-        turtlelib::Transform2D Tmb = Tmo*Tob.inv();
+        turtlelib::Transform2D Tmo = Tmb*Tob.inv();
 
-        transform.header.stamp = ros::Time::now();
+        // ROS_ERROR_STREAM("Tmb: " << Tmb);
+        // ROS_ERROR_STREAM("Tob: " << Tob);
 
-        transform.header.frame_id = "map";
-        transform.child_frame_id = "odom";
+        map_odom_tf.header.stamp = ros::Time::now();
 
-        transform.transform.translation.x = Tmb.translation().x;
-        transform.transform.translation.y = Tmb.translation().y;
-        transform.transform.translation.z = 0.0;
+        map_odom_tf.header.frame_id = "map";
+        map_odom_tf.child_frame_id = "odom";
 
-        tf2::Quaternion q;
-        q.setRPY(0, 0, Tmb.rotation());
+        map_odom_tf.transform.translation.x = Tmo.translation().x;
+        map_odom_tf.transform.translation.y = Tmo.translation().y;
+        map_odom_tf.transform.translation.z = 0.0;
 
-        transform.transform.rotation.x = q.x();
-        transform.transform.rotation.y = q.y();
-        transform.transform.rotation.z = q.z();
-        transform.transform.rotation.w = q.w();
+        // map_odom_tf.transform.translation.x = 1;
+        // map_odom_tf.transform.translation.y = 1;
+        // map_odom_tf.transform.translation.z = 0.0;
 
+        q.setRPY(0, 0, Tmo.rotation());
+
+        map_odom_tf.transform.rotation.x = q.x();
+        map_odom_tf.transform.rotation.y = q.y();
+        map_odom_tf.transform.rotation.z = q.z();
+        map_odom_tf.transform.rotation.w = q.w();
+
+        br.sendTransform(map_odom_tf);
+
+        odom_green_tf.header.stamp = ros::Time::now();
+
+        odom_green_tf.header.frame_id = "odom";
+        odom_green_tf.child_frame_id = "green_base_footprint";
+
+        odom_green_tf.transform.translation.x = x;
+        odom_green_tf.transform.translation.y = y;
+        odom_green_tf.transform.translation.z = 0.0;
+
+        q.setRPY(0, 0, theta);
+
+        odom_green_tf.transform.rotation.x = q.x();
+        odom_green_tf.transform.rotation.y = q.y();
+        odom_green_tf.transform.rotation.z = q.z();
+        odom_green_tf.transform.rotation.w = q.w();
+
+        br.sendTransform(odom_green_tf);
+
+        // if (marker_flag)
+        // {
+        //     marker_pub.publish(ma);
+        //     marker_flag = false;
+        // }
 
 
         // ROS_ERROR_STREAM("THE END");
