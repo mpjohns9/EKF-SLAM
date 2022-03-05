@@ -19,7 +19,9 @@
 #include "ros/ros.h"
 #include <sensor_msgs/JointState.h>
 #include <nav_msgs/Odometry.h>
+#include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseWithCovariance.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <visualization_msgs/MarkerArray.h>
@@ -60,6 +62,9 @@ visualization_msgs::MarkerArray ma;
 static auto radius = 0.0;
 static auto height = 0.0;
 static auto range_max = 0.0;
+
+nav_msgs::Path path;
+geometry_msgs::PoseStamped ps;
 
 
 /// \brief callback for the joint_states subscriber
@@ -278,6 +283,7 @@ int main(int argc, char * argv[])
 
     ros::Publisher odom_pub = nh.advertise<nav_msgs::Odometry>("odom", 1000);
     ros::Publisher marker_pub = nh.advertise<visualization_msgs::MarkerArray>("slam_markers", 1000);
+    ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("slam_path", 1000);
 
     ros::Subscriber joint_sub = nh.subscribe("joint_states", 1000, jointCallback);
     ros::Subscriber fake_sensor_sub = nh.subscribe("fake_sensor", 1000, sensorCallback);
@@ -390,6 +396,19 @@ int main(int argc, char * argv[])
             marker_pub.publish(ma);
             marker_flag = false;
         }
+
+        ps.header.stamp = ros::Time::now();
+        ps.header.frame_id = "map";
+
+        ps.pose.position.x = e.config().x;
+        ps.pose.position.y = e.config().y;
+
+        path.header.stamp = ros::Time::now();
+        path.header.frame_id = "map";
+
+        path.poses.push_back(ps);
+
+        path_pub.publish(path);
 
 
         // ROS_ERROR_STREAM("THE END");

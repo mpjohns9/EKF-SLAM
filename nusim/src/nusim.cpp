@@ -620,7 +620,7 @@ int main(int argc, char * argv[])
     ros::Publisher marker_pub = nh_prv.advertise<visualization_msgs::MarkerArray>("obstacles", 1, true);
     ros::Publisher wall_pub = nh_prv.advertise<visualization_msgs::MarkerArray>("walls", 1, true);
     ros::Publisher sensor_pub = nh.advertise<nuturtlebot_msgs::SensorData>("sensor_data", 1000);
-    ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("robot_path", 1000);
+    ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("nusim_path", 1000);
     ros::Publisher fake_sensor_pub = nh.advertise<visualization_msgs::MarkerArray>("fake_sensor", 1000);
     ros::Publisher scan_pub = nh.advertise<sensor_msgs::LaserScan>("laser_scan", 1000);
 

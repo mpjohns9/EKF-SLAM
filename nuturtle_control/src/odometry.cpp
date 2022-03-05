@@ -9,6 +9,7 @@
 ///
 /// PUBLISHES: 
 ///     odom_pub (nav_msgs/Odometry): publishes to odom
+///     path_pub(nav_msgs/Path): publishes path of robot (odometry)
 ///
 /// SUBSCRIBES:
 ///     joint_sub (joint_states): subscribes to joint_states
@@ -19,6 +20,7 @@
 #include "ros/ros.h"
 #include <sensor_msgs/JointState.h>
 #include <nav_msgs/Odometry.h>
+#include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseWithCovariance.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/transform_broadcaster.h>
@@ -46,6 +48,9 @@ static auto rwheel_vel = 0.0;
 
 static auto lwheel_pos = 0.0;
 static auto rwheel_pos = 0.0;
+
+nav_msgs::Path path;
+geometry_msgs::PoseStamped ps;
 
 /// \brief callback for the joint_states subscriber
 /// \param msg - sensor_msgs/JointState message obj
@@ -134,6 +139,7 @@ int main(int argc, char * argv[])
     nh.param<std::string>("odom_id", odom_id, "odom");
 
     ros::Publisher odom_pub = nh.advertise<nav_msgs::Odometry>("odom", 1000);
+    ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("odom_path", 1000);
 
     ros::Subscriber joint_sub = nh.subscribe("joint_states", 1000, jointCallback);
 
@@ -182,6 +188,20 @@ int main(int argc, char * argv[])
 
         br.sendTransform(transform);
         // ROS_ERROR_STREAM("THE END");
+
+        ps.header.stamp = ros::Time::now();
+        ps.header.frame_id = "world";
+
+        ps.pose.position.x = x;
+        ps.pose.position.y = y;
+
+        path.header.stamp = ros::Time::now();
+        path.header.frame_id = "world";
+
+        path.poses.push_back(ps);
+
+        path_pub.publish(path);
+
         ros::spinOnce();
         r.sleep();
     }
