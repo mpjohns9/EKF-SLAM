@@ -120,9 +120,6 @@ std::mt19937 & get_random()
      return mt;
  }
 
-std::normal_distribution<double> on(0.0, basic_sensor_variance);
-double obs_noise = on(get_random());
-
 /// \brief callback for reset service
 ///
 /// resets timestep to 0 and robot to initial position
@@ -190,8 +187,8 @@ void wheelCallback(const nuturtlebot_msgs::WheelCommands & msg)
 
     for (int i=0;i<int(obs_x.size());i++)
     {
-        double x_obstacle = obs_x.at(i) + obs_noise;
-        double y_obstacle = obs_y.at(i) + obs_noise;
+        double x_obstacle = obs_x.at(i);
+        double y_obstacle = obs_y.at(i);
 
         double distance = std::sqrt(std::pow(x_obstacle - new_x, 2) + std::pow(y_obstacle - new_y, 2));
         double tan_dist = (radius + collision_rad);
@@ -235,6 +232,9 @@ void marktimerCallback(const ros::TimerEvent&)
     fake_ma.markers.resize(obs_x.size());
     for (int i=0;i<int(obs_x.size());i++)
     {
+        std::normal_distribution<double> on(0.0, basic_sensor_variance);
+        double obs_noise = on(get_random());
+        
         turtlelib::Vector2D vec{x, y};
         turtlelib::Transform2D Twb(vec, theta);
         turtlelib::Transform2D Tbw = Twb.inv();
@@ -270,8 +270,8 @@ void marktimerCallback(const ros::TimerEvent&)
             fake_ma.markers[i].action = visualization_msgs::Marker::DELETE;
         }
         //set pose of marker
-        fake_ma.markers[i].pose.position.x = obs_vec_b.x;
-        fake_ma.markers[i].pose.position.y = obs_vec_b.y;
+        fake_ma.markers[i].pose.position.x = obs_vec_b.x + obs_noise;
+        fake_ma.markers[i].pose.position.y = obs_vec_b.y + obs_noise;
         fake_ma.markers[i].pose.position.z = 0;
         fake_ma.markers[i].pose.orientation.x = 0;
         fake_ma.markers[i].pose.orientation.y = 0;
