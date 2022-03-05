@@ -55,10 +55,13 @@ namespace turtlelib
     /// \returns converted angle in interval [-pi, pi)
     constexpr double normalize_angle(double rad)
     {
-        if (rad >= PI || rad < PI)
+        rad = fmod(rad -PI, 2*PI);
+        if (rad > 0.0)
         {
-            return std::fmod(rad,PI);
+            rad -= 2*PI;
         }
+
+        return rad+PI;
     }
 
     /// static_assertions test compile time assumptions.
