@@ -154,7 +154,7 @@ bool poseCallback(nuturtle_control::SetPose::Request & request, nuturtle_control
 void markerCallback(const ros::TimerEvent&)
 {
     ma.markers.resize(obstacles_slam.size()/2);
-    ROS_ERROR_STREAM("SIZE: " << int(obstacles_slam.size()));
+    // ROS_ERROR_STREAM("SIZE: " << int(obstacles_slam.size()));
     for (int i=0;i<int(obstacles_slam.size()/2);i++)
     {
         // ROS_ERROR_STREAM("obstacles_slam: " << obstacles_slam);
@@ -186,8 +186,8 @@ void markerCallback(const ros::TimerEvent&)
 
         //set color and action
         ma.markers[i].type = visualization_msgs::Marker::CYLINDER;
-        ROS_ERROR_STREAM("r (Obstacle " << i << "): " << r);
-        ROS_ERROR_STREAM("range_max (Obstacle " << i << "): " << range_max);
+        // ROS_ERROR_STREAM("r (Obstacle " << i << "): " << r);
+        // ROS_ERROR_STREAM("range_max (Obstacle " << i << "): " << range_max);
         if (r <= range_max)
         {
             ma.markers[i].action = visualization_msgs::Marker::ADD;
