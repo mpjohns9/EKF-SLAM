@@ -1,0 +1,2 @@
+Fix the compile warnings.
+SLAM appears to be working
