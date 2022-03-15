@@ -154,6 +154,13 @@ target_link_libraries(slam
   turtlelib
 )
 
+add_executable(landmarks src/landmarks.cpp)
+
+target_link_libraries(landmarks
+  ${catkin_LIBRARIES}
+  turtlelib
+)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -172,6 +179,8 @@ target_link_libraries(slam
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(slam ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(landmarks ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 
 #############
 ## Install ##
@@ -189,7 +198,7 @@ add_dependencies(slam ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARG
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-install(TARGETS slam
+install(TARGETS landmarks slam
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
