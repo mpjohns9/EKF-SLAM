@@ -31,7 +31,7 @@
 #include "turtlelib/ekf.hpp"
 
 turtlelib::diffDrive dd;
-turtlelib::EKF e(3);
+turtlelib::EKF e(100);
 
 static auto rate = 0;
 
@@ -120,6 +120,11 @@ void sensorCallback(const visualization_msgs::MarkerArray & msg)
         obs_x.at(i) = x;
         obs_y.at(i) = y;
 
+        if (e.check_known_obs(x, y))
+        {
+            landmark_flag = true;
+        }
+
         // z_sensor.at(index) = x;
         // z_sensor.at(index + 1) = y;
         // index += 2;
@@ -145,7 +150,7 @@ void sensorCallback(const visualization_msgs::MarkerArray & msg)
 }
 
 /// \brief callback for set pose service
-bool poseCallback(nuturtle_control::SetPose::Request & request, nuturtle_control::SetPose::Response & response)
+bool poseCallback(nuturtle_control::SetPose::Request & request, nuturtle_control::SetPose::Response &)
 {
     x = request.x;
     y = request.y;
@@ -158,9 +163,24 @@ bool poseCallback(nuturtle_control::SetPose::Request & request, nuturtle_control
 
 void markerCallback(const ros::TimerEvent&)
 {
-    ma.markers.resize(obstacles_slam.size()/2);
+    int non_zero = 0;
+    for (int i=0; i<int(obstacles_slam.size()/2); i++)
+    {
+        double check_x = obstacles_slam.at(2*i);
+        double check_y = obstacles_slam.at((2*i)+1);
+
+        // ROS_ERROR_STREAM("X " << check_x);
+        // ROS_ERROR_STREAM("Y " << check_y);
+
+        if (check_x != 0.0 && check_y != 0.0)
+        {
+            non_zero += 1;
+        }
+    }
+    // ROS_ERROR_STREAM("COUNT" << non_zero);
+    ma.markers.resize(non_zero);
     // ROS_ERROR_STREAM("SIZE: " << int(obstacles_slam.size()));
-    for (int i=0;i<int(obstacles_slam.size()/2);i++)
+    for (int i=0;i<int(non_zero);i++)
     {
         // ROS_ERROR_STREAM("obstacles_slam: " << obstacles_slam);
         // ROS_ERROR_STREAM("id: " << i);
@@ -170,6 +190,11 @@ void markerCallback(const ros::TimerEvent&)
 
         double x_obstacle = obstacles_slam.at(2*i);
         double y_obstacle = obstacles_slam.at((2*i)+1);
+
+        // if (x_obstacle == 0 && y_obstacle == 0)
+        // {
+        //     continue;
+        // }
 
         // turtlelib::Vector2D obs_vec {x_obstacle, y_obstacle};
         // turtlelib::Vector2D obs_vec_b = Tbw(obs_vec);

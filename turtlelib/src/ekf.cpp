@@ -17,7 +17,7 @@ namespace turtlelib
         state = {0.0, 0.0, 0.0};
         q = {state.ang, state.x, state.y};
         num_obstacles = n;
-        obstacles = arma::vec(2*n);
+        obstacles = arma::vec(2*n, arma::fill::zeros);
         xi_prev = arma::vec(3 + (2*n), arma::fill::zeros);
         xi_minus = arma::vec(3 + (2*n), arma::fill::zeros);
         xi_plus = arma::vec(3 + (2*n), arma::fill::zeros);
@@ -49,6 +49,7 @@ namespace turtlelib
 
     arma::vec EKF::initialize_landmarks(std::vector<double> obs_x, std::vector<double> obs_y)
     {
+        // ROS_ERROR_STREAM("INIT LANDMARKS");
         int index = 0;
         for (int i=0; i<int(obs_x.size()); i++)
         {
@@ -66,6 +67,18 @@ namespace turtlelib
 
             obstacles.at(index) = mx;
             obstacles.at(index+1) = my;
+
+            for (int j=0; j<int(known_obs.size()); j++)
+            {
+                if (abs(known_obs.at(j).x - obs_x.at(i)) > 0.05 or abs(known_obs.at(j).y - obs_x.at(i)) > 0.05)
+                {
+                    Vector2D o;
+                    o.x = obs_x.at(i);
+                    o.y = obs_y.at(i);
+
+                    known_obs.push_back(o);
+                }
+            }
             index += 2;
         }
 
@@ -76,6 +89,7 @@ namespace turtlelib
 
     arma::vec EKF::calc_h(int j)
     {
+        // ROS_ERROR_STREAM("CALC h");
         double mx = xi_minus.at(3+(2*j));
         double my = xi_minus.at(4+(2*j));
         double r = sqrt(pow(mx - xi_minus.at(1), 2) + pow(my - xi_minus.at(2), 2));
@@ -87,6 +101,7 @@ namespace turtlelib
 
     arma::mat EKF::calc_H(int j)
     {
+        // ROS_ERROR_STREAM("CALC H");
         double mx = xi_minus.at(3+(2*j));
         double my = xi_minus.at(4+(2*j));
         // ROS_ERROR_STREAM("MX: " << mx);
@@ -120,6 +135,7 @@ namespace turtlelib
 
     arma::mat EKF::calc_A(Twist2D u)
     {
+        // ROS_ERROR_STREAM("CALC A");
         arma::mat I = arma::eye((3+(2*num_obstacles)), (3+(2*num_obstacles)));
         arma::mat mat((3+(2*num_obstacles)), (3+(2*num_obstacles)), arma::fill::zeros);
 
@@ -144,6 +160,7 @@ namespace turtlelib
 
     arma::vec EKF::update_state(Twist2D u)
     {
+        // ROS_ERROR_STREAM("UPDATE");
         if (almost_equal(u.ang, 0.0))
         {
             arma::vec ut(3+(2*num_obstacles), arma::fill::zeros);
@@ -188,11 +205,24 @@ namespace turtlelib
         std::vector<double> v;
         v = arma::conv_to < std::vector<double> >::from(xi_plus);
         std::vector<double> v_out = std::vector<double>(v.begin()+3, v.end());
+
+        // for (int i=0; i<int(v_out.size()); i+=2)
+        // {
+        //     auto curr = v_out.at(i);
+        //     auto next = v_out.at(i+1);
+        //     if (curr == 0.0 && next == 0.0)
+        //     {
+        //         v_out = std::vector<double>(v_out.begin()+3, v_out.begin()+(i-1));
+        //         break;
+        //     }
+            
+        // }
         return v_out;
     }
 
     void EKF::predict(Twist2D u)
     {
+        ROS_ERROR_STREAM("PREDICT");
         int n = num_obstacles;
         arma::mat Q = arma::eye(3, 3);
         arma::mat Q_bar(3+(2*n), 3+(2*n), arma::fill::zeros);
@@ -209,6 +239,7 @@ namespace turtlelib
 
     void EKF::update(int j, double x, double y)
     {
+        ROS_ERROR_STREAM("UPDATE");
         // xi_plus.print("XI INIT");
         arma::mat I = arma::eye(3+(2*num_obstacles), 3+(2*num_obstacles));
 
@@ -243,6 +274,18 @@ namespace turtlelib
         // xi_prev.print("XI PREV");
         sigma_prev = sigma_plus;
         // xi_plus.print("XI");
+    }
+
+    bool EKF::check_known_obs(double x, double y)
+    {
+        for (int i=0; i<int(known_obs.size()); i++)
+        {
+            if (abs(known_obs.at(i).x - x) > 0.05 or abs(known_obs.at(i).y - y) > 0.05)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
 
