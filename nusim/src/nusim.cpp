@@ -97,6 +97,7 @@ static auto range_max = 0.0;
 static auto num_samples = 0.0;
 
 static auto basic_sensor_variance = 0.0;
+static auto laser_variance = 0.0;
 
 static auto collision_rad = 0.0;
 
@@ -301,6 +302,7 @@ void marktimerCallback(const ros::TimerEvent&)
 
 void scantimerCallback (const ros::TimerEvent&)
 {
+
     laser.header.stamp = ros::Time::now();
     laser.header.frame_id = "red_base_scan";
 
@@ -320,6 +322,8 @@ void scantimerCallback (const ros::TimerEvent&)
         std::vector<double> int_vec;
         for (int i=0;i<int(obs_x.size());i++)
         {
+            std::normal_distribution<double> on(0.0, laser_variance);
+            double laser_noise = on(get_random());
             // ROS_ERROR_STREAM("OBSTACLE " << i);
             double r_min = range_min;
             double xb1 = r_min*cos(ang);
@@ -329,7 +333,7 @@ void scantimerCallback (const ros::TimerEvent&)
             double xb2 = r_max*cos(ang);
             double yb2 = r_max*sin(ang);
 
-            turtlelib::Vector2D obs_vec{obs_x[i], obs_y[i]};
+            turtlelib::Vector2D obs_vec{obs_x[i] + laser_noise, obs_y[i] + laser_noise};
             turtlelib::Vector2D b1_vec{xb1, yb1};
             turtlelib::Vector2D b2_vec{xb2, yb2};
 
@@ -514,7 +518,7 @@ void scantimerCallback (const ros::TimerEvent&)
             
             
         }
-        int_vec.push_back(range_max);
+        // int_vec.push_back(range_max);
 
         
         scan_flag = true;
@@ -525,19 +529,19 @@ void scantimerCallback (const ros::TimerEvent&)
         {
             ang = 0.0;
         }
-        if (min < 3.4)
-        {
-            // ROS_ERROR_STREAM("ANGLE " << ang);
-            // ROS_ERROR_STREAM("-----------------");
-            // ROS_ERROR_STREAM("VECTOR: ");
-            // ROS_ERROR_STREAM("-----------------");
-            // ROS_ERROR_STREAM("MIN: " << min);
-            for (int k=0; k<int(int_vec.size());k++)
-            {
-                // ROS_ERROR_STREAM(int_vec[k]);
-            }
+        // if (min < 3.4)
+        // {
+        //     // ROS_ERROR_STREAM("ANGLE " << ang);
+        //     // ROS_ERROR_STREAM("-----------------");
+        //     // ROS_ERROR_STREAM("VECTOR: ");
+        //     // ROS_ERROR_STREAM("-----------------");
+        //     // ROS_ERROR_STREAM("MIN: " << min);
+        //     for (int k=0; k<int(int_vec.size());k++)
+        //     {
+        //         // ROS_ERROR_STREAM(int_vec[k]);
+        //     }
             
-        }
+        // }
         // ROS_ERROR_STREAM("LASER MSG " << laser);
     }
 
@@ -545,7 +549,6 @@ void scantimerCallback (const ros::TimerEvent&)
 
 int main(int argc, char * argv[])
 {
-
     ros::init(argc, argv, "nusim");
     ros::NodeHandle nh_prv("~");
     ros::NodeHandle nh;
@@ -578,6 +581,7 @@ int main(int argc, char * argv[])
     nh_prv.getParam("sensor/range_min", range_min);
     nh_prv.getParam("sensor/range_max", range_max);
     nh_prv.getParam("sensor/num_samples", num_samples);
+    nh_prv.getParam("sensor/noise_level", laser_variance);
 
 
     nh.getParam("collision_radius", collision_rad);
