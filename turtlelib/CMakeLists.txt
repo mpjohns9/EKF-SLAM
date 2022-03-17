@@ -120,7 +120,7 @@ ${ARMADILLO_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-add_library(${PROJECT_NAME} src/diff_drive.cpp src/ekf.cpp src/rigid2d.cpp)
+add_library(${PROJECT_NAME} src/circle_fit.cpp src/diff_drive.cpp src/ekf.cpp src/rigid2d.cpp)
 
 
 
@@ -229,6 +229,7 @@ catch_add_test(${PROJECT_NAME}_test
     tests/tests.cpp
     tests/diff_drive_tests.cpp
     tests/ekf_tests.cpp
+    tests/circle_tests.cpp
 )
 
 target_link_libraries(
