@@ -2,6 +2,7 @@
 #include <cmath>
 #include <iostream>
 #include "turtlelib/circle_fit.hpp"
+#include "turtlelib/rigid2d.hpp"
 #include <ros/ros.h>
 #include <tuple>
 
@@ -151,8 +152,8 @@ namespace turtlelib
 
         double a = (-A.at(1))/(2*A.at(0));
         double b = (-A.at(2))/(2*A.at(0));
-        std::cout << a;
-        std::cout << b;
+        // std::cout << a;
+        // std::cout << b;
         double r = sqrt((pow(A.at(1), 2) + pow(A.at(2), 2) - (4*A.at(0)*A.at(3)))/(4*pow(A.at(0), 2)));
 
         double c_x = a + arma::mean(cluster_x);
@@ -184,6 +185,39 @@ namespace turtlelib
     arma::vec circleFit::get_z()
     {
         return z;
+    }
+
+    bool circleFit::classify_circle()
+    {
+        auto p1_x = cluster_x.front();
+        auto p2_x = cluster_x.back();
+
+        auto p1_y = cluster_y.front();
+        auto p2_y = cluster_y.back();
+
+        std::vector<double> angle_vec;
+
+        for (int i=1; i<(int(cluster_x.size())-1); i++)
+        {
+            auto p_x = cluster_x.at(i);
+            auto p_y = cluster_y.at(i);
+
+            Vector2D v1, v2, v;
+
+            v1.x = p1_x - p_x;
+            v1.y = p1_y - p_y;
+
+            v2.x = p2_x - p_x;
+            v2.y = p2_y - p_y;
+
+            double ang = v.angle(v1, v2);
+            angle_vec.push_back(ang);
+        }
+
+        double mean = arma::mean(arma::vec(angle_vec));
+        double stddev = arma::stddev(arma::vec(angle_vec));
+
+        return (stddev < 0.15 && (rad2deg(mean) >= 90.0 && rad2deg(mean) <= 135.0)); 
     }
 
 

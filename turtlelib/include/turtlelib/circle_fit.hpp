@@ -29,6 +29,7 @@ namespace turtlelib
         arma::vec get_clusterx_shifted();
         arma::vec get_clustery_shifted();
         arma::vec get_z();
+        bool classify_circle();
 
     private:
         arma::vec cluster_x;
