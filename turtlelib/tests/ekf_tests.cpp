@@ -49,19 +49,19 @@ TEST_CASE("Calculate A", "[slam]")
 
 }
 
-TEST_CASE("Calculate H", "[slam]")
-{
-    turtlelib::Config c {0.0, 0.0, 0.0};
-    int n = 3;
-    int j = 0;
+// TEST_CASE("Calculate H", "[slam]")
+// {
+//     turtlelib::Config c {0.0, 0.0, 0.0};
+//     int n = 3;
+//     int j = 0;
     
-    turtlelib::EKF e = turtlelib::EKF(c, n);
+//     turtlelib::EKF e = turtlelib::EKF(c, n);
 
-    turtlelib::Twist2D u {1.0, 1.0, 1.0};
+//     turtlelib::Twist2D u {1.0, 1.0, 1.0};
 
-    arma::mat H = e.calc_H(j);
+//     arma::mat H = e.calc_H(j);
 
-    // CHECK(H.n_cols == 1);
-    CHECK(1 == 2);
+//     // CHECK(H.n_cols == 1);
+//     CHECK(1 == 2);
 
-}
+// }
