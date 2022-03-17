@@ -45,19 +45,19 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
     for (int i=0; i<int(msg.ranges.size()); i++)
     {
         auto angle = i*angle_inc;
-        ROS_ERROR_STREAM("ANGLE: " << angle);
+        // ROS_ERROR_STREAM("ANGLE: " << angle);
 
         // handle out of range case
         if (int(msg.ranges.at(i)) > range_max)
         {
-            if (int(cluster.size()) < 3)
+            if (int(cluster.size()) < 4)
             {
                 cluster.clear();
             }
             else
             {
-                ROS_ERROR_STREAM("CLUSTER ADDED (OOR).");
-                ROS_ERROR_STREAM("Length of Cluster List: " << int(cluster_list.size()));
+                // ROS_ERROR_STREAM("CLUSTER ADDED (OOR).");
+                // ROS_ERROR_STREAM("Length of Cluster List: " << int(cluster_list.size()));
                 cluster_list.push_back(cluster);
                 cluster.clear();
             }
@@ -70,9 +70,9 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
             auto prev = std::get<1>(cluster.back());
             auto curr = msg.ranges.at(i);
 
-            ROS_ERROR_STREAM("PREV: " << prev);
-            ROS_ERROR_STREAM("CURR: " << curr);
-            ROS_ERROR_STREAM("DIFF: " << prev-curr);
+            // ROS_ERROR_STREAM("PREV: " << prev);
+            // ROS_ERROR_STREAM("CURR: " << curr);
+            // ROS_ERROR_STREAM("DIFF: " << prev-curr);
 
 
             if (abs(prev-curr) <= threshold)
@@ -81,10 +81,10 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
             }
             else
             {
-                if (int(cluster.size()) >= 3)
+                if (int(cluster.size()) >= 4)
                 {
-                    ROS_ERROR_STREAM("CLUSTER ADDED (NORM).");
-                    ROS_ERROR_STREAM("Length of Cluster List: " << int(cluster_list.size()));
+                    // ROS_ERROR_STREAM("CLUSTER ADDED (NORM).");
+                    // ROS_ERROR_STREAM("Length of Cluster List: " << int(cluster_list.size()));
                     cluster_list.push_back(cluster);
                     cluster.clear();
                 }
@@ -130,7 +130,7 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
 
     // print clusters for testing
     ma.markers.resize(size);
-    circle_ma.markers.resize(size);
+    circle_ma.markers.resize(int(cluster_list.size()));
     test_pub_flag = false;
     int counter = 0;
 
@@ -189,45 +189,52 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
         }
 
         turtlelib::circleFit cf(cluster_x, cluster_y);
+        double c_x, c_y, r;
+        std::tie(c_x, c_y, r) = cf.fit_circle();
+
+        //set header and timestamp
+        circle_ma.markers[i].header.frame_id = "red_base_scan";
+        circle_ma.markers[i].header.stamp = ros::Time::now();
+
+        //set id diff for each marker
+        circle_ma.markers[i].id = i;
+
+        //set color and action
+        circle_ma.markers[i].type = visualization_msgs::Marker::CYLINDER;
+        // ROS_ERROR_STREAM("r (Obstacle " << i << "): " << r);
+
         if (cf.classify_circle())
         {
-            double c_x, c_y, r;
-            std::tie(c_x, c_y, r) = cf.fit_circle();
-
-            //set header and timestamp
-            circle_ma.markers[i].header.frame_id = "red_base_scan";
-            circle_ma.markers[i].header.stamp = ros::Time::now();
-
-            //set id diff for each marker
-            circle_ma.markers[i].id = i;
-
-            //set color and action
-            circle_ma.markers[i].type = visualization_msgs::Marker::CYLINDER;
-            // ROS_ERROR_STREAM("r (Obstacle " << i << "): " << r);
-            
-            //set pose of marker
-            circle_ma.markers[i].pose.position.x = c_x;
-            circle_ma.markers[i].pose.position.y = c_y;
-            circle_ma.markers[i].pose.position.z = 0;
-            circle_ma.markers[i].pose.orientation.x = 0;
-            circle_ma.markers[i].pose.orientation.y = 0;
-            circle_ma.markers[i].pose.orientation.z = 0;
-            circle_ma.markers[i].pose.orientation.w = 1;
-
-            //set size
-            circle_ma.markers[i].scale.x = 2*r;
-            circle_ma.markers[i].scale.y = 2*r;
-            circle_ma.markers[i].scale.z = 0.25;
-
-
-            //set color
-            circle_ma.markers[i].color.r = 1.0;
-            circle_ma.markers[i].color.g = 1.0;
-            circle_ma.markers[i].color.b = 0.0;
-            circle_ma.markers[i].color.a = 1.0;
+            circle_ma.markers[i].action = visualization_msgs::Marker::ADD;
         }
+        else
+        {
+            circle_ma.markers[i].action = visualization_msgs::Marker::DELETE;
+        }
+        
+        //set pose of marker
+        circle_ma.markers[i].pose.position.x = c_x;
+        circle_ma.markers[i].pose.position.y = c_y;
+        circle_ma.markers[i].pose.position.z = 0;
+        circle_ma.markers[i].pose.orientation.x = 0;
+        circle_ma.markers[i].pose.orientation.y = 0;
+        circle_ma.markers[i].pose.orientation.z = 0;
+        circle_ma.markers[i].pose.orientation.w = 1;
+
+        //set size
+        circle_ma.markers[i].scale.x = 2*r;
+        circle_ma.markers[i].scale.y = 2*r;
+        circle_ma.markers[i].scale.z = 0.25;
+
+
+        //set color
+        circle_ma.markers[i].color.r = 1.0;
+        circle_ma.markers[i].color.g = 1.0;
+        circle_ma.markers[i].color.b = 0.0;
+        circle_ma.markers[i].color.a = 1.0;
 
     }
+    // ROS_ERROR_STREAM_ONCE(circle_ma);
     test_pub_flag = true;
 
     // ROS_ERROR_STREAM_ONCE("____________________________________");
@@ -259,8 +266,10 @@ int main(int argc, char * argv[])
     
     while(ros::ok())
     {
+        ROS_ERROR_STREAM("LANDMARKS");
         if (test_pub_flag)
         {
+            // ROS_ERROR_STREAM("PUBLISHING");
             test_cluster_pub.publish(ma);
             landmark_pub.publish(circle_ma);
         }
