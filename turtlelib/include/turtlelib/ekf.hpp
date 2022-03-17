@@ -39,6 +39,8 @@ namespace turtlelib
         
         void update(int j, double x, double y);
 
+        bool check_known_obs(double x, double y);
+
 
     
     private:
@@ -54,6 +56,7 @@ namespace turtlelib
         arma::mat sigma_minus;
         arma::mat sigma_plus;
         arma::mat sigma_prev;
+        std::vector<Vector2D> known_obs;
         // diffDrive::Twist2D u;
     };
 }
