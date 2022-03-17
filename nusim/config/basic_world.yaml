@@ -21,6 +21,6 @@ nusim:
     time_increment: 0.00055555555
     scan_time: 0.2
     range_min: 0.12
-    range_max: 1.5
+    range_max: 3.5
     noise_level: 0.01
     num_samples: 360
