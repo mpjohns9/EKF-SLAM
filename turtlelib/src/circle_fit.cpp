@@ -29,6 +29,7 @@ namespace turtlelib
 
     std::pair<arma::vec, arma::vec> circleFit::shift()
     {
+        ROS_ERROR_STREAM("SHIFT");
         arma::vec new_x(int(cluster_x.size()), arma::fill::ones);
         arma::vec new_y(int(cluster_y.size()), arma::fill::ones);
 
@@ -43,6 +44,7 @@ namespace turtlelib
 
     arma::vec circleFit::calc_z()
     {
+        ROS_ERROR_STREAM("CALC z");
         for (int i=0; i<int(z.size()); i++)
         {
             z.at(i) = pow(cluster_x_shifted.at(i), 2) + pow(cluster_y_shifted.at(i), 2);
@@ -52,6 +54,7 @@ namespace turtlelib
 
     arma::mat circleFit::z_mat()
     {
+        ROS_ERROR_STREAM("Z MAT");
         arma::vec ones(int(z.size()), arma::fill::ones);
         arma::mat Z;
 
@@ -81,6 +84,7 @@ namespace turtlelib
 
     arma::mat circleFit::constraint_matrix_inv()
     {
+        ROS_ERROR_STREAM("CONSTRAINT MAT");
         arma::mat H_inv(4, 4, arma::fill::eye);
         H_inv(0, 0) = 0;
         H_inv(0, 3) = 0.5;
@@ -91,6 +95,7 @@ namespace turtlelib
 
     std::tuple<arma::mat, arma::vec, arma::mat> circleFit::svd(arma::mat X)
     {
+        ROS_ERROR_STREAM("SVD");
         arma::mat U;
         arma::vec s;
         arma::mat V;
@@ -101,6 +106,7 @@ namespace turtlelib
 
     arma::mat circleFit::calc_A()
     {
+        ROS_ERROR_STREAM("CALC A");
         arma::mat U;
         arma::vec s;
         arma::mat V;
@@ -113,12 +119,19 @@ namespace turtlelib
         }
         else
         {
+            ROS_ERROR_STREAM("S");
+            s.print();
             arma::mat s_mat = arma::diagmat(s);
-            // s_mat.print();
+            ROS_ERROR_STREAM("S MAT");
+            s_mat.print();
+            ROS_ERROR_STREAM("V");
+            V.print();
             arma::mat Y = V*s_mat*V.t();
-            // Y.print();
+            ROS_ERROR_STREAM("Y");
+            Y.print();
             arma::mat Q = Y*constraint_matrix_inv()*Y;
-            // Q.print();
+            ROS_ERROR_STREAM("Q");
+            Q.print();
 
             arma::vec eigval;
             arma::mat eigvec;
@@ -146,6 +159,7 @@ namespace turtlelib
 
     std::tuple<double, double, double> circleFit::fit_circle()
     {
+        ROS_ERROR_STREAM("FIT CIRCLE");
         shift();
         calc_z();
         arma::vec A = calc_A();
