@@ -25,11 +25,14 @@
 #include "turtlelib/rigid2d.hpp"
 #include "turtlelib/diff_drive.hpp"
 #include "turtlelib/ekf.hpp"
+#include "turtlelib/circle_fit.hpp"
 #include <vector>
 
 static auto angle_inc = 0.0;
 static auto range_max = 0.0;
 visualization_msgs::MarkerArray ma;
+visualization_msgs::MarkerArray circle_ma;
+
 
 bool test_pub_flag = false;
 
@@ -58,7 +61,7 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
                 cluster_list.push_back(cluster);
                 cluster.clear();
             }
-            break;
+            continue;
         }
 
         // cluster range data
@@ -127,10 +130,15 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
 
     // print clusters for testing
     ma.markers.resize(size);
+    circle_ma.markers.resize(size);
     test_pub_flag = false;
     int counter = 0;
+
     for (int i=0; i<int(cluster_list.size()); i++)
     {
+        std::vector<double> cluster_x;
+        std::vector<double> cluster_y;
+        double color = 0.05 + (i*0.95/int(cluster_list.size()));
         // ROS_ERROR_STREAM_ONCE("CLUSTER: -------------------------------------");
         for (int j=0; j<int(cluster_list.at(i).size()); j++)
         {
@@ -140,6 +148,9 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
 
             auto x = r*cos(angle);
             auto y = r*sin(angle);
+
+            cluster_x.push_back(x);
+            cluster_y.push_back(y);
 
             //set header and timestamp
             ma.markers[counter].header.frame_id = "red_base_scan";
@@ -169,12 +180,50 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
 
             //set color
             ma.markers[counter].color.r = 0.0;
-            ma.markers[counter].color.g = 1.0;
+            ma.markers[counter].color.g = color;
             ma.markers[counter].color.b = 0.0;
             ma.markers[counter].color.a = 1.0;
+
             counter++;
 
         }
+
+        turtlelib::circleFit cf(cluster_x, cluster_y);
+        double c_x, c_y, r;
+        std::tie(c_x, c_y, r) = cf.fit_circle();
+
+        //set header and timestamp
+        circle_ma.markers[i].header.frame_id = "red_base_scan";
+        circle_ma.markers[i].header.stamp = ros::Time::now();
+
+        //set id diff for each marker
+        circle_ma.markers[i].id = i;
+
+        //set color and action
+        circle_ma.markers[i].type = visualization_msgs::Marker::CYLINDER;
+        // ROS_ERROR_STREAM("r (Obstacle " << i << "): " << r);
+        
+        //set pose of marker
+        circle_ma.markers[i].pose.position.x = c_x;
+        circle_ma.markers[i].pose.position.y = c_y;
+        circle_ma.markers[i].pose.position.z = 0;
+        circle_ma.markers[i].pose.orientation.x = 0;
+        circle_ma.markers[i].pose.orientation.y = 0;
+        circle_ma.markers[i].pose.orientation.z = 0;
+        circle_ma.markers[i].pose.orientation.w = 1;
+
+        //set size
+        circle_ma.markers[i].scale.x = 2*r;
+        circle_ma.markers[i].scale.y = 2*r;
+        circle_ma.markers[i].scale.z = 0.25;
+
+
+        //set color
+        circle_ma.markers[i].color.r = 1.0;
+        circle_ma.markers[i].color.g = 1.0;
+        circle_ma.markers[i].color.b = 0.0;
+        circle_ma.markers[i].color.a = 1.0;
+
     }
     test_pub_flag = true;
 
@@ -200,6 +249,8 @@ int main(int argc, char * argv[])
     nh.getParam("nusim/sensor/range_max", range_max);
 
     ros::Publisher test_cluster_pub = nh.advertise<visualization_msgs::MarkerArray>("test_cluster", 1000);
+    ros::Publisher landmark_pub = nh.advertise<visualization_msgs::MarkerArray>("landmarks", 1000);
+
 
     ros::Subscriber laser_sub = nh.subscribe("laser_scan", 1000, laserCallback);
     
@@ -208,6 +259,7 @@ int main(int argc, char * argv[])
         if (test_pub_flag)
         {
             test_cluster_pub.publish(ma);
+            landmark_pub.publish(circle_ma);
         }
         ros::spinOnce();
         r.sleep();
