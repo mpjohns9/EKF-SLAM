@@ -189,40 +189,43 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
         }
 
         turtlelib::circleFit cf(cluster_x, cluster_y);
-        double c_x, c_y, r;
-        std::tie(c_x, c_y, r) = cf.fit_circle();
+        if (cf.classify_circle())
+        {
+            double c_x, c_y, r;
+            std::tie(c_x, c_y, r) = cf.fit_circle();
 
-        //set header and timestamp
-        circle_ma.markers[i].header.frame_id = "red_base_scan";
-        circle_ma.markers[i].header.stamp = ros::Time::now();
+            //set header and timestamp
+            circle_ma.markers[i].header.frame_id = "red_base_scan";
+            circle_ma.markers[i].header.stamp = ros::Time::now();
 
-        //set id diff for each marker
-        circle_ma.markers[i].id = i;
+            //set id diff for each marker
+            circle_ma.markers[i].id = i;
 
-        //set color and action
-        circle_ma.markers[i].type = visualization_msgs::Marker::CYLINDER;
-        // ROS_ERROR_STREAM("r (Obstacle " << i << "): " << r);
-        
-        //set pose of marker
-        circle_ma.markers[i].pose.position.x = c_x;
-        circle_ma.markers[i].pose.position.y = c_y;
-        circle_ma.markers[i].pose.position.z = 0;
-        circle_ma.markers[i].pose.orientation.x = 0;
-        circle_ma.markers[i].pose.orientation.y = 0;
-        circle_ma.markers[i].pose.orientation.z = 0;
-        circle_ma.markers[i].pose.orientation.w = 1;
+            //set color and action
+            circle_ma.markers[i].type = visualization_msgs::Marker::CYLINDER;
+            // ROS_ERROR_STREAM("r (Obstacle " << i << "): " << r);
+            
+            //set pose of marker
+            circle_ma.markers[i].pose.position.x = c_x;
+            circle_ma.markers[i].pose.position.y = c_y;
+            circle_ma.markers[i].pose.position.z = 0;
+            circle_ma.markers[i].pose.orientation.x = 0;
+            circle_ma.markers[i].pose.orientation.y = 0;
+            circle_ma.markers[i].pose.orientation.z = 0;
+            circle_ma.markers[i].pose.orientation.w = 1;
 
-        //set size
-        circle_ma.markers[i].scale.x = 2*r;
-        circle_ma.markers[i].scale.y = 2*r;
-        circle_ma.markers[i].scale.z = 0.25;
+            //set size
+            circle_ma.markers[i].scale.x = 2*r;
+            circle_ma.markers[i].scale.y = 2*r;
+            circle_ma.markers[i].scale.z = 0.25;
 
 
-        //set color
-        circle_ma.markers[i].color.r = 1.0;
-        circle_ma.markers[i].color.g = 1.0;
-        circle_ma.markers[i].color.b = 0.0;
-        circle_ma.markers[i].color.a = 1.0;
+            //set color
+            circle_ma.markers[i].color.r = 1.0;
+            circle_ma.markers[i].color.g = 1.0;
+            circle_ma.markers[i].color.b = 0.0;
+            circle_ma.markers[i].color.a = 1.0;
+        }
 
     }
     test_pub_flag = true;
