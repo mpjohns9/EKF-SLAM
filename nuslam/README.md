@@ -46,7 +46,7 @@ algorithm is not properly tuned, so the SLAM algorithm is unable to run on unkno
 is functional when presented with fake sensor data.
 
  # Landmark Detection Demonstration
- ![Landmark Video](media/demo.mp4)
+ ![Landmark Video](media/demo.gif)
 
  ![Landmark SS](media/landmark.png)
 
