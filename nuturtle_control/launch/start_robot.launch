@@ -8,6 +8,8 @@
     <remap from="red/sensor_data" to="sensor_data"/>
 
     <rosparam command="load" file="$(find nuturtle_description)/config/diff_params.yaml"/>
+    <rosparam command="load" file="$(find nusim)/config/basic_world.yaml"/>
+
 
     <node name="circle" pkg="nuturtle_control" type="circle" if="$(eval arg('cmd_src') == 'circle')" output="screen">
         <param name="frequency" value="100"/>
@@ -33,12 +35,13 @@
     </group>
 
     <group if="$(eval arg('robot') != 'nusim')">
-        
+        <!-- <remap from="/laser_scan" to="/scan"/> -->
+
         <include file="$(find nuturtle_description)/launch/load.launch" pass_all_args="true">
             <arg name="color" value="blue"/>
             <arg name="use_jsp" value="true"/>
             <arg name="use_rviz" value="true"/>
-            <arg name="config" value="$(find nusim)/config/nusim.rviz"/>
+            <arg name="config" value="$(find nuslam)/config/nuslam.rviz"/>
             <arg name="fixed_frame" value="world"/>
         </include>
 
