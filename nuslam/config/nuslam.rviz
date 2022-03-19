@@ -4,9 +4,7 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Global Options1
         - /TF1/Frames1
-        - /LaserScan1
       Splitter Ratio: 0.5
     Tree Height: 1568
   - Class: rviz/Selection
@@ -58,7 +56,7 @@ Visualization Manager:
       Marker Topic: /slam_markers
       Name: SlamMarkers
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -66,7 +64,7 @@ Visualization Manager:
       Marker Topic: /nusim/obstacles
       Name: SimMarkers
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -74,7 +72,7 @@ Visualization Manager:
       Marker Topic: /nusim/walls
       Name: WallMarkers
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -82,7 +80,7 @@ Visualization Manager:
       Marker Topic: /fake_sensor
       Name: FakeSensorMarkers
       Namespaces:
-        "": true
+        {}
       Queue Size: 100
       Value: true
     - Angle Tolerance: 0.10000000149011612
@@ -126,7 +124,7 @@ Visualization Manager:
       Frames:
         All Enabled: false
         blue_base_footprint:
-          Value: true
+          Value: false
         blue_base_link:
           Value: false
         blue_base_scan:
@@ -136,39 +134,13 @@ Visualization Manager:
         blue_imu_link:
           Value: false
         blue_wheel_left_link:
-          Value: true
+          Value: false
         blue_wheel_right_link:
-          Value: true
-        green_base_footprint:
-          Value: true
-        green_base_link:
-          Value: true
-        green_base_scan:
-          Value: true
-        green_caster_back_link:
-          Value: true
-        green_imu_link:
-          Value: true
-        green_wheel_left_link:
-          Value: true
-        green_wheel_right_link:
-          Value: true
-        map:
-          Value: true
+          Value: false
         odom:
-          Value: true
-        red_base_footprint:
-          Value: true
-        red_base_link:
-          Value: false
-        red_base_scan:
-          Value: false
-        red_caster_back_link:
-          Value: false
-        red_imu_link:
           Value: false
         world:
-          Value: true
+          Value: false
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -177,40 +149,19 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
-          blue_base_footprint:
-            blue_base_link:
-              blue_base_scan:
-                {}
-              blue_caster_back_link:
-                {}
-              blue_imu_link:
-                {}
-              blue_wheel_left_link:
-                {}
-              blue_wheel_right_link:
-                {}
-          map:
-            odom:
-              green_base_footprint:
-                green_base_link:
-                  green_base_scan:
-                    {}
-                  green_caster_back_link:
-                    {}
-                  green_imu_link:
-                    {}
-                  green_wheel_left_link:
-                    {}
-                  green_wheel_right_link:
-                    {}
-          red_base_footprint:
-            red_base_link:
-              red_base_scan:
-                {}
-              red_caster_back_link:
-                {}
-              red_imu_link:
-                {}
+          odom:
+            blue_base_footprint:
+              blue_base_link:
+                blue_base_scan:
+                  {}
+                blue_caster_back_link:
+                  {}
+                blue_imu_link:
+                  {}
+                blue_wheel_left_link:
+                  {}
+                blue_wheel_right_link:
+                  {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -251,39 +202,6 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        red_base_footprint:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        red_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        red_base_scan:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        red_caster_back_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        red_imu_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        red_wheel_left_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        red_wheel_right_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
       Name: SimRobot
       Robot Description: red/robot_description
       TF Prefix: ""
@@ -300,39 +218,6 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        green_base_footprint:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        green_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        green_base_scan:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        green_caster_back_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        green_imu_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        green_wheel_left_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        green_wheel_right_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
       Name: SlamRobot
       Robot Description: green/robot_description
       TF Prefix: ""
@@ -436,6 +321,42 @@ Visualization Manager:
       Topic: /slam_path
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/LaserScan
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: LaserScan
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic: /scan
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /landmarks
+      Name: MarkerArray
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -464,7 +385,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 7.372713088989258
+      Distance: 5.596843242645264
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -472,17 +393,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.2744280695915222
-        Y: 0.2968413233757019
-        Z: -0.4462313950061798
+        X: 0.051777277141809464
+        Y: 0.18100522458553314
+        Z: -0.25989583134651184
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6897969841957092
+      Pitch: 0.8647968173027039
       Target Frame: <Fixed Frame>
-      Yaw: 0.8953981399536133
+      Yaw: 4.605396270751953
     Saved: ~
 Window Geometry:
   Displays:
