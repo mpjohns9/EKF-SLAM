@@ -1,4 +1,4 @@
-# HOMEWORK 1 - Task C
+# NUSIM
 **Author: Marshall Johnson**  
 
 This package can be used as a simulator and visualizer.
