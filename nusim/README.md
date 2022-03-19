@@ -1,4 +1,4 @@
-# NUSIM
+# THE NUSIM PACKAGE
 **Author: Marshall Johnson**  
 
 This package can be used as a simulator and visualizer.
