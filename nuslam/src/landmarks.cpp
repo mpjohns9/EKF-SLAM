@@ -30,10 +30,11 @@
 
 static auto angle_inc = 0.0;
 static auto range_max = 0.0;
+static auto range_min = 0.0;
 visualization_msgs::MarkerArray ma;
 visualization_msgs::MarkerArray circle_ma;
 
-
+bool landmark_flag = false;
 bool test_pub_flag = false;
 
 void laserCallback(const sensor_msgs::LaserScan & msg)
@@ -44,6 +45,7 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
     static auto threshold = 0.1;
     for (int i=0; i<int(msg.ranges.size()); i++)
     {
+        // ROS_ERROR_STREAM("LENGTH OF MSG: " << msg.ranges.size());
         auto angle = i*angle_inc;
         // ROS_ERROR_STREAM("ANGLE: " << angle);
 
@@ -57,9 +59,9 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
             else
             {
                 // ROS_ERROR_STREAM("CLUSTER ADDED (OOR).");
-                // ROS_ERROR_STREAM("Length of Cluster List: " << int(cluster_list.size()));
                 cluster_list.push_back(cluster);
                 cluster.clear();
+                // ROS_ERROR_STREAM("Length of Cluster List: " << int(cluster_list.size()));
             }
             continue;
         }
@@ -126,28 +128,32 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
     {
         size += int(cluster_list.at(i).size());
     }
-    
 
-    // print clusters for testing
     ma.markers.resize(size);
-    circle_ma.markers.resize(int(cluster_list.size()));
     test_pub_flag = false;
     int counter = 0;
-
+    // ROS_ERROR_STREAM("CLUSTER LIST SIZE: " << cluster_list.size());
+    std::vector<std::tuple<double, double, double>> circle_mark;
     for (int i=0; i<int(cluster_list.size()); i++)
     {
+        // ROS_ERROR_STREAM("CLUSTER " << i);
         std::vector<double> cluster_x;
         std::vector<double> cluster_y;
         double color = 0.05 + (i*0.95/int(cluster_list.size()));
-        // ROS_ERROR_STREAM_ONCE("CLUSTER: -------------------------------------");
+        // ROS_ERROR_STREAM("CLUSTER " << i << "_______________________________________");
+        // ROS_ERROR_STREAM("CLUSTER SIZE " << cluster_list.at(i).size());
         for (int j=0; j<int(cluster_list.at(i).size()); j++)
         {
-            // ROS_ERROR_STREAM_ONCE(std::get<1>(cluster_list.at(i).at(j)));
+            // ROS_ERROR_STREAM(std::get<1>(cluster_list.at(i).at(j)));
             auto angle = std::get<0>(cluster_list.at(i).at(j));
             auto r = std::get<1>(cluster_list.at(i).at(j));
 
             auto x = r*cos(angle);
             auto y = r*sin(angle);
+
+            // ROS_ERROR_STREAM("ANGLE: " << angle);
+            // ROS_ERROR_STREAM("X: " << x);
+            // ROS_ERROR_STREAM("Y: " << y);
 
             cluster_x.push_back(x);
             cluster_y.push_back(y);
@@ -188,10 +194,29 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
 
         }
 
+        // ROS_ERROR_STREAM("TOTAL CLUSTERS: " << cluster_list.size());
+
         turtlelib::circleFit cf(cluster_x, cluster_y);
         double c_x, c_y, r;
         std::tie(c_x, c_y, r) = cf.fit_circle();
 
+        // ROS_ERROR_STREAM("FIT PARAMS: " << c_x << c_y << r);
+
+        // ROS_ERROR_STREAM("DONE");
+
+        if (cf.classify_circle())
+        {
+            // ROS_ERROR_STREAM("CLASSIFIED CIRCLE");
+            circle_mark.push_back(std::make_tuple(c_x, c_y, r));
+        }
+        // ROS_ERROR_STREAM("DONE");
+
+    }
+
+    circle_ma.markers.resize(circle_mark.size());
+    // ROS_ERROR_STREAM("CIRCLE MARK SIZE: " << circle_mark.size());
+    for (int i=0; i<int(circle_mark.size()); i++)
+    {
         //set header and timestamp
         circle_ma.markers[i].header.frame_id = "red_base_scan";
         circle_ma.markers[i].header.stamp = ros::Time::now();
@@ -203,18 +228,14 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
         circle_ma.markers[i].type = visualization_msgs::Marker::CYLINDER;
         // ROS_ERROR_STREAM("r (Obstacle " << i << "): " << r);
 
-        if (cf.classify_circle())
-        {
-            circle_ma.markers[i].action = visualization_msgs::Marker::ADD;
-        }
-        else
-        {
-            circle_ma.markers[i].action = visualization_msgs::Marker::DELETE;
-        }
+        // if (abs(c_x) > 3 or abs(c_y) > 3)
+        // {
+        //     circle_ma.markers[i].action = visualization_msgs::Marker::DELETE;
+        // }
         
         //set pose of marker
-        circle_ma.markers[i].pose.position.x = c_x;
-        circle_ma.markers[i].pose.position.y = c_y;
+        circle_ma.markers[i].pose.position.x = std::get<0>(circle_mark.at(i));
+        circle_ma.markers[i].pose.position.y = std::get<1>(circle_mark.at(i));
         circle_ma.markers[i].pose.position.z = 0;
         circle_ma.markers[i].pose.orientation.x = 0;
         circle_ma.markers[i].pose.orientation.y = 0;
@@ -222,8 +243,8 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
         circle_ma.markers[i].pose.orientation.w = 1;
 
         //set size
-        circle_ma.markers[i].scale.x = 2*r;
-        circle_ma.markers[i].scale.y = 2*r;
+        circle_ma.markers[i].scale.x = 2*std::get<2>(circle_mark.at(i));
+        circle_ma.markers[i].scale.y = 2*std::get<2>(circle_mark.at(i));
         circle_ma.markers[i].scale.z = 0.25;
 
 
@@ -232,7 +253,6 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
         circle_ma.markers[i].color.g = 1.0;
         circle_ma.markers[i].color.b = 0.0;
         circle_ma.markers[i].color.a = 1.0;
-
     }
     // ROS_ERROR_STREAM_ONCE(circle_ma);
     test_pub_flag = true;
@@ -248,6 +268,11 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
 
 }
 
+void landmarkCallback(const ros::TimerEvent&)
+{
+    landmark_flag = true;   
+}
+
 int main(int argc, char * argv[])
 {
     ros::init(argc, argv, "landmarks");
@@ -257,21 +282,30 @@ int main(int argc, char * argv[])
 
     nh.getParam("nusim/sensor/angle_increment", angle_inc);
     nh.getParam("nusim/sensor/range_max", range_max);
+    nh.getParam("nusim/sensor/range_min", range_min);
 
     ros::Publisher test_cluster_pub = nh.advertise<visualization_msgs::MarkerArray>("test_cluster", 1000);
     ros::Publisher landmark_pub = nh.advertise<visualization_msgs::MarkerArray>("landmarks", 1000);
 
 
     ros::Subscriber laser_sub = nh.subscribe("laser_scan", 1000, laserCallback);
+
+    ros::Timer landmark_timer = nh.createTimer(ros::Duration(0.2), landmarkCallback);
+
     
     while(ros::ok())
     {
-        ROS_ERROR_STREAM("LANDMARKS");
+        // ROS_ERROR_STREAM("LANDMARKS");
         if (test_pub_flag)
         {
             // ROS_ERROR_STREAM("PUBLISHING");
             test_cluster_pub.publish(ma);
+        }
+
+        if (landmark_flag)
+        {
             landmark_pub.publish(circle_ma);
+            landmark_flag = false;
         }
         ros::spinOnce();
         r.sleep();
