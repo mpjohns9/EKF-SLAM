@@ -349,7 +349,7 @@ void scantimerCallback (const ros::TimerEvent&)
             // ROS_ERROR_STREAM("VEC 1: " << o1_vec);
             // ROS_ERROR_STREAM("VEC 2: " << o2_vec);
 
-            double dx = o2_vec.x - o1_vec.  x;
+            double dx = o2_vec.x - o1_vec.x;
             double dy = o2_vec.y - o1_vec.y;
             // ROS_ERROR_STREAM("DX: " << dx);
             // ROS_ERROR_STREAM("DY: " << dy);
@@ -358,7 +358,7 @@ void scantimerCallback (const ros::TimerEvent&)
             double D = (o1_vec.x*o2_vec.y) - (o2_vec.x*o1_vec.y);
             // ROS_ERROR_STREAM("D: " << D);
 
-            double disc = (pow(collision_rad, 2)*pow(dr, 2)) - pow(D, 2);
+            double disc = (pow(radius, 2)*pow(dr, 2)) - pow(D, 2);
             // ROS_ERROR_STREAM("DISC " << disc);
 
             if (turtlelib::almost_equal(disc, 0.0) or disc > 0)
