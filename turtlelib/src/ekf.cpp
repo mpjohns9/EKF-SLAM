@@ -53,35 +53,74 @@ namespace turtlelib
         int index = 0;
         for (int i=0; i<int(obs_x.size()); i++)
         {
-            // ROS_ERROR_STREAM("LAND X: " << obs_x.at(i));
-            // ROS_ERROR_STREAM("LAND Y: " << obs_y.at(i));
+            ROS_ERROR_STREAM("SIZE OF OBS VEC: " << obs_x.size());
+            ROS_ERROR_STREAM("LAND X: " << obs_x.at(i));
+            ROS_ERROR_STREAM("LAND Y: " << obs_y.at(i));
             double r = sqrt(pow(obs_x.at(i), 2) + pow(obs_y.at(i), 2));
             // ROS_ERROR_STREAM("r: " << r);
             double phi = atan2(obs_y.at(i), obs_x.at(i));
             // ROS_ERROR_STREAM("phi: " << r);
 
-            double mx = state.x + r*cos(phi + state.ang);
+            double mx = xi_prev.at(1) + r*cos(phi + xi_prev.at(0));
             // ROS_ERROR_STREAM("mx: " << r);
-            double my = state.y + r*sin(phi + state.ang);
+            double my = xi_prev.at(2) + r*sin(phi + xi_prev.at(0));
             // ROS_ERROR_STREAM("my: " << r);
 
             obstacles.at(index) = mx;
             obstacles.at(index+1) = my;
 
-            for (int j=0; j<int(known_obs.size()); j++)
-            {
-                if (abs(known_obs.at(j).x - obs_x.at(i)) > 0.05 or abs(known_obs.at(j).y - obs_x.at(i)) > 0.05)
-                {
-                    Vector2D o;
-                    o.x = obs_x.at(i);
-                    o.y = obs_y.at(i);
+            Vector2D o;
+            o.x = obs_x.at(i);
+            o.y = obs_y.at(i);
 
-                    known_obs.push_back(o);
-                }
-            }
+            Vector2D mb;
+            mb.x = xi_prev.at(1);
+            mb.y = xi_prev.at(2);
+
+            Transform2D Tmb(mb);
+
+            std::vector<Vector2D> known_obs_copy = known_obs;
+            bool exists = false;
+
+            // ROS_ERROR_STREAM("SIZE: " << known_obs_copy.size());
+            // if (known_obs_copy.size() > 0)
+            // {
+            //     for (int j=0; j<int(known_obs_copy.size()); j++)
+            //     {   
+                    
+            //         ROS_ERROR_STREAM("CHECKING KNOWN OBSTACLE #" << j+1);
+
+            //         ROS_ERROR_STREAM("KNOWN X: " << known_obs.at(j).x);
+            //         ROS_ERROR_STREAM("CURRENT X: " << obs_x.at(i));
+
+            //         ROS_ERROR_STREAM("KNOWN Y: " << known_obs.at(j).y);
+            //         ROS_ERROR_STREAM("CURRENT Y: " << obs_y.at(i));
+
+            //         if ((abs(known_obs.at(j).x - obs_x.at(i)) < 0.05) && (abs(known_obs.at(j).y - obs_y.at(i)) < 0.05))
+            //         {
+            //             exists = true;
+            //             ROS_ERROR_STREAM("OBSTACLE EXISTS ALREADY");
+            //             break;
+            //         }
+            //     }
+
+            //     if (!exists)
+            //     {
+            //         ROS_ERROR_STREAM_ONCE("PUSHING BACK -- NEW OBS");
+            //         known_obs.push_back(Tmb(o));
+            //     }
+            // }
+            // else
+            // {
+            //     ROS_ERROR_STREAM_ONCE("PUSHING BACK -- FIRST OBS");
+            //     known_obs.push_back(Tmb(o));
+            // }
+            ROS_ERROR_STREAM("OBS SIZE: " << known_obs.size());
+            ROS_ERROR_STREAM("______________________________________________________________________");
             index += 2;
         }
 
+        // ROS_ERROR_STREAM("XI: " << xi_prev);
         xi_prev = arma::join_cols(q, obstacles);
         // ROS_ERROR_STREAM("XI PREV INIT: " << xi_prev);
         return xi_prev;
@@ -222,7 +261,7 @@ namespace turtlelib
 
     void EKF::predict(Twist2D u)
     {
-        ROS_ERROR_STREAM("PREDICT");
+        // ROS_ERROR_STREAM("PREDICT");
         int n = num_obstacles;
         arma::mat Q = arma::eye(3, 3);
         arma::mat Q_bar(3+(2*n), 3+(2*n), arma::fill::zeros);
@@ -239,7 +278,7 @@ namespace turtlelib
 
     void EKF::update(int j, double x, double y)
     {
-        ROS_ERROR_STREAM("UPDATE");
+        // ROS_ERROR_STREAM("UPDATE");
         // xi_plus.print("XI INIT");
         arma::mat I = arma::eye(3+(2*num_obstacles), 3+(2*num_obstacles));
 
@@ -278,9 +317,21 @@ namespace turtlelib
 
     bool EKF::check_known_obs(double x, double y)
     {
+        Vector2D v;
+        v.x = x;
+        v.y = y;
+
+        Vector2D mb;
+        mb.x = xi_prev.at(1);
+        mb.y = xi_prev.at(2);
+
+        Transform2D Tmb(mb);
+
+        Vector2D v_mb = Tmb(v);
+
         for (int i=0; i<int(known_obs.size()); i++)
         {
-            if (abs(known_obs.at(i).x - x) > 0.05 or abs(known_obs.at(i).y - y) > 0.05)
+            if (abs(known_obs.at(i).x - v_mb.x) > 0.05 && abs(known_obs.at(i).y - v_mb.y) > 0.05)
             {
                 return true;
             }
