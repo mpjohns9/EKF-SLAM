@@ -101,7 +101,7 @@ void jointCallback(const sensor_msgs::JointState & msg)
     dd = turtlelib::diffDrive(c, pos, v);
 }
 
-void sensorCallback(const visualization_msgs::MarkerArray & msg)
+void landmarkCallback(const visualization_msgs::MarkerArray & msg)
 {
     int n = msg.markers.size();
 
@@ -120,10 +120,11 @@ void sensorCallback(const visualization_msgs::MarkerArray & msg)
         obs_x.at(i) = x;
         obs_y.at(i) = y;
 
-        if (e.check_known_obs(x, y))
-        {
-            landmark_flag = true;
-        }
+        // if (e.check_known_obs(x, y))
+        // {
+        //     ROS_ERROR_STREAM("NEW OBSTACLE DETECTED");
+        //     landmark_flag = true;
+        // }
 
         // z_sensor.at(index) = x;
         // z_sensor.at(index + 1) = y;
@@ -133,6 +134,7 @@ void sensorCallback(const visualization_msgs::MarkerArray & msg)
 
     if (landmark_flag)
     {
+        ROS_ERROR_STREAM("INITIALIZING LANDMARKS");
         e.initialize_landmarks(obs_x, obs_y);
         landmark_flag = false;
     }
@@ -311,7 +313,8 @@ int main(int argc, char * argv[])
     ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("slam_path", 1000);
 
     ros::Subscriber joint_sub = nh.subscribe("joint_states", 1000, jointCallback);
-    ros::Subscriber fake_sensor_sub = nh.subscribe("fake_sensor", 1000, sensorCallback);
+    // ros::Subscriber fake_sensor_sub = nh.subscribe("fake_sensor", 1000, landmarkCallback);
+    ros::Subscriber landmark_sub = nh.subscribe("landmarks", 1000, landmarkCallback);
 
     ros::ServiceServer set_pose = nh.advertiseService("set_pose", poseCallback);
 
@@ -363,9 +366,9 @@ int main(int argc, char * argv[])
         world_blue_tf.transform.rotation.w = q.w();
         br.sendTransform(world_blue_tf);
 
-        // ROS_ERROR_STREAM("X: " << e.config().x);
-        // ROS_ERROR_STREAM("Y: " << e.config().y);
-        // ROS_ERROR_STREAM("ANG: " << e.config().ang);
+        ROS_ERROR_STREAM("X: " << e.config().x);
+        ROS_ERROR_STREAM("Y: " << e.config().y);
+        ROS_ERROR_STREAM("ANG: " << e.config().ang);
 
         turtlelib::Vector2D xy{e.config().x, e.config().y};
         turtlelib::Transform2D Tmb(xy, e.config().ang);
@@ -376,6 +379,9 @@ int main(int argc, char * argv[])
         // ROS_ERROR_STREAM("Tmb: " << Tmb);
         // ROS_ERROR_STREAM("Tob: " << Tob);
 
+        // ROS_ERROR_STREAM("X: " << Tmo.translation().x);
+        // ROS_ERROR_STREAM("Y: " << Tmo.translation().y);
+
         map_odom_tf.header.stamp = ros::Time::now();
 
         map_odom_tf.header.frame_id = "map";
@@ -384,12 +390,16 @@ int main(int argc, char * argv[])
         map_odom_tf.transform.translation.x = Tmo.translation().x;
         map_odom_tf.transform.translation.y = Tmo.translation().y;
         map_odom_tf.transform.translation.z = 0.0;
+        // map_odom_tf.transform.translation.x = 0;
+        // map_odom_tf.transform.translation.y = 0;
+        // map_odom_tf.transform.translation.z = 0.0;
 
         // map_odom_tf.transform.translation.x = 1;
         // map_odom_tf.transform.translation.y = 1;
         // map_odom_tf.transform.translation.z = 0.0;
 
         q.setRPY(0, 0, Tmo.rotation());
+        // q.setRPY(0, 0, 0);
 
         map_odom_tf.transform.rotation.x = q.x();
         map_odom_tf.transform.rotation.y = q.y();
