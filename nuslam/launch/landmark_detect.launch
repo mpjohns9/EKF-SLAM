@@ -1,4 +1,9 @@
 <launch>
-    <include file="$(find nuslam)/launch/slam.launch"/>
+    <arg name="robot" default="nusim"/>
+    <include file="$(find nuslam)/launch/slam.launch" pass_all_args="true">
+        <arg name="robot" value="$(arg robot)"/>
+    </include>
     <node name="landmarks" pkg="nuslam" type="landmarks" output="screen"/>
+    
+    
 </launch>
