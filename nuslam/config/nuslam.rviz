@@ -56,7 +56,7 @@ Visualization Manager:
       Marker Topic: /slam_markers
       Name: SlamMarkers
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -64,7 +64,7 @@ Visualization Manager:
       Marker Topic: /nusim/obstacles
       Name: SimMarkers
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -72,7 +72,7 @@ Visualization Manager:
       Marker Topic: /nusim/walls
       Name: WallMarkers
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -80,7 +80,7 @@ Visualization Manager:
       Marker Topic: /fake_sensor
       Name: FakeSensorMarkers
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Angle Tolerance: 0.10000000149011612
@@ -137,8 +137,34 @@ Visualization Manager:
           Value: false
         blue_wheel_right_link:
           Value: false
+        green_base_footprint:
+          Value: true
+        green_base_link:
+          Value: true
+        green_base_scan:
+          Value: true
+        green_caster_back_link:
+          Value: true
+        green_imu_link:
+          Value: true
+        green_wheel_left_link:
+          Value: true
+        green_wheel_right_link:
+          Value: true
+        map:
+          Value: true
         odom:
           Value: false
+        red_base_footprint:
+          Value: true
+        red_base_link:
+          Value: true
+        red_base_scan:
+          Value: true
+        red_caster_back_link:
+          Value: true
+        red_imu_link:
+          Value: true
         world:
           Value: false
       Marker Alpha: 1
@@ -149,19 +175,40 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
-          odom:
-            blue_base_footprint:
-              blue_base_link:
-                blue_base_scan:
-                  {}
-                blue_caster_back_link:
-                  {}
-                blue_imu_link:
-                  {}
-                blue_wheel_left_link:
-                  {}
-                blue_wheel_right_link:
-                  {}
+          blue_base_footprint:
+            blue_base_link:
+              blue_base_scan:
+                {}
+              blue_caster_back_link:
+                {}
+              blue_imu_link:
+                {}
+              blue_wheel_left_link:
+                {}
+              blue_wheel_right_link:
+                {}
+          map:
+            odom:
+              green_base_footprint:
+                green_base_link:
+                  green_base_scan:
+                    {}
+                  green_caster_back_link:
+                    {}
+                  green_imu_link:
+                    {}
+                  green_wheel_left_link:
+                    {}
+                  green_wheel_right_link:
+                    {}
+          red_base_footprint:
+            red_base_link:
+              red_base_scan:
+                {}
+              red_caster_back_link:
+                {}
+              red_imu_link:
+                {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -202,6 +249,39 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        red_base_footprint:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        red_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        red_base_scan:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        red_caster_back_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        red_imu_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        red_wheel_left_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        red_wheel_right_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Name: SimRobot
       Robot Description: red/robot_description
       TF Prefix: ""
@@ -218,6 +298,39 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        green_base_footprint:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        green_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        green_base_scan:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        green_caster_back_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        green_imu_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        green_wheel_left_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        green_wheel_right_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Name: SlamRobot
       Robot Description: green/robot_description
       TF Prefix: ""
@@ -352,7 +465,7 @@ Visualization Manager:
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: /landmarks
-      Name: MarkerArray
+      Name: Landmarks
       Namespaces:
         "": true
       Queue Size: 100
