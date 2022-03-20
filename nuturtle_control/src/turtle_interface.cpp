@@ -31,9 +31,9 @@ turtlelib::Transform2D tf;
 static int rate = 500;
 
 // robot configuration
-static auto x = 0.0;
-static auto y = 0.0;
-static auto theta = 0.0;
+// static auto x = 0.0;
+// static auto y = 0.0;
+// static auto theta = 0.0;
 
 // wheel velocities
 static auto lwheel_vel = 0.0;

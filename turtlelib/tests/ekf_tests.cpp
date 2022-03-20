@@ -13,9 +13,9 @@ TEST_CASE("Constructor test", "[slam]")
 
     turtlelib::EKF e = turtlelib::EKF(c, j);
 
-    turtlelib::Twist2D u {2.0, 2.0, 0.0};
-    double x = 5.0;
-    double y = 5.0;
+    // turtlelib::Twist2D u {2.0, 2.0, 0.0};
+    // double x = 5.0;
+    // double y = 5.0;
 
     // std::tuple t = e.sigmas();
 

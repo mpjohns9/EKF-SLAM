@@ -29,7 +29,7 @@ static auto radius = 0.0;
 /// \brief callback for control service
 /// 
 /// Takes radius and velocity and updates angular and linear velocity of robot
-bool controlCallback(nuturtle_control::Control::Request & request, nuturtle_control::Control::Response & response)
+bool controlCallback(nuturtle_control::Control::Request & request, nuturtle_control::Control::Response &)
 {
     ang_vel = request.velocity;
     radius = request.radius;
@@ -44,7 +44,7 @@ bool controlCallback(nuturtle_control::Control::Request & request, nuturtle_cont
 /// \brief callback for reverse service
 ///
 /// Flips velocities to reverse direction of motion
-bool reverseCallback(std_srvs::Empty::Request & request, std_srvs::Empty::Response & response)
+bool reverseCallback(std_srvs::Empty::Request &, std_srvs::Empty::Response &)
 {
     ang_vel = -ang_vel;
     lin_vel = -lin_vel;
@@ -55,7 +55,7 @@ bool reverseCallback(std_srvs::Empty::Request & request, std_srvs::Empty::Respon
 /// \brief callback for stop service
 ///
 /// Sets velocities to zero to stop motion
-bool stopCallback(std_srvs::Empty::Request & request, std_srvs::Empty::Response & response)
+bool stopCallback(std_srvs::Empty::Request &, std_srvs::Empty::Response &)
 {
     ang_vel = 0;
     lin_vel = 0;

@@ -121,7 +121,7 @@ visualization_msgs::MarkerArray fake_ma;
 sensor_msgs::LaserScan laser;
 static auto fake_sensor_flag = false;
 static auto scan_flag = false;
-static auto collision_flag = false;
+// static auto collision_flag = false;
 
 /// \brief RNG seeding function
 ///
@@ -200,7 +200,7 @@ void wheelCallback(const nuturtlebot_msgs::WheelCommands & msg)
 
     double new_x = c.x;
     double new_y = c.y;
-    double new_theta = c.ang;
+    // double new_theta = c.ang;
 
     for (int i=0;i<int(obs_x.size());i++)
     {
@@ -263,7 +263,7 @@ void marktimerCallback(const ros::TimerEvent&)
         turtlelib::Vector2D obs_vec {x_obstacle, y_obstacle};
         turtlelib::Vector2D obs_vec_b = Tbw(obs_vec);
 
-        double obs_theta = atan2(obs_vec_b.x, obs_vec_b.y) + obs_noise;
+        // double obs_theta = atan2(obs_vec_b.x, obs_vec_b.y) + obs_noise;
         double r = std::sqrt(std::pow(obs_vec_b.x, 2) + std::pow(obs_vec_b.y, 2));
 
         // double distance = std::sqrt(std::pow(x_obstacle - x, 2) + std::pow(y_obstacle - y, 2));

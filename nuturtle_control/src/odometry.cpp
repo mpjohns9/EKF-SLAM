@@ -83,7 +83,7 @@ void jointCallback(const sensor_msgs::JointState & msg)
 }
 
 /// \brief callback for set pose service
-bool poseCallback(nuturtle_control::SetPose::Request & request, nuturtle_control::SetPose::Response & response)
+bool poseCallback(nuturtle_control::SetPose::Request & request, nuturtle_control::SetPose::Response &)
 {
     x = request.x;
     y = request.y;
