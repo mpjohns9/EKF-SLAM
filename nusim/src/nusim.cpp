@@ -243,6 +243,7 @@ void wheelCallback(const nuturtlebot_msgs::WheelCommands & msg)
     
 }
 
+/// \brief callback for marker timer
 void marktimerCallback(const ros::TimerEvent&)
 {
     std::vector<double> obs_vec;
@@ -316,6 +317,7 @@ void marktimerCallback(const ros::TimerEvent&)
 
 }
 
+/// \brief callback for scan timer
 void scantimerCallback (const ros::TimerEvent&)
 {
 
