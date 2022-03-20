@@ -120,11 +120,11 @@ void landmarkCallback(const visualization_msgs::MarkerArray & msg)
         obs_x.at(i) = x;
         obs_y.at(i) = y;
 
-        // if (e.check_known_obs(x, y))
-        // {
-        //     ROS_ERROR_STREAM("NEW OBSTACLE DETECTED");
-        //     landmark_flag = true;
-        // }
+        if (e.check_known_obs(x, y))
+        {
+            // ROS_ERROR_STREAM("NEW OBSTACLE DETECTED");
+            landmark_flag = true;
+        }
 
         // z_sensor.at(index) = x;
         // z_sensor.at(index + 1) = y;
@@ -134,7 +134,7 @@ void landmarkCallback(const visualization_msgs::MarkerArray & msg)
 
     if (landmark_flag)
     {
-        ROS_ERROR_STREAM("INITIALIZING LANDMARKS");
+        // ROS_ERROR_STREAM("INITIALIZING LANDMARKS");
         e.initialize_landmarks(obs_x, obs_y);
         landmark_flag = false;
     }

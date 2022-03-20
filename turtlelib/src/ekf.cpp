@@ -53,9 +53,9 @@ namespace turtlelib
         int index = 0;
         for (int i=0; i<int(obs_x.size()); i++)
         {
-            ROS_ERROR_STREAM("SIZE OF OBS VEC: " << obs_x.size());
-            ROS_ERROR_STREAM("LAND X: " << obs_x.at(i));
-            ROS_ERROR_STREAM("LAND Y: " << obs_y.at(i));
+            // ROS_ERROR_STREAM("SIZE OF OBS VEC: " << obs_x.size());
+            // ROS_ERROR_STREAM("LAND X: " << obs_x.at(i));
+            // ROS_ERROR_STREAM("LAND Y: " << obs_y.at(i));
             double r = sqrt(pow(obs_x.at(i), 2) + pow(obs_y.at(i), 2));
             // ROS_ERROR_STREAM("r: " << r);
             double phi = atan2(obs_y.at(i), obs_x.at(i));
@@ -66,58 +66,60 @@ namespace turtlelib
             double my = xi_prev.at(2) + r*sin(phi + xi_prev.at(0));
             // ROS_ERROR_STREAM("my: " << r);
 
-            obstacles.at(index) = mx;
-            obstacles.at(index+1) = my;
+            Vector2D v;
+            v.x = mx;
+            v.y = my;
 
-            Vector2D o;
-            o.x = obs_x.at(i);
-            o.y = obs_y.at(i);
+            // Vector2D mb;
+            // mb.x = xi_prev.at(1);
+            // mb.y = xi_prev.at(2);
 
-            Vector2D mb;
-            mb.x = xi_prev.at(1);
-            mb.y = xi_prev.at(2);
-
-            Transform2D Tmb(mb);
+            // Transform2D Tmb(mb);
 
             std::vector<Vector2D> known_obs_copy = known_obs;
             bool exists = false;
 
             // ROS_ERROR_STREAM("SIZE: " << known_obs_copy.size());
-            // if (known_obs_copy.size() > 0)
-            // {
-            //     for (int j=0; j<int(known_obs_copy.size()); j++)
-            //     {   
+            if (known_obs_copy.size() > 0)
+            {
+                for (int j=0; j<int(known_obs_copy.size()); j++)
+                {   
                     
-            //         ROS_ERROR_STREAM("CHECKING KNOWN OBSTACLE #" << j+1);
+                    ROS_ERROR_STREAM("CHECKING KNOWN OBSTACLE #" << j+1);
 
-            //         ROS_ERROR_STREAM("KNOWN X: " << known_obs.at(j).x);
-            //         ROS_ERROR_STREAM("CURRENT X: " << obs_x.at(i));
+                    ROS_ERROR_STREAM("KNOWN X: " << known_obs.at(j).x);
+                    ROS_ERROR_STREAM("CURRENT X: " << obs_x.at(i));
 
-            //         ROS_ERROR_STREAM("KNOWN Y: " << known_obs.at(j).y);
-            //         ROS_ERROR_STREAM("CURRENT Y: " << obs_y.at(i));
+                    ROS_ERROR_STREAM("KNOWN Y: " << known_obs.at(j).y);
+                    ROS_ERROR_STREAM("CURRENT Y: " << obs_y.at(i));
 
-            //         if ((abs(known_obs.at(j).x - obs_x.at(i)) < 0.05) && (abs(known_obs.at(j).y - obs_y.at(i)) < 0.05))
-            //         {
-            //             exists = true;
-            //             ROS_ERROR_STREAM("OBSTACLE EXISTS ALREADY");
-            //             break;
-            //         }
-            //     }
+                    if ((abs(known_obs.at(j).x - mx) < 0.1) && (abs(known_obs.at(j).y - my) < 0.1))
+                    {
+                        exists = true;
+                        ROS_ERROR_STREAM("OBSTACLE EXISTS ALREADY");
+                        break;
+                    }
+                }
 
-            //     if (!exists)
-            //     {
-            //         ROS_ERROR_STREAM_ONCE("PUSHING BACK -- NEW OBS");
-            //         known_obs.push_back(Tmb(o));
-            //     }
-            // }
-            // else
-            // {
-            //     ROS_ERROR_STREAM_ONCE("PUSHING BACK -- FIRST OBS");
-            //     known_obs.push_back(Tmb(o));
-            // }
+                if (!exists)
+                {
+                    ROS_ERROR_STREAM_ONCE("PUSHING BACK -- NEW OBS");
+                    known_obs.push_back(v);
+                    obstacles.at(index) = mx;
+                    obstacles.at(index+1) = my;
+                    index += 2;
+                }
+            }
+            else
+            {
+                ROS_ERROR_STREAM_ONCE("PUSHING BACK -- FIRST OBS");
+                known_obs.push_back(v);
+                obstacles.at(index) = mx;
+                obstacles.at(index+1) = my;
+                index += 2;
+            }
             ROS_ERROR_STREAM("OBS SIZE: " << known_obs.size());
             ROS_ERROR_STREAM("______________________________________________________________________");
-            index += 2;
         }
 
         // ROS_ERROR_STREAM("XI: " << xi_prev);
@@ -317,21 +319,35 @@ namespace turtlelib
 
     bool EKF::check_known_obs(double x, double y)
     {
+        // Vector2D v;
+        // v.x = x;
+        // v.y = y;
+
+        // Vector2D mb;
+        // mb.x = xi_prev.at(1);
+        // mb.y = xi_prev.at(2);
+
+        // Transform2D Tmb(mb);
+
+        // Vector2D v_mb = Tmb(v);
+
+        double r = sqrt(pow(x, 2) + pow(y, 2));
+        // ROS_ERROR_STREAM("r: " << r);
+        double phi = atan2(y, x);
+        // ROS_ERROR_STREAM("phi: " << r);
+
+        double mx = xi_prev.at(1) + r*cos(phi + xi_prev.at(0));
+        // ROS_ERROR_STREAM("mx: " << r);
+        double my = xi_prev.at(2) + r*sin(phi + xi_prev.at(0));
+        // ROS_ERROR_STREAM("my: " << r);
+
         Vector2D v;
-        v.x = x;
-        v.y = y;
-
-        Vector2D mb;
-        mb.x = xi_prev.at(1);
-        mb.y = xi_prev.at(2);
-
-        Transform2D Tmb(mb);
-
-        Vector2D v_mb = Tmb(v);
+        v.x = mx;
+        v.y = my;
 
         for (int i=0; i<int(known_obs.size()); i++)
         {
-            if (abs(known_obs.at(i).x - v_mb.x) > 0.05 && abs(known_obs.at(i).y - v_mb.y) > 0.05)
+            if (abs(known_obs.at(i).x - mx) > 0.1 && abs(known_obs.at(i).y - my) > 0.1)
             {
                 return true;
             }
