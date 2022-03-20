@@ -9,12 +9,28 @@
 ///     obs_y (std::vector<double>): list of x-coordinates for obstacles
 ///     radius (double): radius of obstacles
 ///     height (double): height of obstacles
+///     vnoise_mean (double): velocity noise mean
+///     vnoise_stddev (double): velocity noise standard deviation
+///     slip_min (double): minimum slip noise
+///     slip_max (double): maximum slip noise
+///     angle_min (double): minimum sensor angle
+///     angle_max (double): maximum sensor angle
+///     time_inc (double): time between sensor measurements
+///     scan_time (double): frequency of measurements
+///     range_min (double): minimum laser scan distance
+///     range_max (double): maximum laser scan distance
+///     num_samples (double): number of data points per full scan
+///     laser_variance (double): sensor noise
+///     collision_rad (double): collision radius of robot
+///     basic_sensor_variance (double): fake sensor noise
 /// PUBLISHES:
 ///     pub_step (std_msgs/UInt64): publishes timestep of simulation
 ///     marker_pub (visualization_msgs/MarkerArray): publishes array of cylindrical markers
 ///     wall_pub (visualization_msgs/MarkerArray): publishes array of cubes (walls)
 ///     sensor_pub (nuturtlebot_msgs/SensorData): publishes updated wheel positions
 ///     path_pub (nav_msgs/Path): publishes path of robot
+///     fake_sensor_pub (visualization_msgs/MarkerArray): publishes fake laser scan data
+///     scan_pub (sensor_msgs/LaserScan): publishes actual laser scan data
 /// SUBSCRIBES:
 ///     wheel_sub (nuturtlebot_msgs/WheelCommands): updates wheel velocities
 /// SERVICES:
