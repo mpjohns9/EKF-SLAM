@@ -232,7 +232,7 @@ namespace turtlelib
         double stddev = arma::stddev(arma::vec(angle_vec));
         // ROS_ERROR_STREAM("MEAN: " << rad2deg(mean));
         // ROS_ERROR_STREAM("STDDEV: " << stddev);
-        return (stddev < 0.15 && (rad2deg(mean) >= 90.0 && rad2deg(mean) <= 135.0)); 
+        return (stddev < 0.7 && (rad2deg(mean) >= 90.0 && rad2deg(mean) <= 170.0)); 
     }
 
 

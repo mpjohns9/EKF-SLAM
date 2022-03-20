@@ -204,15 +204,26 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
         double c_x, c_y, r;
         std::tie(c_x, c_y, r) = cf.fit_circle();
 
-        // ROS_ERROR_STREAM("FIT PARAMS: " << c_x << c_y << r);
-
         // ROS_ERROR_STREAM("DONE");
 
         if (cf.classify_circle())
         {
-            // ROS_ERROR_STREAM("CLASSIFIED CIRCLE");
-            circle_mark.push_back(std::make_tuple(c_x, c_y, r));
+            if (r < 0.1)
+            {
+                // ROS_ERROR_STREAM("CLASSIFIED CIRCLE");
+                circle_mark.push_back(std::make_tuple(c_x, c_y, r));
+            }
         }
+        // else // debugging
+        // {
+        //     if (r < 1)
+        //     {
+        //         ROS_ERROR_STREAM("FIT PARAMS: ");
+        //         ROS_ERROR_STREAM("CX " << c_x);
+        //         ROS_ERROR_STREAM("CY " << c_y);
+        //         ROS_ERROR_STREAM("R " << r);
+        //     }
+        // }
         // ROS_ERROR_STREAM("DONE");
 
     }
