@@ -1,17 +1,24 @@
 /// \file
-/// \brief publishes odometry messages and transform
+/// \brief EKF SLAM implementation
+/// publishes odometry messages and transform for SLAM
 
 /// PARAMETERS:
 ///     body_id: name of robot body frame
 ///     odom_id: name of odometry frame
 ///     wheel_left: name of left wheel joint
 ///     wheel_right: name of right wheel joint
+///     radius: obstacle radius
+///     height: obstacle height
+///     range_max: maximium range of laser scan
 ///
 /// PUBLISHES: 
 ///     odom_pub (nav_msgs/Odometry): publishes to odom
+///     marker_pub (visualization_msgs/MarkerArray): publishes markers from SLAM
+///     path_pub (nav_msgs/Path): publishes path for SLAM robot
 ///
 /// SUBSCRIBES:
 ///     joint_sub (joint_states): subscribes to joint_states
+///     landmark_sub (landmarks): subscribes to landmarks to get obstacles position
 ///
 /// SERVICES: 
 ///     set_pose (geometry_msgs/Pose): provides configuration of robot
@@ -101,6 +108,8 @@ void jointCallback(const sensor_msgs::JointState & msg)
     dd = turtlelib::diffDrive(c, pos, v);
 }
 
+/// \brief callback for the landmarks subscriber
+/// \param msg - visualization_msgs/MarkerArray message obj
 void landmarkCallback(const visualization_msgs::MarkerArray & msg)
 {
     int n = msg.markers.size();
@@ -163,6 +172,7 @@ bool poseCallback(nuturtle_control::SetPose::Request & request, nuturtle_control
     return true;
 }
 
+/// \brief callback for the marker timer
 void markerCallback(const ros::TimerEvent&)
 {
     int non_zero = 0;
