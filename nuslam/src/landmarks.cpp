@@ -2,14 +2,16 @@
 /// \brief Detects landmarks and publishes their location
 
 /// PARAMETERS:
+///     angle_inc (double): increment of laser scan angle
+///     range_max (double): maximum laser scan distance
+///     range_min (double): minimum laser scan distance
 ///
 /// PUBLISHES: 
+///     test_cluster_pub (visualization_msgs/MarkerArray): publishes clusters for testing
+///     landmark_pub (visualization_msgs/MarkerArray): publishes landmarks from laser scan
 ///
 /// SUBSCRIBES:
 ///     laser_sub (sensor_msgs/LaserScan): gets laser scan data 
-///
-/// SERVICES: 
-
 
 #include "ros/ros.h"
 #include <sensor_msgs/JointState.h>
@@ -37,6 +39,8 @@ visualization_msgs::MarkerArray circle_ma;
 bool landmark_flag = false;
 bool test_pub_flag = false;
 
+/// \brief callback for laser_sub subscriber
+/// \param msg - sensor_msgs/LaserScan message obj
 void laserCallback(const sensor_msgs::LaserScan & msg)
 {
     std::vector<std::vector<std::pair<double, double>>> cluster_list;
@@ -268,6 +272,8 @@ void laserCallback(const sensor_msgs::LaserScan & msg)
 
 }
 
+/// \brief callback for landmark timer
+/// controls publishing rate
 void landmarkCallback(const ros::TimerEvent&)
 {
     landmark_flag = true;   
