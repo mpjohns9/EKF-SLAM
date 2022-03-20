@@ -24,7 +24,7 @@ TEST_CASE("Circle tests", "[landmarks]")
 
         CHECK(c_x == Approx(4.615482));
         CHECK(c_y == Approx(2.807354));
-        CHECK(r == Approx(4.8275));
+        CHECK(r == Approx(4.827575));
 
         // CHECK(size(cf.calc_A())[0] == 3);
     }
@@ -113,8 +113,8 @@ TEST_CASE("Circle tests", "[landmarks]")
 
         cf.shift();
 
-        CHECK(cf.get_clusterx_shifted().at(0) == -1.0);
-        CHECK(cf.get_clusterx_shifted().at(1) == 0.0);
+        CHECK(cf.get_clusterx_shifted().at(0) == 1.0);
+        CHECK(cf.get_clusterx_shifted().at(1) == 2.0);
 
         CHECK(cf.calc_z().at(0) == 2.0);
         CHECK(cf.calc_z().at(1) == 0.0);
