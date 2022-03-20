@@ -85,25 +85,25 @@ namespace turtlelib
                 for (int j=0; j<int(known_obs_copy.size()); j++)
                 {   
                     
-                    ROS_ERROR_STREAM("CHECKING KNOWN OBSTACLE #" << j+1);
+                    // ROS_ERROR_STREAM("CHECKING KNOWN OBSTACLE #" << j+1);
 
-                    ROS_ERROR_STREAM("KNOWN X: " << known_obs.at(j).x);
-                    ROS_ERROR_STREAM("CURRENT X: " << obs_x.at(i));
+                    // ROS_ERROR_STREAM("KNOWN X: " << known_obs.at(j).x);
+                    // ROS_ERROR_STREAM("CURRENT X: " << obs_x.at(i));
 
-                    ROS_ERROR_STREAM("KNOWN Y: " << known_obs.at(j).y);
-                    ROS_ERROR_STREAM("CURRENT Y: " << obs_y.at(i));
+                    // ROS_ERROR_STREAM("KNOWN Y: " << known_obs.at(j).y);
+                    // ROS_ERROR_STREAM("CURRENT Y: " << obs_y.at(i));
 
                     if ((abs(known_obs.at(j).x - mx) < 0.1) && (abs(known_obs.at(j).y - my) < 0.1))
                     {
                         exists = true;
-                        ROS_ERROR_STREAM("OBSTACLE EXISTS ALREADY");
+                        // ROS_ERROR_STREAM("OBSTACLE EXISTS ALREADY");
                         break;
                     }
                 }
 
                 if (!exists)
                 {
-                    ROS_ERROR_STREAM_ONCE("PUSHING BACK -- NEW OBS");
+                    // ROS_ERROR_STREAM_ONCE("PUSHING BACK -- NEW OBS");
                     known_obs.push_back(v);
                     obstacles.at(index) = mx;
                     obstacles.at(index+1) = my;
@@ -112,14 +112,14 @@ namespace turtlelib
             }
             else
             {
-                ROS_ERROR_STREAM_ONCE("PUSHING BACK -- FIRST OBS");
+                // ROS_ERROR_STREAM_ONCE("PUSHING BACK -- FIRST OBS");
                 known_obs.push_back(v);
                 obstacles.at(index) = mx;
                 obstacles.at(index+1) = my;
                 index += 2;
             }
-            ROS_ERROR_STREAM("OBS SIZE: " << known_obs.size());
-            ROS_ERROR_STREAM("______________________________________________________________________");
+            // ROS_ERROR_STREAM("OBS SIZE: " << known_obs.size());
+            // ROS_ERROR_STREAM("______________________________________________________________________");
         }
 
         // ROS_ERROR_STREAM("XI: " << xi_prev);

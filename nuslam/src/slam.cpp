@@ -376,9 +376,9 @@ int main(int argc, char * argv[])
         world_blue_tf.transform.rotation.w = q.w();
         br.sendTransform(world_blue_tf);
 
-        ROS_ERROR_STREAM("X: " << e.config().x);
-        ROS_ERROR_STREAM("Y: " << e.config().y);
-        ROS_ERROR_STREAM("ANG: " << e.config().ang);
+        // ROS_ERROR_STREAM("X: " << e.config().x);
+        // ROS_ERROR_STREAM("Y: " << e.config().y);
+        // ROS_ERROR_STREAM("ANG: " << e.config().ang);
 
         turtlelib::Vector2D xy{e.config().x, e.config().y};
         turtlelib::Transform2D Tmb(xy, e.config().ang);
